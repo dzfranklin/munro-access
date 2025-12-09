@@ -1,0 +1,8 @@
+https://itsleeds.github.io/UK2GTFS/ https://github.com/itsleeds/UK2GTFS
+https://github.com/planarnetwork/dtd2mysql (and aubin fork)
+
+https://opendata.nationalrail.co.uk/
+https://publicdatafeeds.networkrail.co.uk/ntrod
+
+https://wiki.openraildata.com/index.php/Main_Page
+https://wiki.openraildata.com/index.php/Darwin:Push_Port
