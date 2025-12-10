@@ -1,9 +1,0 @@
-{
-  "outputPath": "./out/html/",
-  "agencies": [
-    {
-      "agencyKey": "rail",
-      "path": "./out/rail_scot_gtfs.zip"
-    }
-  ]
-}

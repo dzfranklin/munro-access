@@ -1,9 +1,10 @@
 {
-  "outputPath": "out/html",
+  "outputPath": "./out/html/",
+  "showMap": true,
   "agencies": [
     {
       "agencyKey": "rail",
-      "path": "out/rail_scot_gtfs"
+      "path": "./out/rail_scot_gtfs"
     }
   ]
 }
