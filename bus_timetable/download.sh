@@ -26,9 +26,10 @@ if [ -z "$BODS_API_KEY" ]; then
 fi
 
 # Download GTFS data
-OUTPUT_FILE="bus_scot_gtfs.zip"
+OUTPUT_FILE="out/bus_scot_gtfs.zip"
 DOWNLOAD_URL="https://data.bus-data.dft.gov.uk/timetable/download/gtfs-file/scotland/?api_key=${BODS_API_KEY}"
 
+mkdir -p out
 echo "Downloading Scotland GTFS data from BODS..."
 if curl -L -o "$OUTPUT_FILE" "$DOWNLOAD_URL"; then
   # Verify file exists and is not empty

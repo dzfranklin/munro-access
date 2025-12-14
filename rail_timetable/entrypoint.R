@@ -1,12 +1,17 @@
 #!/usr/bin/env Rscript
 
+# Define package dependencies
+renv::use(
+  "sf",
+  "rnaturalearth",
+  "ITSleeds/UK2GTFS@f15694a655c508f8caebaf99328b0a2d1bc8dfa5"
+)
+
 # Parse command-line arguments
 args <- commandArgs(trailingOnly = TRUE)
-setup_mode <- "--setup" %in% args
 preview_mode <- "--preview" %in% args
 
 # Configuration
-uk2gtfs_version <- "f15694a655c508f8caebaf99328b0a2d1bc8dfa5"
 out_dir <- "./out"
 out_name <- "rail_scot_gtfs"
 timetable_zip <- file.path(out_dir, "timetable.zip")
@@ -18,62 +23,12 @@ safe_execute <- function(expr, error_msg) {
   tryCatch(
     expr,
     error = function(e) {
-      message(sprintf("ERROR: %s", error_msg))
-      message(sprintf("Details: %s", e$message))
+      message(sprintf("ERROR: %s\n", error_msg))
+      message(sprintf("Details: %s\n", e$message))
       quit(status = 1)
     }
   )
 }
-
-# Setup mode: Install dependencies and download static data
-if (setup_mode) {
-  message("=== SETUP MODE ===")
-
-  # Load libraries (remotes, sf already installed via apt)
-  library(sf)
-  library(remotes)
-  library(parallel)
-
-  # Install UK2GTFS from GitHub
-  message(sprintf("Installing UK2GTFS (version %s)...", uk2gtfs_version))
-  if (!require("UK2GTFS", quietly = TRUE)) {
-    safe_execute(
-      remotes::install_github("ITSleeds/UK2GTFS", ref = uk2gtfs_version),
-      "Failed to install UK2GTFS"
-    )
-  }
-
-  # Load UK2GTFS
-  library(UK2GTFS)
-
-  # Create output directory
-  message(sprintf("Creating output directory: %s", out_dir))
-  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-
-  # Load pre-generated Scotland boundary data
-  message("Loading Scotland boundary from scotland_boundary.geojson...")
-  scotland_geojson <- "scotland_boundary.geojson"
-  if (!file.exists(scotland_geojson)) {
-    message(sprintf("ERROR: %s not found", scotland_geojson))
-    message("Please run prepare_scotland_boundary.R first to generate this file")
-    quit(status = 1)
-  }
-
-  scotland <- safe_execute(
-    sf::st_read(scotland_geojson, quiet = TRUE),
-    "Failed to read Scotland boundary from GeoJSON"
-  )
-
-  # Save Scotland boundary for later use
-  message(sprintf("Saving Scotland boundary to %s", scotland_rds))
-  saveRDS(scotland, scotland_rds)
-
-  message("=== SETUP COMPLETE ===")
-  quit(status = 0)
-}
-
-# Default mode: Convert timetable to GTFS
-message("=== CONVERSION MODE ===")
 
 # Load required libraries
 message("Loading libraries...")
@@ -81,26 +36,44 @@ safe_execute(
   {
     library(UK2GTFS)
     library(sf)
+    library(rnaturalearth)
     library(parallel)
   },
-  "Failed to load required libraries. Did you run --setup?"
+  "Failed to load required libraries"
 )
-
-# Load Scotland boundary
-message(sprintf("Loading Scotland boundary from %s", scotland_rds))
-if (!file.exists(scotland_rds)) {
-  message(sprintf("ERROR: Scotland boundary file not found at %s", scotland_rds))
-  message("Please run with --setup first to download required data")
-  quit(status = 1)
-}
-scotland <- readRDS(scotland_rds)
 
 # Create output directory
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
+# Download Scotland boundary if not already cached
+if (!file.exists(scotland_rds)) {
+  message("Downloading Scotland boundary data from Natural Earth...")
+  scotland_highres <- safe_execute(
+    rnaturalearth::ne_download(
+      scale = 10L,
+      type = "map_subunits",
+      category = "cultural",
+      returnclass = "sf"
+    ) |>
+      subset(SU_A3 == "SCT"),
+    "Failed to download Scotland boundary data"
+  )
+
+  # Buffer the boundary by 1000m
+  message("Buffering Scotland boundary (1000m)...")
+  scotland <- sf::st_buffer(scotland_highres, 1000)
+
+  # Save Scotland boundary for later use
+  message(sprintf("Saving Scotland boundary to %s\n", scotland_rds))
+  saveRDS(scotland, scotland_rds)
+} else {
+  message(sprintf("Loading Scotland boundary from %s\n", scotland_rds))
+  scotland <- readRDS(scotland_rds)
+}
+
 # Download timetable if not already present
 if (dir.exists(timetable_dir) && length(list.files(timetable_dir)) > 0) {
-  message(sprintf("Using existing timetable from %s", timetable_dir))
+  message(sprintf("Using existing timetable from %s\n", timetable_dir))
 } else {
   # Get credentials from environment variables
   nrdp_username <- Sys.getenv("NRDP_username")
@@ -113,8 +86,8 @@ if (dir.exists(timetable_dir) && length(list.files(timetable_dir)) > 0) {
     quit(status = 1)
   }
 
-  message(sprintf("Downloading timetable from NRDP to %s...", timetable_zip))
-  message(sprintf("Using NRDP username: %s", nrdp_username))
+  message(sprintf("Downloading timetable from NRDP to %s...\n", timetable_zip))
+  message(sprintf("Using NRDP username: %s\n", nrdp_username))
 
   safe_execute(
     nrdp_timetable(
@@ -125,7 +98,7 @@ if (dir.exists(timetable_dir) && length(list.files(timetable_dir)) > 0) {
     "Failed to download NRDP timetable"
   )
 
-  message(sprintf("Unzipping timetable to %s...", timetable_dir))
+  message(sprintf("Unzipping timetable to %s...\n", timetable_dir))
   dir.create(timetable_dir, showWarnings = FALSE)
   safe_execute(
     unzip(timetable_zip, exdir = timetable_dir),
@@ -135,7 +108,7 @@ if (dir.exists(timetable_dir) && length(list.files(timetable_dir)) > 0) {
 
 # Detect number of cores
 ncores <- parallel::detectCores()
-message(sprintf("Using %d cores for processing", ncores))
+message(sprintf("Using %d cores for processing\n", ncores))
 
 # Convert ATOC to GTFS
 message("Converting ATOC to GTFS...")
@@ -187,7 +160,10 @@ if (!is.null(gtfs$transfers)) {
 # Fix out-of-order arrival/departure times
 out_of_order_times <- gtfs$stop_times$arrival_time > gtfs$stop_times$departure_time
 if (any(out_of_order_times)) {
-  message(sprintf("Swapping %d stop_times with arrival > departure", sum(out_of_order_times)))
+  message(sprintf(
+    "Swapping %d stop_times with arrival > departure\n",
+    sum(out_of_order_times)
+  ))
   temp <- gtfs$stop_times$arrival_time[out_of_order_times]
   gtfs$stop_times$arrival_time[out_of_order_times] <- gtfs$stop_times$departure_time[out_of_order_times]
   gtfs$stop_times$departure_time[out_of_order_times] <- temp
@@ -198,7 +174,10 @@ empty_short_names <- is.na(gtfs$routes$route_short_name) | gtfs$routes$route_sho
 if (any(empty_short_names)) {
   message("Fixing empty route_short_name fields...")
   gtfs$routes$route_short_name[empty_short_names] <- gtfs$routes$route_long_name[empty_short_names]
-  message(sprintf("Copied route_long_name to route_short_name for %d routes", sum(empty_short_names)))
+  message(sprintf(
+    "Copied route_long_name to route_short_name for %d routes\n",
+    sum(empty_short_names)
+  ))
 }
 
 # Validate after cleaning
@@ -229,7 +208,7 @@ if (preview_mode) {
   end_date_obj <- start_date_obj + 9
   end_date <- as.integer(format(end_date_obj, "%Y%m%d"))
 
-  message(sprintf("Trimming to: %d - %d", start_date, end_date))
+  message(sprintf("Trimming to: %d - %d\n", start_date, end_date))
 
   gtfs <- safe_execute(
     gtfs_trim_dates(gtfs, startdate = start_date, enddate = end_date),
@@ -239,12 +218,12 @@ if (preview_mode) {
 
 # Write output
 out_zip_path <- file.path(out_dir, paste0(out_name, ".zip"))
-message(sprintf("Writing GTFS to %s...", out_zip_path))
+message(sprintf("Writing GTFS to %s...\n", out_zip_path))
 safe_execute(
   gtfs_write(gtfs, folder = out_dir, name = out_name),
   "Failed to write GTFS output"
 )
 
 message("=== CONVERSION COMPLETE ===")
-message(sprintf("Output: %s", out_zip_path))
+message(sprintf("Output: %s\n", out_zip_path))
 quit(status = 0)

@@ -1,8 +1,8 @@
 # Environment variables with credentials
 .env
 
-# Output file
-rail_scot_gtfs.zip
+# Output directory
+out/
 
 # R temporary files
 .Rhistory

@@ -4,21 +4,8 @@ set -e
 # Change to script directory
 cd "$(dirname "$0")"
 
-# Configuration
-IMAGE_NAME="rail-gtfs-converter"
-OUTPUT_DIR=$(mktemp -d)
-PREVIEW_MODE=""
-
-# Cleanup on exit
-cleanup() {
-  if [ -d "$OUTPUT_DIR" ]; then
-    echo "Cleaning up temporary directory..."
-    rm -rf "$OUTPUT_DIR"
-  fi
-}
-trap cleanup EXIT
-
 # Parse arguments
+PREVIEW_MODE=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --preview)
@@ -53,33 +40,22 @@ if [ -z "$NRDP_username" ] || [ -z "$NRDP_password" ]; then
 fi
 
 echo "Using NRDP username: $NRDP_username"
-echo "Using temporary directory: $OUTPUT_DIR"
-
-# Build the Docker image
-echo "Building Docker image..."
-docker build -t "$IMAGE_NAME" .
 
 # Run the conversion
 echo "Running GTFS conversion..."
 if [ -n "$PREVIEW_MODE" ]; then
   echo "Preview mode enabled"
+  Rscript entrypoint.R --preview
+else
+  Rscript entrypoint.R
 fi
 
-docker run --rm \
-  -e NRDP_username="$NRDP_username" \
-  -e NRDP_password="$NRDP_password" \
-  -v "$OUTPUT_DIR:/app/out" \
-  "$IMAGE_NAME" \
-  $PREVIEW_MODE
-
-# Check if output was created and copy it
-OUTPUT_NAME=rail_scot_gtfs.zip
-OUTPUT_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
-if [ -f $OUTPUT_PATH ]; then
-  cp $OUTPUT_PATH ./$OUTPUT_NAME
+# Check if output was created
+OUTPUT_NAME=out/rail_scot_gtfs.zip
+if [ -f "$OUTPUT_NAME" ]; then
   echo "Success! Created $OUTPUT_NAME"
-  ls -lh ./$OUTPUT_NAME
+  ls -lh "$OUTPUT_NAME"
 else
-  echo "Error: Output file not found at $OUTPUT_PATH"
+  echo "Error: Output file not found at $OUTPUT_NAME"
   exit 1
 fi
