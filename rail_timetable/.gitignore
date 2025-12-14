@@ -1,0 +1,10 @@
+# Environment variables with credentials
+.env
+
+# Output file
+rail_scot_gtfs.zip
+
+# R temporary files
+.Rhistory
+.RData
+.Rproj.user

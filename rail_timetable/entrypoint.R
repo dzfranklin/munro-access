@@ -29,21 +29,10 @@ safe_execute <- function(expr, error_msg) {
 if (setup_mode) {
   message("=== SETUP MODE ===")
 
-  # Install pacman if not present
-  message("Installing pacman...")
-  if (!require("pacman", quietly = TRUE)) {
-    safe_execute(
-      install.packages("pacman", repos = "https://cloud.r-project.org/"),
-      "Failed to install pacman"
-    )
-  }
-
-  # Install required packages
-  message("Installing dependencies (remotes, rnaturalearth, sf)...")
-  safe_execute(
-    pacman::p_load(remotes, rnaturalearth, sf, parallel),
-    "Failed to install dependencies"
-  )
+  # Load libraries (remotes, sf already installed via apt)
+  library(sf)
+  library(remotes)
+  library(parallel)
 
   # Install UK2GTFS from GitHub
   message(sprintf("Installing UK2GTFS (version %s)...", uk2gtfs_version))
@@ -61,21 +50,19 @@ if (setup_mode) {
   message(sprintf("Creating output directory: %s", out_dir))
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-  # Download Scotland boundary data
-  message("Downloading Scotland boundary data from Natural Earth...")
-  scotland_highres <- safe_execute(
-    rnaturalearth::ne_download(
-      scale = 10L,
-      type = "map_subunits",
-      category = "cultural",
-      returnclass = "sf"
-    ) |> subset(SU_A3 == "SCT"),
-    "Failed to download Scotland boundary data"
-  )
+  # Load pre-generated Scotland boundary data
+  message("Loading Scotland boundary from scotland_boundary.geojson...")
+  scotland_geojson <- "scotland_boundary.geojson"
+  if (!file.exists(scotland_geojson)) {
+    message(sprintf("ERROR: %s not found", scotland_geojson))
+    message("Please run prepare_scotland_boundary.R first to generate this file")
+    quit(status = 1)
+  }
 
-  # Buffer the boundary
-  message("Buffering Scotland boundary...")
-  scotland <- sf::st_buffer(scotland_highres, 1000)
+  scotland <- safe_execute(
+    sf::st_read(scotland_geojson, quiet = TRUE),
+    "Failed to read Scotland boundary from GeoJSON"
+  )
 
   # Save Scotland boundary for later use
   message(sprintf("Saving Scotland boundary to %s", scotland_rds))
@@ -115,9 +102,26 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 if (dir.exists(timetable_dir) && length(list.files(timetable_dir)) > 0) {
   message(sprintf("Using existing timetable from %s", timetable_dir))
 } else {
+  # Get credentials from environment variables
+  nrdp_username <- Sys.getenv("NRDP_username")
+  nrdp_password <- Sys.getenv("NRDP_password")
+
+  # Validate credentials are present
+  if (nrdp_username == "" || nrdp_password == "") {
+    message("ERROR: NRDP credentials not found in environment variables")
+    message("Please set NRDP_username and NRDP_password")
+    quit(status = 1)
+  }
+
   message(sprintf("Downloading timetable from NRDP to %s...", timetable_zip))
+  message(sprintf("Using NRDP username: %s", nrdp_username))
+
   safe_execute(
-    nrdp_timetable(timetable_zip),
+    nrdp_timetable(
+      destfile = timetable_zip,
+      username = nrdp_username,
+      password = nrdp_password
+    ),
     "Failed to download NRDP timetable"
   )
 
