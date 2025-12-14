@@ -2,6 +2,7 @@
 
 # Define package dependencies
 renv::use(
+  verbose = FALSE,
   "sf",
   "rnaturalearth",
   "ITSleeds/UK2GTFS@f15694a655c508f8caebaf99328b0a2d1bc8dfa5"

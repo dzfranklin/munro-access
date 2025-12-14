@@ -20,18 +20,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Load environment variables from .env file
-if [ -f ".env" ]; then
-  echo "Loading credentials from .env file..."
-  set -a
-  source .env
-  set +a
-else
-  echo "Error: .env file not found"
-  echo "Please create a .env file with NRDP_username and NRDP_password"
-  exit 1
-fi
-
 # Validate required environment variables
 if [ -z "$NRDP_username" ] || [ -z "$NRDP_password" ]; then
   echo "Error: NRDP credentials not found in .env file"
@@ -49,6 +37,8 @@ if [ -n "$PREVIEW_MODE" ]; then
 else
   Rscript entrypoint.R
 fi
+
+rm -r ./out/timetable ./out/timetable.zip ./tmp
 
 # Check if output was created
 OUTPUT_NAME=out/rail_scot_gtfs.zip

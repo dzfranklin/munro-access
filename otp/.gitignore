@@ -1,0 +1,8 @@
+cache
+
+# Data files
+*gtfs.zip
+*.pbf
+*.jar
+*.tif
+*.aux.xml

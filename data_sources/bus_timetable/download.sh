@@ -4,19 +4,6 @@ set -e
 # Change to script directory
 cd "$(dirname "$0")"
 
-# Load environment variables from .env file
-if [ -f ".env" ]; then
-  echo "Loading credentials from .env file..."
-  set -a
-  source .env
-  set +a
-else
-  echo "Error: .env file not found"
-  echo "Please create a .env file with BODS_API_KEY"
-  echo "Get your API key from: https://data.bus-data.dft.gov.uk/account/settings/"
-  exit 1
-fi
-
 # Validate required environment variable
 if [ -z "$BODS_API_KEY" ]; then
   echo "Error: BODS_API_KEY not found in .env file"
