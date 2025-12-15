@@ -1,4 +1,5 @@
 {
+  "streetGraph": "streetGraph.obj",
   "writeCachedElevations": true,
   "transitServiceStart": "-P2D",
   "transitServiceEnd": "P10D",

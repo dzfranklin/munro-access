@@ -32,15 +32,12 @@ mkdir -p otp/cache
 
 if [[ "$BUILD_STREET" = true || ( "$BUILD" = true && ! -f otp/streetGraph.obj ) ]]; then
   java -Xmx8G -jar "$OTP" --buildStreet --save --cache ./otp/cache ./otp
-  mv otp/graph.obj otp/streetGraph.obj
-
   if [ "$BUILD" != true ]; then
     exit 0
   fi
 fi
 
 if [ "$BUILD" = true ]; then
-  cp otp/streetGraph.obj otp/graph.obj
   java -Xmx8G -jar "$OTP" --loadStreet --save --cache ./otp/cache ./otp
   exit 0
 fi
