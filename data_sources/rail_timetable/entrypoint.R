@@ -5,7 +5,8 @@ renv::use(
   verbose = FALSE,
   "sf",
   "rnaturalearth",
-  "ITSleeds/UK2GTFS@f15694a655c508f8caebaf99328b0a2d1bc8dfa5"
+#   "ITSleeds/UK2GTFS@f15694a655c508f8caebaf99328b0a2d1bc8dfa5"
+  "dzfranklin/UK2GTFS@route-short-name"
 )
 
 # Parse command-line arguments
@@ -170,16 +171,10 @@ if (any(out_of_order_times)) {
   gtfs$stop_times$departure_time[out_of_order_times] <- temp
 }
 
-# Fix empty route_short_name fields
-empty_short_names <- is.na(gtfs$routes$route_short_name) | gtfs$routes$route_short_name == ""
-if (any(empty_short_names)) {
-  message("Fixing empty route_short_name fields...")
-  gtfs$routes$route_short_name[empty_short_names] <- gtfs$routes$route_long_name[empty_short_names]
-  message(sprintf(
-    "Copied route_long_name to route_short_name for %d routes\n",
-    sum(empty_short_names)
-  ))
-}
+# Set bikes_allowed=1 for all trips
+message("Setting bikes_allowed=1 for all trips...")
+gtfs$trips$bikes_allowed <- 1
+message(sprintf("Updated %d trips to allow bicycles\n", nrow(gtfs$trips)))
 
 # Validate after cleaning
 message("Validating GTFS (after cleaning)...")

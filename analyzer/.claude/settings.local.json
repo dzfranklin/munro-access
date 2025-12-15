@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(mvn compile:*)",
+      "Bash(unzip:*)",
+      "WebFetch(domain:docs.opentripplanner.org)",
+      "WebSearch"
+    ]
+  }
+}

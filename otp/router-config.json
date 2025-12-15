@@ -1,0 +1,13 @@
+{
+  "routingDefaults": {
+    "drivingDirection": "left",
+    "transferOptimization": {
+      "optimizeTransferWaitTime": false // workaround for crash on some rail transfers
+    }
+  },
+  "transit": {
+    "dynamicSearchWindow": {
+      "maxWindow": "PT24H"
+    }
+  }
+}

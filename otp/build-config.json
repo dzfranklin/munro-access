@@ -1,3 +1,14 @@
 {
-  "writeCachedElevations": true
+  "writeCachedElevations": true,
+  "transitServiceStart": "-P2D",
+  "transitServiceEnd": "P10D",
+  "osmDefaults": {
+    "timeZone": "Europe/London",
+    "osmTagMapping": "uk"
+  },
+  "transferRequests": [
+    {
+      "modes": "WALK"
+    }
+  ]
 }

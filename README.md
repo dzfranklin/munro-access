@@ -7,7 +7,7 @@
 ## Usage
 
 ```bash
-> ./download_static_data.sh
+> ./download_streets.sh
 > ./download_timetables.sh # (Use --clean to overwrite existing files)
 > ./otp.sh --build
 ```

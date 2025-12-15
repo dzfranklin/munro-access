@@ -1,5 +1,8 @@
 cache
 
+# Generated graph
+*.obj
+
 # Data files
 *gtfs.zip
 *.pbf
