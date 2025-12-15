@@ -8,6 +8,6 @@
 
 ```bash
 > ./download_streets.sh
-> ./download_timetables.sh # (Use --clean to overwrite existing files)
-> ./otp.sh --build
+> ./download_timetables.sh
+> ./otp.sh --build # (Caches street graph, use --buildStreet to rebuild)
 ```
