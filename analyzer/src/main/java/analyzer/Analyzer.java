@@ -29,11 +29,11 @@ public class Analyzer {
     private static final ZoneId tz = ZoneId.of("Europe/London");
     private static final String otpEndpoint = "http://localhost:8080";
 
-    private Clock clock = Clock.system(tz);
-    private OtpApiClient otp = new OtpApiClient(tz, otpEndpoint);
+    private final Clock clock = Clock.system(tz);
+    private final OtpApiClient otp = new OtpApiClient(tz, otpEndpoint);
 
-    private ArrayList<StartingPlace> starts = new ArrayList<>();
-    private ArrayList<OutputTargetPlace> outputTargets = new ArrayList<>();
+    private final ArrayList<StartingPlace> starts = new ArrayList<>();
+    private final ArrayList<OutputTargetPlace> outputTargets = new ArrayList<>();
 
     Output output() {
         return new Output(starts, outputTargets);
