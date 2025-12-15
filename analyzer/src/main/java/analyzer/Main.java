@@ -29,7 +29,6 @@ public class Main {
         var outputFile = new File(args[2]);
         log.info("analyzer (starts {}, targets {}, output {})", inputStartsFile, inputTargetsFile, outputFile);
 
-
         DefaultPrettyPrinter jsonPrettyPrinter = new DefaultPrettyPrinter();
         jsonPrettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
@@ -58,8 +57,7 @@ public class Main {
             output = new Output();
         }
 
-        var analyzer = new Analyzer(output);
-
+        var analyzer = new Analyzer();
         int skipped = 0;
         for (TargetPlace target : inputTargets) {
             for (StartingPlace start : inputStarts) {
@@ -70,10 +68,13 @@ public class Main {
 
                 log.info("Analyzing {} from {}", target.id(), start.id());
                 Instant startTime = Instant.now();
-                analyzer.analyze(start, target);
+                Result result = analyzer.analyze(start, target);
                 Instant endTime = Instant.now();
                 log.info("Analyzed {} from {} in {}", target.id(), start.id(), Duration.between(startTime, endTime));
 
+                output.putTarget(target);
+                output.putStart(start);
+                output.putResult(result);
                 jsonMapper.writeValue(outputFile, output);
             }
         }

@@ -59,6 +59,10 @@ public class Output {
         starts.put(start.id(), start);
     }
 
+    public void putTarget(TargetPlace target) {
+        targets.put(target.id(), target);
+    }
+
     public void putResult(Result result) {
         results.add(result);
         resultSet.add(result.id());

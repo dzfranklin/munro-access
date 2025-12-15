@@ -32,19 +32,7 @@ public class Analyzer {
     private final Clock clock = Clock.system(tz);
     private final OtpApiClient otp = new OtpApiClient(tz, otpEndpoint);
 
-    private final Output output;
-
-    public Analyzer(Output output) {
-        this.output = output;
-    }
-
-    public Analyzer() {
-        this(new Output());
-    }
-
-    public void analyze(StartingPlace start, TargetPlace target) throws IOException {
-        output.putStart(start);
-
+    public Result analyze(StartingPlace start, TargetPlace target) throws IOException {
         HashMap<DayOfWeek, List<OutputItinerary>> itineraries = new HashMap<>();
         var today = LocalDate.now(clock);
         for (DayOfWeek day : searchDays) {
@@ -56,8 +44,7 @@ public class Analyzer {
             dayItineraries.sort(null);
             itineraries.put(day, dayItineraries);
         }
-
-        output.putResult(new Result(start.id(), target.id(), itineraries));
+        return new Result(start.id(), target.id(), itineraries);
     }
 
     private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {
