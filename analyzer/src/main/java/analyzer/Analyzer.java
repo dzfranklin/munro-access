@@ -32,38 +32,19 @@ public class Analyzer {
     private final Clock clock = Clock.system(tz);
     private final OtpApiClient otp = new OtpApiClient(tz, otpEndpoint);
 
-    private final ArrayList<StartingPlace> starts = new ArrayList<>();
-    private final ArrayList<OutputTargetPlace> outputTargets = new ArrayList<>();
+    private final Output output;
 
-    Output output() {
-        return new Output(starts, outputTargets);
+    public Analyzer(Output output) {
+        this.output = output;
     }
 
-    void analyze(List<StartingPlace> inputStarts, List<InputTargetPlace> inputTargets) throws IOException {
-        if (!starts.isEmpty()) {
-            throw new RuntimeException("analyze(input) should be called once per Analyzer");
-        }
-
-        try {
-            List<Alert> alerts = otp.alerts();
-            if (!alerts.isEmpty()) {
-                log.warn("Alerts exist: {}", alerts);
-            }
-        } catch (java.net.SocketException err) {
-            log.error("Failed to get alerts, have you started OTP? (./otp.sh)");
-            throw err;
-        }
-
-        starts.addAll(inputStarts);
-
-        for (var target : inputTargets) {
-            for (var start : inputStarts) {
-                analyze(start, target);
-            }
-        }
+    public Analyzer() {
+        this(new Output());
     }
 
-    private void analyze(StartingPlace start, InputTargetPlace target) throws IOException {
+    public void analyze(StartingPlace start, TargetPlace target) throws IOException {
+        output.putStart(start);
+
         HashMap<DayOfWeek, List<OutputItinerary>> itineraries = new HashMap<>();
         var today = LocalDate.now(clock);
         for (DayOfWeek day : searchDays) {
@@ -72,14 +53,14 @@ public class Analyzer {
             for (boolean withCycle : new boolean[]{false, true}) {
                 dayItineraries.addAll(findItineraries(start, target, nextDay, withCycle));
             }
-            dayItineraries.sort(Comparator.comparing(OutputItinerary::startTime));
+            dayItineraries.sort(null);
             itineraries.put(day, dayItineraries);
         }
 
-        outputTargets.add(new OutputTargetPlace(target.id(), target.data(), target.lngLat(), itineraries));
+        output.putResult(new Result(start.id(), target.id(), itineraries));
     }
 
-    private List<OutputItinerary> findItineraries(StartingPlace start, InputTargetPlace target, LocalDate date, boolean withCycle) throws IOException {
+    private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {
         log.debug("findRoutes: start {}, target {}, date {}", start, target, date);
 
         HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
@@ -98,7 +79,14 @@ public class Analyzer {
                 .withOptimize(OptimizeType.QUICK)
                 .withNumberOfItineraries(5);
 
-        TripPlan result = otp.plan(params.build());
+        TripPlan result;
+        try {
+            result = otp.plan(params.build());
+        } catch (java.net.SocketException err) {
+            log.error("Failed to get alerts, have you started OTP? (./otp.sh)");
+            throw err;
+        }
+
         var itineraries = new ArrayList<OutputItinerary>();
         pagination:
         while (true) {
@@ -111,7 +99,7 @@ public class Analyzer {
                     continue; // skip all-bike itineraries
                 }
                 if (withCycle && !it.legs().stream().anyMatch(leg -> leg.mode() == LegMode.BICYCLE)) {
-                    continue;
+                    continue; // withCycle should only return itineraries involving cycling
                 }
                 it = snipItineraryToStartingRadius(start, it);
                 itineraries.add(new OutputItinerary(it));
@@ -124,7 +112,7 @@ public class Analyzer {
         return itineraries;
     }
 
-    private Itinerary snipItineraryToStartingRadius(StartingPlace start, Itinerary it) {
+    Itinerary snipItineraryToStartingRadius(StartingPlace start, Itinerary it) {
         ArrayList<Leg> legs = new ArrayList<>();
         var started = false;
         SpatialContext ctx = SpatialContext.GEO;

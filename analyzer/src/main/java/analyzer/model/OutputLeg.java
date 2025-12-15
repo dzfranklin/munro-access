@@ -3,14 +3,15 @@ package analyzer.model;
 import org.opentripplanner.client.model.LegMode;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 public record OutputLeg(
-        String from,
-        String to,
+        OutputPlace from,
+        OutputPlace to,
         boolean interlineWithPreviousLeg,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
+        LocalTime startTime,
+        LocalTime endTime,
         LegMode mode,
         String agencyName,
         String routeName
@@ -19,11 +20,11 @@ public record OutputLeg(
 
     public OutputLeg(org.opentripplanner.client.model.Leg l) {
         this(
-                l.from().name(),
-                l.to().name(),
+                new OutputPlace(l.from()),
+                new OutputPlace(l.to()),
                 l.interlineWithPreviousLeg(),
-                l.startTime().atZoneSameInstant(tz).toLocalDateTime(),
-                l.endTime().atZoneSameInstant(tz).toLocalDateTime(),
+                l.startTime().atZoneSameInstant(tz).toLocalTime(),
+                l.endTime().atZoneSameInstant(tz).toLocalTime(),
                 l.mode(),
                 l.agency() != null ? l.agency().name() : null,
                 l.route() != null ? l.route().getShortName() : null

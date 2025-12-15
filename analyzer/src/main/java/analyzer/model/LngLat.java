@@ -1,6 +1,5 @@
 package analyzer.model;
 
-import org.opentripplanner.client.model.Coordinate;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
@@ -10,6 +9,8 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
 import tools.jackson.databind.deser.std.StdDeserializer;
 import tools.jackson.databind.ser.std.StdSerializer;
+
+import java.text.DecimalFormat;
 
 @JsonDeserialize(using = LngLat.LngLatDeserializer.class)
 @JsonSerialize(using = LngLat.LngLatSerializer.class)
@@ -30,14 +31,18 @@ public record LngLat(double lng, double lat) {
     }
 
     static class LngLatSerializer extends StdSerializer<LngLat> {
+        private final DecimalFormat formatter = new DecimalFormat(".#####");
+
         public LngLatSerializer() {
             super(LngLat.class);
         }
 
-
         @Override
         public void serialize(LngLat value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
-            gen.writeArray(new double[]{value.lng, value.lat}, 0, 2);
+            gen.writeStartArray();
+            gen.writeNumber(formatter.format(value.lng));
+            gen.writeNumber(formatter.format(value.lat));
+            gen.writeEndArray();
         }
     }
 }
