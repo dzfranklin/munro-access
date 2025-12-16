@@ -8,11 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public record Result(String start, String target, Map<DayOfWeek, List<OutputItinerary>> itineraries) {
-    protected String id() {
-        return id(start, target);
-    }
-
-    protected static String id(String start, String target) {
-        return start + ":" + target;
+    public ResultID id() {
+        return new ResultID(start, target);
     }
 }
