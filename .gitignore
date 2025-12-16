@@ -2,3 +2,4 @@
 out
 tmp
 .env
+node_modules

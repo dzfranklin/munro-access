@@ -1,0 +1,20 @@
+{
+  "name": "walkhighlands",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "preview": "node main.js --preview",
+    "download": "node main.js | tee munro_routes.jsonl"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "csv-parse": "^6.1.0",
+    "patchright": "^1.57.0",
+    "playwright": "^1.57.0"
+  }
+}
