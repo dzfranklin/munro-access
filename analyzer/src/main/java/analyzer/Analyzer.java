@@ -48,7 +48,7 @@ public class Analyzer {
     }
 
     private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {
-        log.debug("findRoutes: start {}, target {}, date {}", start, target, date);
+        log.debug("findRoutes: start {}, target {}, date {}, withCycle {}", start, target, date, withCycle);
 
         HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
         if (withCycle) {

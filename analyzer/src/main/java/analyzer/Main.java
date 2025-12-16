@@ -21,9 +21,24 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
+
+    private static String formatDuration(Duration d) {
+        long hours = d.toHours();
+        long minutes = d.toMinutesPart();
+        long seconds = d.toSecondsPart();
+
+        if (hours > 0) {
+            return String.format("%dh %dm %ds", hours, minutes, seconds);
+        } else if (minutes > 0) {
+            return String.format("%dm %ds", minutes, seconds);
+        } else {
+            return String.format("%ds", seconds);
+        }
+    }
 
     public static void main(String[] args) throws IOException {
         if (args.length != 3) {
@@ -69,6 +84,7 @@ public class Main {
                 BufferedWriter resultsFileWriter = new BufferedWriter(new FileWriter(resultsFile, true));
         ) {
             int skipped = 0;
+            AtomicInteger completedCount = new AtomicInteger(0);
             ArrayList<AnalyzeTask> tasks = new ArrayList<>();
             for (TargetPlace target : inputTargets) {
                 for (StartingPlace start : inputStarts) {
@@ -76,20 +92,79 @@ public class Main {
                         skipped++;
                         continue;
                     }
-                    tasks.add(new AnalyzeTask(resultsFileWriter, start, target));
+                    tasks.add(new AnalyzeTask(resultsFileWriter, start, target, completedCount));
                 }
             }
 
             log.info("Analyzing {} start -> target pairs, skipped {} already in results", tasks.size(), skipped);
+
+            // Start a background thread for progress logging
+            Instant overallStartTime = Instant.now();
+            Thread progressLogger = new Thread(() -> {
+                Logger progressLog = LoggerFactory.getLogger(Main.class);
+
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        Thread.sleep(60_000); // Log every minute
+
+                        int completed = completedCount.get();
+                        int total = tasks.size();
+
+                        if (completed > 0 && completed < total) {
+                            double progress = (double) completed / total;
+                            Duration elapsed = Duration.between(overallStartTime, Instant.now());
+
+                            // Calculate ETA: (elapsed / completed) * remaining
+                            long avgMs = elapsed.toMillis() / completed;
+                            long remainingMs = avgMs * (total - completed);
+                            Duration eta = Duration.ofMillis(remainingMs);
+
+                            progressLog.info("Progress: {}/{} ({:.1f}%) completed, ETA: {}",
+                                     completed, total, progress * 100, formatDuration(eta));
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }, "progress-logger");
+            progressLogger.setDaemon(true);
+            progressLogger.start();
+
             var startTime = Instant.now();
-            ArrayList<Throwable> failures = new ArrayList<>();
-            for (var fut : executor.invokeAll(tasks)) {
+            var futures = executor.invokeAll(tasks);
+
+            // Stop the progress logger
+            progressLogger.interrupt();
+            try {
+                progressLogger.join(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            ArrayList<TaskFailure> taskFailures = new ArrayList<>();
+            for (int i = 0; i < futures.size(); i++) {
+                var fut = futures.get(i);
                 if (fut.state() == Future.State.FAILED) {
-                    failures.add(fut.exceptionNow());
+                    Throwable ex = fut.exceptionNow();
+                    AnalyzeTask task = tasks.get(i);
+                    ResultID id = new ResultID(task.start.id(), task.target.id());
+
+                    // Extract the root cause
+                    Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                    taskFailures.add(TaskFailure.from(id, (Exception) cause, 3));
                 }
             }
-            if (!failures.isEmpty()) {
-                log.error("{} failure(s)", failures.size());
+
+            if (!taskFailures.isEmpty()) {
+                log.error("{} failure(s) after retries:", taskFailures.size());
+                for (TaskFailure failure : taskFailures) {
+                    log.error("  - {} -> {}: {} ({})",
+                              failure.id().start(),
+                              failure.id().target(),
+                              failure.errorMessage(),
+                              failure.errorType());
+                }
                 System.exit(1);
             }
             var endTime = Instant.now();
