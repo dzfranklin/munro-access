@@ -61,6 +61,8 @@ public class Main {
             log.info("Results file {} does not exist", resultsFile);
         }
 
+        // A single analyze task takes about 30 seconds and spends most time waiting on calls to OTP. OTP runs on the
+        // same machine and is cpu-bound.
         var nThreads = Runtime.getRuntime().availableProcessors();
         try (
                 ExecutorService executor = Executors.newFixedThreadPool(nThreads);
