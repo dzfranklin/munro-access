@@ -24,15 +24,7 @@ public class Analyzer {
     private static final Logger log = LoggerFactory.getLogger(Analyzer.class);
 
     // Search configuration
-    private static final List<DayOfWeek> searchDays = List.of(DayOfWeek.WEDNESDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
-    private static final LocalTime minTargetArrival = LocalTime.of(6, 0);
-    private static final LocalTime maxTargetArrival = LocalTime.of(13, 0);
-
-    // Return journey configuration
-    // Minimum hike duration: 4h40m aligns with hourly bus schedules
-    // (e.g., arrive 10:00 AM, hike 4h40m, finish 2:40 PM, catch 3:00 PM bus)
-    private static final Duration MIN_HIKE_TIME = Duration.ofHours(4).plusMinutes(40);
-    private static final LocalTime LATEST_RETURN_DEPARTURE = LocalTime.of(23, 59);
+    private static final List<DayOfWeek> searchDays = List.of(DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
     private static final ZoneId tz = ZoneId.of("Europe/London");
     private static final String otpEndpoint = "http://localhost:8080";
@@ -50,26 +42,14 @@ public class Analyzer {
             var dayOutbounds = new ArrayList<OutputItinerary>();
             var dayReturns = new ArrayList<OutputItinerary>();
 
-            // Find all outbound itineraries
+            // Find all outbound itineraries throughout the day
             for (boolean withCycle : new boolean[]{false, true}) {
                 dayOutbounds.addAll(findItineraries(start, target, nextDay, withCycle));
             }
 
-            // Find return itineraries if we have outbounds
-            if (!dayOutbounds.isEmpty()) {
-                LocalTime earliestArrival = dayOutbounds.stream()
-                        .map(OutputItinerary::getEndTime)
-                        .min(LocalTime::compareTo)
-                        .orElseThrow();
-
-                LocalTime returnSearchStart = earliestArrival.plus(MIN_HIKE_TIME);
-
-                // Search for return journeys
-                for (boolean withCycle : new boolean[]{false, true}) {
-                    dayReturns.addAll(findReturnItineraries(
-                            target, start, nextDay, returnSearchStart, withCycle
-                    ));
-                }
+            // Find all return itineraries throughout the day
+            for (boolean withCycle : new boolean[]{false, true}) {
+                dayReturns.addAll(findReturnItineraries(target, start, nextDay, withCycle));
             }
 
             dayOutbounds.sort(null);
@@ -93,7 +73,7 @@ public class Analyzer {
     }
 
     private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {
-        log.debug("findRoutes: start {}, target {}, date {}, withCycle {}", start, target, date, withCycle);
+        log.debug("findItineraries: start {}, target {}, date {}, withCycle {}", start, target, date, withCycle);
 
         HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
         if (withCycle) {
@@ -104,9 +84,9 @@ public class Analyzer {
                 .withFrom(start.coordinate())
                 .withTo(target.coordinate())
                 .withModes(modes)
-                .withSearchDirection(TripPlanParameters.SearchDirection.ARRIVE_BY)
-                .withTime(date.atTime(minTargetArrival))
-                .withSearchWindow(Duration.between(minTargetArrival, maxTargetArrival))
+                .withSearchDirection(TripPlanParameters.SearchDirection.DEPART_AT)
+                .withTime(date.atTime(0, 0))
+                .withSearchWindow(Duration.ofHours(24))
                 .withWalkReluctance(1.1)
                 .withOptimize(OptimizeType.QUICK)
                 .withNumberOfItineraries(5);
@@ -120,13 +100,9 @@ public class Analyzer {
         }
 
         var itineraries = new ArrayList<OutputItinerary>();
-        pagination:
         while (true) {
             for (Itinerary it : result.itineraries()) {
                 List<Leg> transitLegs = it.transitLegs();
-                if (it.legs().getLast().endTime().toLocalTime().isAfter(maxTargetArrival)) {
-                    break pagination;
-                }
                 if (transitLegs.isEmpty()) {
                     continue; // skip all-bike itineraries
                 }
@@ -148,12 +124,11 @@ public class Analyzer {
             TargetPlace from,
             StartingPlace to,
             LocalDate date,
-            LocalTime earliestDeparture,
             boolean withCycle
     ) throws IOException {
 
-        log.debug("findReturnItineraries: from {}, to {}, earliestDeparture {}, withCycle {}",
-                from, to, earliestDeparture, withCycle);
+        log.debug("findReturnItineraries: from {}, to {}, date {}, withCycle {}",
+                from, to, date, withCycle);
 
         // Build mode set
         HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
@@ -161,17 +136,14 @@ public class Analyzer {
             modes.add(RequestMode.BICYCLE);
         }
 
-        // Search from earliest departure to end of day
-        Duration searchWindow = Duration.between(earliestDeparture, LATEST_RETURN_DEPARTURE);
-
-        // Build OTP query - DEPART_AT from trailhead
+        // Build OTP query - DEPART_AT from trailhead, search full day
         TripPlanParametersBuilder params = new TripPlanParametersBuilder()
                 .withFrom(from.coordinate())
                 .withTo(to.coordinate())
                 .withModes(modes)
                 .withSearchDirection(TripPlanParameters.SearchDirection.DEPART_AT)
-                .withTime(date.atTime(earliestDeparture))
-                .withSearchWindow(searchWindow)
+                .withTime(date.atTime(0, 0))
+                .withSearchWindow(Duration.ofHours(24))
                 .withWalkReluctance(1.1)
                 .withOptimize(OptimizeType.QUICK)
                 .withNumberOfItineraries(5);
@@ -187,64 +159,27 @@ public class Analyzer {
         // Collect all viable return itineraries
         List<OutputItinerary> returnItineraries = new ArrayList<>();
 
-        for (Itinerary it : result.itineraries()) {
-            List<Leg> transitLegs = it.transitLegs();
-
-            if (transitLegs.isEmpty()) {
-                continue; // skip all-bike itineraries
-            }
-
-            if (withCycle && !it.legs().stream().anyMatch(leg -> leg.mode() == LegMode.BICYCLE)) {
-                continue; // withCycle should only return itineraries involving cycling
-            }
-
-            LocalTime departTime = transitLegs.getFirst().startTime().toLocalTime();
-
-            // Check if departure is after earliest allowed
-            if (departTime.isBefore(earliestDeparture)) {
-                continue;
-            }
-
-            // Snip ending radius (remove legs within home city)
-            it = snipItineraryToEndingRadius(to, it);
-            returnItineraries.add(new OutputItinerary(it));
-        }
-
-        // Paginate through results if needed (similar to outbound logic)
-        LocalTime lastDepartureTime = LATEST_RETURN_DEPARTURE;
-        if (!returnItineraries.isEmpty()) {
-            lastDepartureTime = returnItineraries.getLast().getStartTime();
-        }
-
-        while (lastDepartureTime.isBefore(LATEST_RETURN_DEPARTURE)) {
-            params.withTime(date.atTime(lastDepartureTime));
-            try {
-                result = otp.plan(params.build());
-            } catch (java.net.SocketException err) {
-                log.error("Failed to contact OTP for return journey pagination");
-                throw err;
-            }
-
-            boolean foundNew = false;
+        while (true) {
             for (Itinerary it : result.itineraries()) {
                 List<Leg> transitLegs = it.transitLegs();
 
-                if (transitLegs.isEmpty()) continue;
-                if (withCycle && !it.legs().stream().anyMatch(leg -> leg.mode() == LegMode.BICYCLE)) continue;
-
-                LocalTime departTime = transitLegs.getFirst().startTime().toLocalTime();
-
-                if (departTime.isBefore(earliestDeparture)) continue;
-
-                if (departTime.isAfter(lastDepartureTime)) {
-                    it = snipItineraryToEndingRadius(to, it);
-                    returnItineraries.add(new OutputItinerary(it));
-                    lastDepartureTime = departTime;
-                    foundNew = true;
+                if (transitLegs.isEmpty()) {
+                    continue; // skip all-bike itineraries
                 }
+
+                if (withCycle && !it.legs().stream().anyMatch(leg -> leg.mode() == LegMode.BICYCLE)) {
+                    continue; // withCycle should only return itineraries involving cycling
+                }
+
+                // Snip ending radius (remove legs within home city)
+                it = snipItineraryToEndingRadius(to, it);
+                returnItineraries.add(new OutputItinerary(it));
             }
 
-            if (!foundNew) break;
+            if (result.nextPageCursor() == null) {
+                break;
+            }
+            result = otp.plan(params.withPageCursor(result.nextPageCursor()).build());
         }
 
         return returnItineraries;
