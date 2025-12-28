@@ -10,7 +10,7 @@ renv::use(
 )
 
 # Parse command-line arguments
-args <- commandArgs(trailingOnly `= TRUE)
+args <- commandArgs(trailingOnly = TRUE)
 preview_mode <- "--preview" %in% args
 
 # Configuration
@@ -180,38 +180,46 @@ message(sprintf("Updated %d trips to allow bicycles\n", nrow(gtfs$trips)))
 message("Validating GTFS (after cleaning)...")
 gtfs_validate_internal(gtfs)
 
-  message("Trimming to next full Monday-Sunday week...")
+# Check if trimming should be skipped
+skip_trim <- Sys.getenv("SKIP_TRIM", "")
+if (skip_trim == "") {
+  message("Trimming to Monday-Sunday week from GTFS_WEEK_START...")
 
-# Calculate next full week (Monday-Sunday)
-today <- Sys.Date()
-day_of_week <- as.integer(format(today, "%u"))  # 1=Monday, 7=Sunday
-days_to_monday <- (8 - day_of_week) %% 7
-if (days_to_monday == 0) days_to_monday <- 0  # Today is Monday
-week_start <- today + days_to_monday
-week_end <- week_start + 6
+  # Read week start from environment variable
+  week_start_str <- Sys.getenv("GTFS_WEEK_START", "")
+  if (week_start_str == "") {
+    message("ERROR: GTFS_WEEK_START environment variable not set")
+    message("This should be set by download_timetables.sh")
+    quit(status = 1)
+  }
 
-# Convert to GTFS date format (YYYYMMDD integers)
-start_date <- as.integer(format(week_start, "%Y%m%d"))
-end_date <- as.integer(format(week_end, "%Y%m%d"))
+  # Parse YYYYMMDD format
+  start_date <- as.integer(week_start_str)
+  week_start <- as.Date(week_start_str, format = "%Y%m%d")
+  week_end <- week_start + 6
+  end_date <- as.integer(format(week_end, "%Y%m%d"))
 
-message(sprintf("Trimming rail GTFS to week: %s to %s (GTFS format: %d to %d)\n",
-              week_start, week_end, start_date, end_date))
+  message(sprintf("Trimming rail GTFS to week: %s to %s (GTFS format: %d to %d)\n",
+                week_start, week_end, start_date, end_date))
 
-gtfs <- safe_execute(
-gtfs_trim_dates(gtfs, startdate = start_date, enddate = end_date),
-"Failed to trim GTFS dates"
-)
+  gtfs <- safe_execute(
+    gtfs_trim_dates(gtfs, startdate = start_date, enddate = end_date),
+    "Failed to trim GTFS dates"
+  )
 
-# Validate coverage for all 7 days
-message("Validating rail GTFS service coverage for all 7 days...")
+  # Validate coverage for all 7 days
+  message("Validating rail GTFS service coverage for all 7 days...")
 
-# The gtfs_trim_dates function should have already validated, but let's add explicit check
-if (!is.null(gtfs$calendar) && nrow(gtfs$calendar) == 0 &&
-  (!is.null(gtfs$calendar_dates) && nrow(gtfs$calendar_dates) == 0)) {
-stop("Rail GTFS has no service data after trimming")
+  # The gtfs_trim_dates function should have already validated, but let's add explicit check
+  if (!is.null(gtfs$calendar) && nrow(gtfs$calendar) == 0 &&
+    (!is.null(gtfs$calendar_dates) && nrow(gtfs$calendar_dates) == 0)) {
+    stop("Rail GTFS has no service data after trimming")
+  }
+
+  message("✓ Rail GTFS trimmed and validated\n")
+} else {
+  message("SKIP_TRIM is set - keeping full GTFS data\n")
 }
-
-message("✓ Rail GTFS trimmed and validated\n")
 
 # Write output
 out_zip_path <- file.path(out_dir, paste0(out_name, ".zip"))

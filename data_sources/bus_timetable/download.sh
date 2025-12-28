@@ -24,9 +24,14 @@ if curl -L -o "$OUTPUT_FILE" "$DOWNLOAD_URL"; then
     echo "Success! Created $OUTPUT_FILE"
     ls -lh "$OUTPUT_FILE"
 
-    echo ""
-    echo "Trimming to next full week..."
-    uv run trim_to_week.py
+    if [ -z "$SKIP_TRIM" ]; then
+      echo ""
+      echo "Trimming to next full week..."
+      uv run trim_to_week.py
+    else
+      echo ""
+      echo "SKIP_TRIM is set - keeping full GTFS data"
+    fi
 
   else
     echo "Error: Download succeeded but file is empty or missing"

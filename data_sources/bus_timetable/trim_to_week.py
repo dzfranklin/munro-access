@@ -5,10 +5,11 @@
 # ]
 # ///
 """
-Trim bus GTFS to next full Monday-Sunday week.
+Trim bus GTFS to Monday-Sunday week specified by GTFS_WEEK_START environment variable.
 """
 
 import sys
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 import gtfs_kit as gk
@@ -16,15 +17,16 @@ import gtfs_kit as gk
 # Configuration
 INPUT_FILE = Path("out/bus_scot_gtfs.zip")
 
-def get_next_monday():
-    """Calculate the next Monday from today (or today if today is Monday)."""
-    today = datetime.now().date()
-    days_until_monday = (7 - today.weekday()) % 7
-    return today + timedelta(days=days_until_monday)
-
 def main():
-    # Calculate next full Monday-Sunday week
-    week_start = get_next_monday()
+    # Read week start from environment variable
+    week_start_str = os.environ.get('GTFS_WEEK_START')
+    if not week_start_str:
+        print("ERROR: GTFS_WEEK_START environment variable not set", file=sys.stderr)
+        print("This should be set by download_timetables.sh", file=sys.stderr)
+        sys.exit(1)
+
+    # Parse YYYYMMDD format
+    week_start = datetime.strptime(week_start_str, '%Y%m%d').date()
     week_end = week_start + timedelta(days=6)
 
     print(f"Reading bus GTFS from {INPUT_FILE}...")
