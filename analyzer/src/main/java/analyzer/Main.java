@@ -55,8 +55,8 @@ public class Main {
         });
         log.info("Read {} ({} starts)", inputStartsFile, inputStarts.size());
 
-        List<TargetPlace> inputTargets = jsonMapper.readValue(inputTargetsFile, new TypeReference<>() {
-        });
+        TargetsInput targetsInput = jsonMapper.readValue(inputTargetsFile, TargetsInput.class);
+        List<TargetPlace> inputTargets = targetsInput.starts();
         log.info("Read {} ({} targets)", inputTargetsFile, inputTargets.size());
 
         if (resultsFile.getParentFile() != null) {

@@ -1,12 +1,63 @@
-[
-  {
-    "id": "old-bridge-of-tilt-car-park",
-    "name": "Old Bridge of Tilt car park",
-    "lngLat": [-3.84325, 56.7745]
+{
+  "metadata": {
+    "processedAt": "2025-12-28T15:20:40.838Z",
+    "totalStarts": 147,
+    "totalUniqueRoutes": 168,
+    "totalMunros": 282,
+    "lowConfidenceCount": 1,
+    "cacheHits": 140,
+    "apiCalls": 0,
+    "failures": 0
   },
-  {
-    "id": "cairngorm-mountain-car-park-charge",
-    "lngLat": [-3.67120, 57.13400],
-    "name": "Cairngorm Mountain car park (charge)"
-  }
-]
+  "starts": [
+    {
+      "id": "coishavachan-track",
+      "name": "Coishavachan track",
+      "description": "Start of Coishavachan track, Glen Lednock",
+      "lngLat": [
+        -4.0394,
+        56.4209
+      ],
+      "routes": [
+        {
+          "name": "Ben Chonzie from Glen Lednock",
+          "page": "https://www.walkhighlands.co.uk/perthshire/ben-chonzie.shtml",
+          "munros": [
+            {
+              "number": 1,
+              "name": "Ben Chonzie",
+              "page": "https://www.walkhighlands.co.uk/munros/ben-chonzie.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ardvorlich",
+      "name": "Ardvorlich",
+      "description": "Ardvorlich, Loch Earn",
+      "lngLat": [
+        -4.2158,
+        56.3813
+      ],
+      "routes": [
+        {
+          "name": "Ben Vorlich and Stùc a' Chròin from Ardvorlich",
+          "page": "https://www.walkhighlands.co.uk/perthshire/ben-vorlich.shtml",
+          "munros": [
+            {
+              "number": 17,
+              "name": "Ben Vorlich",
+              "page": "https://www.walkhighlands.co.uk/munros/ben-vorlich-loch-earn.php"
+            },
+            {
+              "number": 18,
+              "name": "Stuc a' Chroin",
+              "page": "https://www.walkhighlands.co.uk/munros/stuc-a-chroin.php"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
