@@ -19,6 +19,16 @@
 Munro route starting coordinates were downloaded from walkhighlands (see data_sources/walkhighlands) and checked into
 this repository, so you should not need to redownload them.
 
+**Transit data trimming**
+
+The `./download_timetables.sh` script automatically trims both bus and rail transit data to the next full week (Monday-Sunday):
+- Trimming happens during download using R scripts with GTFS libraries
+- Both sources are trimmed to the same week to ensure consistency
+- `./otp.sh --build` extracts the week start date from the trimmed GTFS and writes it to `otp/transit_week.txt`
+- The analyzer reads this file to determine which Wed/Sat/Sun dates to query
+
+To update to a newer week, re-run from `./download_timetables.sh` onwards. The trimmed transit data represents a fixed week and won't change unless you re-run the workflow.
+
 **Analyze data**
 
 ```bash

@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
@@ -34,7 +36,7 @@ public class Analyzer {
 
     public Result analyze(StartingPlace start, TargetPlace target) throws IOException {
         HashMap<DayOfWeek, List<OutputItinerary>> itineraries = new HashMap<>();
-        var today = LocalDate.now(clock);
+        var today = readTransitWeekStart();
         for (DayOfWeek day : searchDays) {
             LocalDate nextDay = today.with(TemporalAdjusters.next(day));
             var dayItineraries = new ArrayList<OutputItinerary>();
@@ -45,6 +47,18 @@ public class Analyzer {
             itineraries.put(day, dayItineraries);
         }
         return new Result(start.id(), target.id(), itineraries);
+    }
+
+    private LocalDate readTransitWeekStart() {
+        try {
+            Path weekFile = Path.of("../otp/transit_week.txt");
+            String weekStart = Files.readString(weekFile).trim();
+            return LocalDate.parse(weekStart);
+        } catch (IOException e) {
+            log.error("Failed to read transit week from ../otp/transit_week.txt", e);
+            log.error("Have you run ./download_timetables.sh and ./otp.sh --build?");
+            throw new RuntimeException("Cannot determine transit week", e);
+        }
     }
 
     private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {

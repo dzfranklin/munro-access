@@ -38,6 +38,9 @@ if [[ "$BUILD_STREET" = true || ( "$BUILD" = true && ! -f otp/streetGraph.obj ) 
 fi
 
 if [ "$BUILD" = true ]; then
+  echo "Extracting transit week from GTFS..."
+  Rscript extract_transit_week.R
+
   java -Xmx8G -jar "$OTP" --loadStreet --save --cache ./otp/cache ./otp
   exit 0
 fi

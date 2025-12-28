@@ -23,6 +23,11 @@ if curl -L -o "$OUTPUT_FILE" "$DOWNLOAD_URL"; then
   if [ -f "$OUTPUT_FILE" ] && [ -s "$OUTPUT_FILE" ]; then
     echo "Success! Created $OUTPUT_FILE"
     ls -lh "$OUTPUT_FILE"
+
+    echo ""
+    echo "Trimming to next full week..."
+    Rscript trim_to_week.R
+
   else
     echo "Error: Download succeeded but file is empty or missing"
     exit 1

@@ -1,8 +1,8 @@
 {
   "streetGraph": "streetGraph.obj",
   "writeCachedElevations": true,
-  "transitServiceStart": "-P2D",
-  "transitServiceEnd": "P10D",
+  "transitServiceStart": "P0D",
+  "transitServiceEnd": "P0D",
   "osmDefaults": {
     "timeZone": "Europe/London",
     "osmTagMapping": "uk"

@@ -7,3 +7,5 @@ TODO bus open data
 TODO os terrain 50
 
 TODO OSM
+
+TODO walkhighlands - also note data is outdated, may be modified, refer to current
