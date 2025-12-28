@@ -2,7 +2,8 @@
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="analyzer.Main" />
     <module name="munro-access-analyzer" />
-    <option name="PROGRAM_PARAMETERS" value="example_input/starts.json example_input/targets.json out/results.jsonl" />
+    <option name="PROGRAM_PARAMETERS" value="example_input/starts.json example_input/targets.json out/sample_results.jsonl" />
+    <option name="VM_PARAMETERS" value="-Dorg.slf4j.simpleLogger.log.analyzer=debug" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/analyzer" />
     <extension name="coverage">
       <pattern>
@@ -12,7 +13,7 @@
     </extension>
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_clear results" />
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_clear sample results" />
     </method>
   </configuration>
 </component>

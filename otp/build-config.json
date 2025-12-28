@@ -1,8 +1,8 @@
 {
   "streetGraph": "streetGraph.obj",
   "writeCachedElevations": true,
-  "transitServiceStart": "P0D",
-  "transitServiceEnd": "P0D",
+  "transitServiceStart": "-P10Y", // workaround for <https://github.com/opentripplanner/OpenTripPlanner/issues/7161>
+  "transitServiceEnd": "P10Y",
   "osmDefaults": {
     "timeZone": "Europe/London",
     "osmTagMapping": "uk"

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "edinburgh",
+    "name": "Edinburgh",
+    "lngLat": [-3.188159, 55.95186],
+    "radius": 2000
+  },
+  {
+    "id": "stirling",
+    "name": "Stirling",
+    "lngLat": [-3.938219, 56.119943],
+    "radius": 1000
+  },
+  {
+    "id": "glasgow",
+    "name": "Glasgow",
+    "lngLat": [-4.278364, 55.8622269],
+    "radius": 4000
+  }
+]

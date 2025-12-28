@@ -1,14 +1,9 @@
 package analyzer;
 
 import analyzer.model.*;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.core.util.DefaultIndenter;
-import tools.jackson.core.util.DefaultPrettyPrinter;
-import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.*;
@@ -17,7 +12,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -25,20 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-
-    private static String formatDuration(Duration d) {
-        long hours = d.toHours();
-        long minutes = d.toMinutesPart();
-        long seconds = d.toSecondsPart();
-
-        if (hours > 0) {
-            return String.format("%dh %dm %ds", hours, minutes, seconds);
-        } else if (minutes > 0) {
-            return String.format("%dm %ds", minutes, seconds);
-        } else {
-            return String.format("%ds", seconds);
-        }
-    }
 
     public static void main(String[] args) throws IOException {
         if (args.length != 3) {
@@ -119,8 +99,8 @@ public class Main {
                             long remainingMs = avgMs * (total - completed);
                             Duration eta = Duration.ofMillis(remainingMs);
 
-                            progressLog.info("Progress: {}/{} ({:.1f}%) completed, ETA: {}",
-                                     completed, total, progress * 100, formatDuration(eta));
+                            progressLog.info("Progress: {}/{} ({}%) completed, ETA: {}",
+                                    completed, total, String.format("%.1f", progress * 100), eta);
                         }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -160,10 +140,10 @@ public class Main {
                 log.error("{} failure(s) after retries:", taskFailures.size());
                 for (TaskFailure failure : taskFailures) {
                     log.error("  - {} -> {}: {} ({})",
-                              failure.id().start(),
-                              failure.id().target(),
-                              failure.errorMessage(),
-                              failure.errorType());
+                            failure.id().start(),
+                            failure.id().target(),
+                            failure.errorMessage(),
+                            failure.errorType());
                 }
                 System.exit(1);
             }

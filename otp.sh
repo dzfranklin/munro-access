@@ -39,7 +39,7 @@ fi
 
 if [ "$BUILD" = true ]; then
   echo "Extracting transit week from GTFS..."
-  Rscript extract_transit_week.R
+  uv run extract_transit_week.py
 
   java -Xmx8G -jar "$OTP" --loadStreet --save --cache ./otp/cache ./otp
   exit 0

@@ -38,10 +38,11 @@ public class AnalyzeTask implements Callable<Void> {
         int attempt = 0;
         Exception lastException = null;
 
+        var analyzer = new Analyzer();
+
         while (attempt < maxAttempts) {
             attempt++;
             try {
-                var analyzer = new Analyzer();
 
                 if (attempt > 1) {
                     log.info("Retry attempt {} for {} from {}", attempt, target.id(), start.id());
@@ -54,8 +55,8 @@ public class AnalyzeTask implements Callable<Void> {
                 Instant endTime = Instant.now();
 
                 log.info("Analyzed {} from {} in {} (attempt {})",
-                         target.id(), start.id(),
-                         Duration.between(startTime, endTime), attempt);
+                        target.id(), start.id(),
+                        Duration.between(startTime, endTime), attempt);
 
                 String resultLine = jsonMapper.writeValueAsString(result);
 
@@ -74,7 +75,7 @@ public class AnalyzeTask implements Callable<Void> {
                     // Exponential backoff: 1s, 2s, 4s
                     long backoffMs = (long) Math.pow(2, attempt - 1) * 1000;
                     log.warn("Failed {} from {} (attempt {}), retrying in {}ms: {}",
-                             target.id(), start.id(), attempt, backoffMs, e.getMessage());
+                            target.id(), start.id(), attempt, backoffMs, e.toString());
                     try {
                         Thread.sleep(backoffMs);
                     } catch (InterruptedException ie) {
@@ -87,7 +88,7 @@ public class AnalyzeTask implements Callable<Void> {
 
         // All attempts failed
         log.error("Failed {} from {} after {} attempts: {}",
-                  target.id(), start.id(), maxAttempts, lastException.toString());
+                target.id(), start.id(), maxAttempts, lastException.toString());
         lastException.printStackTrace();
         throw new RuntimeException("Failed " + new ResultID(start.id(), target.id()), lastException);
     }

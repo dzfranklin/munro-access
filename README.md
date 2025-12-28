@@ -5,6 +5,7 @@
 **Install requirements**
 
 - Java
+- uv (Python package manager - Install via `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - R
 - renv (Install via `Rscript -e "install.packages('renv', repos='https://cloud.r-project.org/')"`)
 
@@ -22,7 +23,8 @@ this repository, so you should not need to redownload them.
 **Transit data trimming**
 
 The `./download_timetables.sh` script automatically trims both bus and rail transit data to the next full week (Monday-Sunday):
-- Trimming happens during download using R scripts with GTFS libraries
+- Bus trimming uses a Python script (with uv for dependency management) that filters GTFS with gtfs-kit
+- Rail trimming uses UK2GTFS's built-in `gtfs_trim_dates()` function in R
 - Both sources are trimmed to the same week to ensure consistency
 - `./otp.sh --build` extracts the week start date from the trimmed GTFS and writes it to `otp/transit_week.txt`
 - The analyzer reads this file to determine which Wed/Sat/Sun dates to query

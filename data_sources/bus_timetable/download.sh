@@ -26,7 +26,7 @@ if curl -L -o "$OUTPUT_FILE" "$DOWNLOAD_URL"; then
 
     echo ""
     echo "Trimming to next full week..."
-    Rscript trim_to_week.R
+    uv run trim_to_week.py
 
   else
     echo "Error: Download succeeded but file is empty or missing"
