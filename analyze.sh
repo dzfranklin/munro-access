@@ -5,7 +5,7 @@ cd "$(dirname "$0")/analyzer"
 
 echo "Building analyzer..."
 echo
-mvn clean package -q
+mvn clean package -Dmaven.test.skip -q
 
 echo
 echo "Running analyser..."

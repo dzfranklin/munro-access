@@ -27,3 +27,5 @@ echo
 echo "Downloading rail timetable..."
 ./data_sources/rail_timetable/download.sh
 mv data_sources/rail_timetable/out/rail_scot_gtfs.zip "$RAIL_GTFS"
+
+echo "$GTFS_WEEK_START">otp/transit_week.txt

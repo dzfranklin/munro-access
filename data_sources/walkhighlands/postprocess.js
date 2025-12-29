@@ -36,6 +36,22 @@ function slugify(text) {
     .replace(/-+$/, '');            // Trim - from end of text
 }
 
+// Utility function: calculate distance between two lat/lng points in meters
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Earth radius in meters
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dlambda = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(dphi/2) * Math.sin(dphi/2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(dlambda/2) * Math.sin(dlambda/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  return R * c;
+}
+
 // Generate unique ID from name, appending numbers for duplicates
 function generateUniqueId(name, usedIds) {
   const baseId = slugify(name);
@@ -259,6 +275,85 @@ async function processLocations(cache, uniqueNames) {
   return { results, cacheHits, apiCalls, failures };
 }
 
+// Deduplicate nearby starts
+function deduplicateStarts(starts) {
+  const SAME_NAME_DISTANCE = 200; // meters - merge same name locations within this distance
+  const DIFF_NAME_DISTANCE = 50;  // meters - merge different name locations within this distance
+  const mergedIndices = new Set(); // Track which indices have been merged
+  const deduplicatedStarts = [];
+  let mergeCount = 0;
+
+  for (let i = 0; i < starts.length; i++) {
+    if (mergedIndices.has(i)) continue;
+
+    let currentStart = starts[i];
+    const mergedRoutes = new Map();
+
+    // Add this start's routes
+    for (const route of currentStart.routes) {
+      const key = `${route.name}::${route.page}`;
+      mergedRoutes.set(key, route);
+    }
+
+    // Check for nearby duplicates
+    for (let j = i + 1; j < starts.length; j++) {
+      if (mergedIndices.has(j)) continue;
+
+      const start2 = starts[j];
+      const distance = haversineDistance(
+        currentStart.lngLat[1], currentStart.lngLat[0],
+        start2.lngLat[1], start2.lngLat[0]
+      );
+
+      // Check if we should merge these two starts
+      const baseName1 = currentStart.id.replace(/-\d+$/, '');
+      const baseName2 = start2.id.replace(/-\d+$/, '');
+      const sameName = baseName1 === baseName2;
+
+      const shouldMerge =
+        (sameName && distance <= SAME_NAME_DISTANCE) ||
+        (!sameName && distance <= DIFF_NAME_DISTANCE);
+
+      if (shouldMerge) {
+        console.log(`  Merging "${currentStart.id}" and "${start2.id}" (${distance.toFixed(1)}m apart, ${sameName ? 'same' : 'different'} name)`);
+        mergeCount++;
+        mergedIndices.add(j);
+
+        // For different names, keep the longer one
+        if (!sameName && start2.name.length > currentStart.name.length) {
+          console.log(`    → Keeping longer name: "${start2.name}" instead of "${currentStart.name}"`);
+          currentStart = {
+            ...currentStart,
+            id: start2.id,
+            name: start2.name,
+            description: start2.description
+          };
+        }
+
+        // Merge routes from start2
+        for (const route of start2.routes) {
+          const key = `${route.name}::${route.page}`;
+          if (!mergedRoutes.has(key)) {
+            mergedRoutes.set(key, route);
+          }
+        }
+      }
+    }
+
+    // Create the deduplicated start
+    deduplicatedStarts.push({
+      id: currentStart.id,
+      name: currentStart.name,
+      description: currentStart.description,
+      lngLat: currentStart.lngLat,
+      routes: Array.from(mergedRoutes.values())
+    });
+  }
+
+  console.log(`✓ Deduplicated starts: ${starts.length} → ${deduplicatedStarts.length} (merged ${mergeCount} duplicates)`);
+  return deduplicatedStarts;
+}
+
 // Build targets JSON structure - organized by start location
 function buildTargetsJson(munros, locationMap, stats) {
   const CONFIDENCE_THRESHOLD = 3; // Warn if confidence is below this
@@ -320,13 +415,17 @@ function buildTargetsJson(munros, locationMap, stats) {
 
   // Convert to array format with unique IDs
   const usedIds = new Set();
-  const starts = Array.from(startLocationMap.values()).map(loc => ({
+  let starts = Array.from(startLocationMap.values()).map(loc => ({
     id: generateUniqueId(loc.name, usedIds),
     name: loc.name,
     description: loc.description,
     lngLat: loc.lngLat,
     routes: Array.from(loc.routes.values())
   }));
+
+  // Deduplicate nearby starts with the same base name
+  console.log('\nDeduplicating starts...');
+  starts = deduplicateStarts(starts);
 
   // Count total unique routes
   const totalUniqueRoutes = starts.reduce((sum, start) => sum + start.routes.length, 0);

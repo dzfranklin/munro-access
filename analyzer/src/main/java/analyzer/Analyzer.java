@@ -72,18 +72,21 @@ public class Analyzer {
         }
     }
 
+    private static Set<RequestMode> requestModes(boolean withCycle) {
+        if (withCycle) {
+            return new HashSet<>(List.of(RequestMode.RAIL, RequestMode.WALK, RequestMode.BICYCLE));
+        } else {
+            return new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
+        }
+    }
+
     private List<OutputItinerary> findItineraries(StartingPlace start, TargetPlace target, LocalDate date, boolean withCycle) throws IOException {
         log.debug("findItineraries: start {}, target {}, date {}, withCycle {}", start, target, date, withCycle);
-
-        HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
-        if (withCycle) {
-            modes.add(RequestMode.BICYCLE);
-        }
 
         TripPlanParametersBuilder params = new TripPlanParametersBuilder()
                 .withFrom(start.coordinate())
                 .withTo(target.coordinate())
-                .withModes(modes)
+                .withModes(requestModes(withCycle))
                 .withSearchDirection(TripPlanParameters.SearchDirection.DEPART_AT)
                 .withTime(date.atTime(0, 0))
                 .withSearchWindow(Duration.ofHours(24))
@@ -101,6 +104,7 @@ public class Analyzer {
 
         var itineraries = new ArrayList<OutputItinerary>();
         while (true) {
+            boolean foundLaterDate = false;
             for (Itinerary it : result.itineraries()) {
                 List<Leg> transitLegs = it.transitLegs();
                 if (transitLegs.isEmpty()) {
@@ -110,9 +114,18 @@ public class Analyzer {
                     continue; // withCycle should only return itineraries involving cycling
                 }
                 it = snipItineraryToStartingRadius(start, it);
-                itineraries.add(new OutputItinerary(it));
+                OutputItinerary outputIt = new OutputItinerary(it);
+                // Only include itineraries that start on the requested date
+                if (outputIt.date().equals(date)) {
+                    itineraries.add(outputIt);
+                } else if (outputIt.date().isAfter(date)) {
+                    // OTP returns itineraries in chronological order, so once we see a later date,
+                    // all subsequent pages will also be from later dates. Stop paginating.
+                    foundLaterDate = true;
+                    break;
+                }
             }
-            if (result.nextPageCursor() == null) {
+            if (foundLaterDate || result.nextPageCursor() == null) {
                 break;
             }
             result = otp.plan(params.withPageCursor(result.nextPageCursor()).build());
@@ -126,21 +139,14 @@ public class Analyzer {
             LocalDate date,
             boolean withCycle
     ) throws IOException {
-
         log.debug("findReturnItineraries: from {}, to {}, date {}, withCycle {}",
                 from, to, date, withCycle);
-
-        // Build mode set
-        HashSet<RequestMode> modes = new HashSet<>(List.of(RequestMode.TRANSIT, RequestMode.WALK));
-        if (withCycle) {
-            modes.add(RequestMode.BICYCLE);
-        }
 
         // Build OTP query - DEPART_AT from trailhead, search full day
         TripPlanParametersBuilder params = new TripPlanParametersBuilder()
                 .withFrom(from.coordinate())
                 .withTo(to.coordinate())
-                .withModes(modes)
+                .withModes(requestModes(withCycle))
                 .withSearchDirection(TripPlanParameters.SearchDirection.DEPART_AT)
                 .withTime(date.atTime(0, 0))
                 .withSearchWindow(Duration.ofHours(24))
@@ -160,6 +166,7 @@ public class Analyzer {
         List<OutputItinerary> returnItineraries = new ArrayList<>();
 
         while (true) {
+            boolean foundLaterDate = false;
             for (Itinerary it : result.itineraries()) {
                 List<Leg> transitLegs = it.transitLegs();
 
@@ -173,10 +180,19 @@ public class Analyzer {
 
                 // Snip ending radius (remove legs within home city)
                 it = snipItineraryToEndingRadius(to, it);
-                returnItineraries.add(new OutputItinerary(it));
+                OutputItinerary outputIt = new OutputItinerary(it);
+                // Only include itineraries that start on the requested date
+                if (outputIt.date().equals(date)) {
+                    returnItineraries.add(outputIt);
+                } else if (outputIt.date().isAfter(date)) {
+                    // OTP returns itineraries in chronological order, so once we see a later date,
+                    // all subsequent pages will also be from later dates. Stop paginating.
+                    foundLaterDate = true;
+                    break;
+                }
             }
 
-            if (result.nextPageCursor() == null) {
+            if (foundLaterDate || result.nextPageCursor() == null) {
                 break;
             }
             result = otp.plan(params.withPageCursor(result.nextPageCursor()).build());
