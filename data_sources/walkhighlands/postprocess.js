@@ -52,6 +52,59 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
+// Parse distance from string like "12.5km / 7.75 miles" to kilometers
+function parseDistance(distanceStr) {
+  if (!distanceStr) return null;
+  const match = distanceStr.match(/^([\d.]+)km/);
+  return match ? parseFloat(match[1]) : null;
+}
+
+// Parse time from string like "4 - 5 hours" to object with min/max hours
+function parseTime(timeStr) {
+  if (!timeStr) return null;
+
+  // Remove "summer conditions" or similar text
+  const cleanStr = timeStr.replace(/\(.*?\)/g, '').trim();
+
+  // Match patterns like "4 - 5 hours" or "6 hours"
+  const rangeMatch = cleanStr.match(/^([\d.]+)\s*-\s*([\d.]+)\s*hours?/);
+  if (rangeMatch) {
+    return {
+      min: parseFloat(rangeMatch[1]),
+      max: parseFloat(rangeMatch[2])
+    };
+  }
+
+  const singleMatch = cleanStr.match(/^([\d.]+)\s*hours?/);
+  if (singleMatch) {
+    const hours = parseFloat(singleMatch[1]);
+    return { min: hours, max: hours };
+  }
+
+  return null;
+}
+
+// Parse ascent from string like "712m (Profile)" to meters
+function parseAscent(ascentStr) {
+  if (!ascentStr) return null;
+  const match = ascentStr.match(/^([\d.]+)m/);
+  return match ? parseInt(match[1]) : null;
+}
+
+// Parse stats object into structured data
+function parseStats(stats) {
+  if (!stats) return null;
+
+  // Handle both "Time (summer conditions)" and "Time" keys
+  const timeStr = stats['Time (summer conditions)'] || stats['Time'];
+
+  return {
+    distanceKm: parseDistance(stats.Distance),
+    timeHours: parseTime(timeStr),
+    ascentM: parseAscent(stats.Ascent)
+  };
+}
+
 // Generate unique ID from name, appending numbers for duplicates
 function generateUniqueId(name, usedIds) {
   const baseId = slugify(name);
@@ -400,6 +453,7 @@ function buildTargetsJson(munros, locationMap, stats) {
         startLoc.routes.set(route.name, {
           name: route.name,
           page: route.page,
+          stats: parseStats(route.stats),
           munros: []
         });
       }
@@ -515,8 +569,14 @@ async function main() {
       failures
     });
 
-    await fs.writeFile(OUTPUT_FILE, JSON.stringify(targets, null, 2));
-    console.log(`✓ Saved output to ${OUTPUT_FILE}`);
+    if (isPreview) {
+      console.log('\n--- Preview Output ---');
+      console.log(JSON.stringify(targets, null, 2));
+      console.log('--- End Preview ---\n');
+    } else {
+      await fs.writeFile(OUTPUT_FILE, JSON.stringify(targets, null, 2));
+      console.log(`✓ Saved output to ${OUTPUT_FILE}`);
+    }
 
     console.log('\n✓ Postprocessing complete!');
     console.log(`\nSummary:`);

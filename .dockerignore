@@ -4,7 +4,7 @@ tmp
 .env
 node_modules
 .DS_Store
-
-# React Router
-/.react-router/
-/build/
+.react-router
+build
+node_modules
+README.md

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "processedAt": "2025-12-29T10:35:21.459Z",
+    "processedAt": "2025-12-29T15:59:35.132Z",
     "totalStarts": 131,
     "totalUniqueRoutes": 168,
     "totalMunros": 282,
@@ -22,6 +22,14 @@
         {
           "name": "Ben Chonzie from Glen Lednock",
           "page": "https://www.walkhighlands.co.uk/perthshire/ben-chonzie.shtml",
+          "stats": {
+            "distanceKm": 12.5,
+            "timeHours": {
+              "min": 4,
+              "max": 5
+            },
+            "ascentM": 712
+          },
           "munros": [
             {
               "number": 1,
@@ -44,6 +52,14 @@
         {
           "name": "Ben Vorlich and Stùc a' Chròin from Ardvorlich",
           "page": "https://www.walkhighlands.co.uk/perthshire/ben-vorlich.shtml",
+          "stats": {
+            "distanceKm": 14.5,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 1145
+          },
           "munros": [
             {
               "number": 17,
@@ -71,6 +87,14 @@
         {
           "name": "Beinn Each route (can be extended to Stùc a' Chròin",
           "page": "https://www.walkhighlands.co.uk/lochlomond/beinn-each.shtml",
+          "stats": {
+            "distanceKm": 7,
+            "timeHours": {
+              "min": 3.5,
+              "max": 4.5
+            },
+            "ascentM": 693
+          },
           "munros": [
             {
               "number": 18,
@@ -93,6 +117,14 @@
         {
           "name": "Ben More and Stob Binnein from Benmore Farm",
           "page": "https://www.walkhighlands.co.uk/lochlomond/ben-more.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1335
+          },
           "munros": [
             {
               "number": 26,
@@ -120,6 +152,14 @@
         {
           "name": "Cruach Àrdrain and Beinn Tulaichean from Inverlochlarig",
           "page": "https://www.walkhighlands.co.uk/lochlomond/cruach-ardrain.shtml",
+          "stats": {
+            "distanceKm": 12.5,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 1019
+          },
           "munros": [
             {
               "number": 30,
@@ -147,6 +187,14 @@
         {
           "name": "An Caisteal and Beinn a' Chròin from Glen Falloch",
           "page": "https://www.walkhighlands.co.uk/lochlomond/an-caisteal.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 5.5,
+              "max": 7
+            },
+            "ascentM": 1045
+          },
           "munros": [
             {
               "number": 31,
@@ -174,6 +222,14 @@
         {
           "name": "Ben Lomond from Rowardennan",
           "page": "https://www.walkhighlands.co.uk/lochlomond/ben-lomond.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 4.5,
+              "max": 5.5
+            },
+            "ascentM": 990
+          },
           "munros": [
             {
               "number": 32,
@@ -196,6 +252,14 @@
         {
           "name": "Beinn Chabhair from Inverarnan",
           "page": "https://www.walkhighlands.co.uk/lochlomond/beinn-chabhair.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 5,
+              "max": 6.5
+            },
+            "ascentM": 948
+          },
           "munros": [
             {
               "number": 38,
@@ -218,6 +282,14 @@
         {
           "name": "Ben Lui and Beinn a' Chlèibh from Glen Lochay",
           "page": "https://www.walkhighlands.co.uk/argyll/ben-lui.shtml",
+          "stats": {
+            "distanceKm": 10,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 1078
+          },
           "munros": [
             {
               "number": 65,
@@ -245,6 +317,14 @@
         {
           "name": "Ben Oss and Beinn Dubhchraig from Dalrigh",
           "page": "https://www.walkhighlands.co.uk/argyll/ben-oss.shtml",
+          "stats": {
+            "distanceKm": 17,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1230
+          },
           "munros": [
             {
               "number": 67,
@@ -272,6 +352,14 @@
         {
           "name": "Beinn Ìme and Beinn Narnain from Arrochar",
           "page": "https://www.walkhighlands.co.uk/lochlomond/beinn-ime.shtml",
+          "stats": {
+            "distanceKm": 13.5,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 1325
+          },
           "munros": [
             {
               "number": 68,
@@ -299,6 +387,14 @@
         {
           "name": "Beinn Bhuidhe via Glen Fyne",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-bhuidhe.shtml",
+          "stats": {
+            "distanceKm": 21.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 955
+          },
           "munros": [
             {
               "number": 70,
@@ -321,6 +417,14 @@
         {
           "name": "Ben Vorlich from Inveruglas via Loch Sloy",
           "page": "https://www.walkhighlands.co.uk/lochlomond/ben-vorlich-lomond.shtml",
+          "stats": {
+            "distanceKm": 13.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6.5
+            },
+            "ascentM": 945
+          },
           "munros": [
             {
               "number": 71,
@@ -332,6 +436,14 @@
         {
           "name": "Ben Vane from Inveruglas",
           "page": "https://www.walkhighlands.co.uk/lochlomond/ben-vane.shtml",
+          "stats": {
+            "distanceKm": 11,
+            "timeHours": {
+              "min": 4.5,
+              "max": 6.5
+            },
+            "ascentM": 930
+          },
           "munros": [
             {
               "number": 76,
@@ -354,6 +466,14 @@
         {
           "name": "Schiehallion from the Braes of Foss",
           "page": "https://www.walkhighlands.co.uk/perthshire/schiehallion.shtml",
+          "stats": {
+            "distanceKm": 10,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 731
+          },
           "munros": [
             {
               "number": 103,
@@ -376,6 +496,14 @@
         {
           "name": "Beinn Achaladair and Beinn a' Chreachain from Achaladair Farm ",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-achaladair.shtml",
+          "stats": {
+            "distanceKm": 21.5,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1266
+          },
           "munros": [
             {
               "number": 104,
@@ -403,6 +531,14 @@
         {
           "name": "Beinn Dòrain and Beinn an Dòthaidh from Bridge of Orchy",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-dorain.shtml",
+          "stats": {
+            "distanceKm": 14.3,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1228
+          },
           "munros": [
             {
               "number": 105,
@@ -430,6 +566,14 @@
         {
           "name": "Càrn Mairg circuit from Invervar",
           "page": "https://www.walkhighlands.co.uk/perthshire/carn-mairg.shtml",
+          "stats": {
+            "distanceKm": 17.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1330
+          },
           "munros": [
             {
               "number": 107,
@@ -467,6 +611,14 @@
         {
           "name": "Stuchd an Lochain from Loch an Dàimh",
           "page": "https://www.walkhighlands.co.uk/perthshire/stuchd-an-lochain.shtml",
+          "stats": {
+            "distanceKm": 8.5,
+            "timeHours": {
+              "min": 3.5,
+              "max": 4.5
+            },
+            "ascentM": 726
+          },
           "munros": [
             {
               "number": 120,
@@ -489,6 +641,14 @@
         {
           "name": "Beinn Mhanach via the Auch Gleann",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-mhanach.shtml",
+          "stats": {
+            "distanceKm": 23.5,
+            "timeHours": {
+              "min": 6.5,
+              "max": 7.5
+            },
+            "ascentM": 920
+          },
           "munros": [
             {
               "number": 122,
@@ -511,6 +671,14 @@
         {
           "name": "Meall Buidhe from Loch an Dàimh",
           "page": "https://www.walkhighlands.co.uk/perthshire/meall-buidhe.shtml",
+          "stats": {
+            "distanceKm": 8.5,
+            "timeHours": {
+              "min": 2.5,
+              "max": 3.5
+            },
+            "ascentM": 551
+          },
           "munros": [
             {
               "number": 123,
@@ -533,6 +701,14 @@
         {
           "name": "Ben Lawers and Beinn Ghlas",
           "page": "https://www.walkhighlands.co.uk/perthshire/ben-lawers.shtml",
+          "stats": {
+            "distanceKm": 11,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 942
+          },
           "munros": [
             {
               "number": 141,
@@ -549,6 +725,14 @@
         {
           "name": "The Tarmachan Ridge",
           "page": "https://www.walkhighlands.co.uk/perthshire/meall-nan-tarmachan.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 783
+          },
           "munros": [
             {
               "number": 149,
@@ -571,6 +755,14 @@
         {
           "name": "Circuit of Coire nan Cat",
           "page": "https://www.walkhighlands.co.uk/perthshire/meall-garbh.shtml",
+          "stats": {
+            "distanceKm": 16.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1230
+          },
           "munros": [
             {
               "number": 142,
@@ -603,6 +795,14 @@
         {
           "name": "Beinn Heasgarnich and Creag Mhòr from Glen Lochay",
           "page": "https://www.walkhighlands.co.uk/perthshire/beinn-heasgarnich.shtml",
+          "stats": {
+            "distanceKm": 25.75,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1470
+          },
           "munros": [
             {
               "number": 145,
@@ -619,6 +819,14 @@
         {
           "name": "Sgiath Chùil and Meall Glas from Glen Lochay",
           "page": "https://www.walkhighlands.co.uk/perthshire/sgiath-chuil.shtml",
+          "stats": {
+            "distanceKm": 20.5,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1250
+          },
           "munros": [
             {
               "number": 158,
@@ -646,6 +854,14 @@
         {
           "name": "Meall Corranaich and Meall a' Choire Lèith from the Lairig an Lochain",
           "page": "https://www.walkhighlands.co.uk/perthshire/meall-corranaich.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 740
+          },
           "munros": [
             {
               "number": 146,
@@ -673,6 +889,14 @@
         {
           "name": "Meall Ghaordaidh from Glen Lochay ",
           "page": "https://www.walkhighlands.co.uk/perthshire/meall-ghaordaidh.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 895
+          },
           "munros": [
             {
               "number": 150,
@@ -695,6 +919,14 @@
         {
           "name": "Ben Challum from Kirkton Farm",
           "page": "https://www.walkhighlands.co.uk/argyll/ben-challum.shtml",
+          "stats": {
+            "distanceKm": 11.5,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 910
+          },
           "munros": [
             {
               "number": 152,
@@ -717,6 +949,14 @@
         {
           "name": "Sgiath Chùil and Meall Glas from Glen Dochart",
           "page": "https://www.walkhighlands.co.uk/lochlomond/meall-glas.shtml",
+          "stats": {
+            "distanceKm": 15.5,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1182
+          },
           "munros": [
             {
               "number": 158,
@@ -744,6 +984,14 @@
         {
           "name": "The Aonach Eagach ridge from Glencoe",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/aonacheagach.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1100
+          },
           "munros": [
             {
               "number": 178,
@@ -771,6 +1019,14 @@
         {
           "name": "Meall Dearg from the north",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/meall-dearg.shtml",
+          "stats": {
+            "distanceKm": 8.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 905
+          },
           "munros": [
             {
               "number": 179,
@@ -793,6 +1049,14 @@
         {
           "name": "Bidean nam Bian via Coire nan Lochain and the Lost Valley",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/bideannambian.shtml",
+          "stats": {
+            "distanceKm": 11,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1316
+          },
           "munros": [
             {
               "number": 191,
@@ -820,6 +1084,14 @@
         {
           "name": "Beinn a'Bheithir ridge from Ballachulish",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/beinnabheithir.shtml",
+          "stats": {
+            "distanceKm": 15.5,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1387
+          },
           "munros": [
             {
               "number": 195,
@@ -847,6 +1119,14 @@
         {
           "name": "Buachaille Etive Mòr ridge from Altnafeadh",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/buachailleetivemor.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1110
+          },
           "munros": [
             {
               "number": 196,
@@ -874,6 +1154,14 @@
         {
           "name": "Sgòr na h-Ulaidh and Meall Ligiche from Glen Coe",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgornaulaidh.shtml",
+          "stats": {
+            "distanceKm": 15.5,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1292
+          },
           "munros": [
             {
               "number": 199,
@@ -896,6 +1184,14 @@
         {
           "name": "Beinn Fhionnlaidh from Elleric, Glen Creran",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-fhionnlaidh.shtml",
+          "stats": {
+            "distanceKm": 14.25,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 980
+          },
           "munros": [
             {
               "number": 201,
@@ -918,6 +1214,14 @@
         {
           "name": "Buachaille Etive Beag from Glencoe",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/buachailleetivebeag.shtml",
+          "stats": {
+            "distanceKm": 8,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 900
+          },
           "munros": [
             {
               "number": 202,
@@ -945,6 +1249,14 @@
         {
           "name": "Beinn Sgulaird from Loch Creran",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-sgulaird.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1240
+          },
           "munros": [
             {
               "number": 207,
@@ -967,6 +1279,14 @@
         {
           "name": "Ben Cruachan and Stob Dàimh circuit",
           "page": "https://www.walkhighlands.co.uk/argyll/ben-cruachan.shtml",
+          "stats": {
+            "distanceKm": 13.75,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1376
+          },
           "munros": [
             {
               "number": 232,
@@ -994,6 +1314,14 @@
         {
           "name": "Meall a' Bhùiridh and Creise from the White Corries ski centre",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/creise.shtml",
+          "stats": {
+            "distanceKm": 10.5,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 1093
+          },
           "munros": [
             {
               "number": 233,
@@ -1021,6 +1349,14 @@
         {
           "name": "Stob Ghabhar & Stob a' Choire Odhair from Victoria Bridge",
           "page": "https://www.walkhighlands.co.uk/argyll/stob-ghabhar.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1239
+          },
           "munros": [
             {
               "number": 237,
@@ -1048,6 +1384,14 @@
         {
           "name": "Ben Starav and Glas Bheinn Mhòr from Glen Etive",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/benstarav.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1423
+          },
           "munros": [
             {
               "number": 238,
@@ -1064,6 +1408,14 @@
         {
           "name": "Stob Coir an Albannaich and Meall nan Eun from Glen Etive",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/stobcoiranalbannaich.shtml",
+          "stats": {
+            "distanceKm": 18,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1327
+          },
           "munros": [
             {
               "number": 241,
@@ -1080,6 +1432,14 @@
         {
           "name": "Beinn nan Aighenan from Glen Etive",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/beinn-nan-aighenan.shtml",
+          "stats": {
+            "distanceKm": 15.75,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1320
+          },
           "munros": [
             {
               "number": 254,
@@ -1102,6 +1462,14 @@
         {
           "name": "Beinn Eunaich and Beinn a' Chochuill from near Dalmally",
           "page": "https://www.walkhighlands.co.uk/argyll/beinn-eunaich.shtml",
+          "stats": {
+            "distanceKm": 13.5,
+            "timeHours": {
+              "min": 5.5,
+              "max": 6.5
+            },
+            "ascentM": 1221
+          },
           "munros": [
             {
               "number": 249,
@@ -1129,6 +1497,14 @@
         {
           "name": "Ben Nevis via the Mountain Path",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/bennevis.shtml",
+          "stats": {
+            "distanceKm": 17,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1352
+          },
           "munros": [
             {
               "number": 278,
@@ -1151,6 +1527,14 @@
         {
           "name": "Ben Nevis via the Càrn Mòr Dearg Arête",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/carnmordeargarete.shtml",
+          "stats": {
+            "distanceKm": 17.5,
+            "timeHours": {
+              "min": 10,
+              "max": 11
+            },
+            "ascentM": 1506
+          },
           "munros": [
             {
               "number": 278,
@@ -1178,6 +1562,14 @@
         {
           "name": "Aonach Beag and Aonach Mòr from Glen Nevis",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/aonachmor.shtml",
+          "stats": {
+            "distanceKm": 16.5,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1430
+          },
           "munros": [
             {
               "number": 279,
@@ -1194,6 +1586,14 @@
         {
           "name": "The Ring of Steall",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/ringofsteall.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 9,
+              "max": 12
+            },
+            "ascentM": 1676
+          },
           "munros": [
             {
               "number": 295,
@@ -1231,6 +1631,14 @@
         {
           "name": "The Aonachs via the gondola",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/aonachs-gondola.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 4.5,
+              "max": 5.5
+            },
+            "ascentM": 860
+          },
           "munros": [
             {
               "number": 279,
@@ -1258,6 +1666,14 @@
         {
           "name": "The Grey Corries ridge",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/greycorries.shtml",
+          "stats": {
+            "distanceKm": 21.5,
+            "timeHours": {
+              "min": 9,
+              "max": 10
+            },
+            "ascentM": 1544
+          },
           "munros": [
             {
               "number": 285,
@@ -1290,6 +1706,14 @@
         {
           "name": "Binnein Mòr and Na Gruagaichean",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/binneinmor.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1336
+          },
           "munros": [
             {
               "number": 287,
@@ -1306,6 +1730,14 @@
         {
           "name": "Sgùrr Èilde Mòr and Binnein Beag from Kinlochleven",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgurreildemor.shtml",
+          "stats": {
+            "distanceKm": 20,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1582
+          },
           "munros": [
             {
               "number": 305,
@@ -1333,6 +1765,14 @@
         {
           "name": "The Easains ridge from near Fersit",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/easains.shtml",
+          "stats": {
+            "distanceKm": 16.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1172
+          },
           "munros": [
             {
               "number": 290,
@@ -1349,6 +1789,14 @@
         {
           "name": "Chno Dearg and Stob Coire Sgriodain from Fersit",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/chnodearg.shtml",
+          "stats": {
+            "distanceKm": 13.5,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 915
+          },
           "munros": [
             {
               "number": 351,
@@ -1376,6 +1824,14 @@
         {
           "name": "Stob Bàn and Mullach nan Coirean from Polldubh, Glen Nevis",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/stobban.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1155
+          },
           "munros": [
             {
               "number": 309,
@@ -1403,6 +1859,14 @@
         {
           "name": "Stob Bàn (Grey Corries) from above Corriechoille",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/stob-ban-grey-corries.shtml",
+          "stats": {
+            "distanceKm": 18,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 852
+          },
           "munros": [
             {
               "number": 314,
@@ -1425,6 +1889,14 @@
         {
           "name": "Ben Alder via the Long Leachas, with Beinn Bheòil",
           "page": "https://www.walkhighlands.co.uk/cairngorms/ben-alder.shtml",
+          "stats": {
+            "distanceKm": 17,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1021
+          },
           "munros": [
             {
               "number": 345,
@@ -1441,6 +1913,14 @@
         {
           "name": "Aonach Beag, Geal Chàrn, Beinn Èibhinn and Càrn Dearg from Culra",
           "page": "https://www.walkhighlands.co.uk/cairngorms/aonach-beag.shtml",
+          "stats": {
+            "distanceKm": 18.5,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1110
+          },
           "munros": [
             {
               "number": 346,
@@ -1478,6 +1958,14 @@
         {
           "name": "Beinn a' Chlachair, Geal Chàrn & Creag Pitridh from Loch Laggan",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/beinn-a-chlachair.shtml",
+          "stats": {
+            "distanceKm": 26,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1280
+          },
           "munros": [
             {
               "number": 349,
@@ -1510,6 +1998,14 @@
         {
           "name": "Càrn Dearg and Sgòr Gaibhre from Corrour Station",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgor-gaibhre.shtml",
+          "stats": {
+            "distanceKm": 21.75,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 973
+          },
           "munros": [
             {
               "number": 361,
@@ -1526,6 +2022,14 @@
         {
           "name": "Beinn na Lap from Corrour Station",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/beinn-na-lap.shtml",
+          "stats": {
+            "distanceKm": 10,
+            "timeHours": {
+              "min": 3,
+              "max": 5
+            },
+            "ascentM": 562
+          },
           "munros": [
             {
               "number": 364,
@@ -1548,6 +2052,14 @@
         {
           "name": "Beinn Udlamain and Sgàirneach Mhòr from Drumochter Pass",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-udlamain.shtml",
+          "stats": {
+            "distanceKm": 15.75,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 783
+          },
           "munros": [
             {
               "number": 383,
@@ -1575,6 +2087,14 @@
         {
           "name": "A'Mharconaich and Geal Chàrn from Drumochter",
           "page": "https://www.walkhighlands.co.uk/cairngorms/a-mharconaich.shtml",
+          "stats": {
+            "distanceKm": 11.5,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 731
+          },
           "munros": [
             {
               "number": 386,
@@ -1602,6 +2122,14 @@
         {
           "name": "Meall Chuaich from near Dalwhinnie",
           "page": "https://www.walkhighlands.co.uk/cairngorms/meall-chuaich.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 4,
+              "max": 5
+            },
+            "ascentM": 614
+          },
           "munros": [
             {
               "number": 388,
@@ -1624,6 +2152,14 @@
         {
           "name": "Càrn na Caim and A' Bhuidheanach Bheag from Drumochter",
           "page": "https://www.walkhighlands.co.uk/cairngorms/carn-na-caim.shtml",
+          "stats": {
+            "distanceKm": 19,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 824
+          },
           "munros": [
             {
               "number": 389,
@@ -1651,6 +2187,14 @@
         {
           "name": "Beinn Dearg from the Old Bridge of Tilt, Blair Atholl",
           "page": "https://www.walkhighlands.co.uk/perthshire/beinn-dearg.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 990
+          },
           "munros": [
             {
               "number": 406,
@@ -1662,6 +2206,14 @@
         {
           "name": "Càrn a' Chlamain from Glen Tilt",
           "page": "https://www.walkhighlands.co.uk/perthshire/carn-a-chlamain.shtml",
+          "stats": {
+            "distanceKm": 26,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 930
+          },
           "munros": [
             {
               "number": 409,
@@ -1684,6 +2236,14 @@
         {
           "name": "An Scarsoch and Càrn an Fhìdhleir from the Linn of Dee",
           "page": "https://www.walkhighlands.co.uk/cairngorms/an-sgarsoch.shtml",
+          "stats": {
+            "distanceKm": 42,
+            "timeHours": {
+              "min": 11,
+              "max": 12
+            },
+            "ascentM": 1059
+          },
           "munros": [
             {
               "number": 407,
@@ -1700,6 +2260,14 @@
         {
           "name": "Ben Macdui and Derry Cairngorm from the Linn of Dee",
           "page": "https://www.walkhighlands.co.uk/cairngorms/ben-macdui.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1068
+          },
           "munros": [
             {
               "number": 518,
@@ -1716,6 +2284,14 @@
         {
           "name": "Beinn Meadhoin and Derry Cairngorm from the Linn of Dee",
           "page": "https://www.walkhighlands.co.uk/cairngorms/mheadhoin-derry.shtml",
+          "stats": {
+            "distanceKm": 31,
+            "timeHours": {
+              "min": 9,
+              "max": 10
+            },
+            "ascentM": 1200
+          },
           "munros": [
             {
               "number": 531,
@@ -1732,6 +2308,14 @@
         {
           "name": "Beinn a' Chaorainn and Beinn Bhreac from Linn of Dee",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-a-chaorainn.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 878
+          },
           "munros": [
             {
               "number": 559,
@@ -1748,6 +2332,14 @@
         {
           "name": "Càrn a'Mhàim from the Linn of Dee",
           "page": "https://www.walkhighlands.co.uk/cairngorms/carn-a-mhaim.shtml",
+          "stats": {
+            "distanceKm": 22.5,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 648
+          },
           "munros": [
             {
               "number": 567,
@@ -1770,6 +2362,14 @@
         {
           "name": "Beinn a' Ghlò from Loch Moraig",
           "page": "https://www.walkhighlands.co.uk/perthshire/beinn-a-ghlo.shtml",
+          "stats": {
+            "distanceKm": 22,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1239
+          },
           "munros": [
             {
               "number": 421,
@@ -1802,6 +2402,14 @@
         {
           "name": "Glas Tulaichean and Càrn an Rìgh from the Spittal of Glenshee",
           "page": "https://www.walkhighlands.co.uk/perthshire/glas-tulaichean.shtml",
+          "stats": {
+            "distanceKm": 27,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1085
+          },
           "munros": [
             {
               "number": 424,
@@ -1829,6 +2437,14 @@
         {
           "name": "Beinn Iutharn Mhòr and Càrn Bhac from Inverey",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-iutharn-mhor.shtml",
+          "stats": {
+            "distanceKm": 32,
+            "timeHours": {
+              "min": 9,
+              "max": 10
+            },
+            "ascentM": 983
+          },
           "munros": [
             {
               "number": 425,
@@ -1856,6 +2472,14 @@
         {
           "name": "The Cairnwell Munros from the pass",
           "page": "https://www.walkhighlands.co.uk/cairngorms/cairnwell.shtml",
+          "stats": {
+            "distanceKm": 13,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 595
+          },
           "munros": [
             {
               "number": 428,
@@ -1888,6 +2512,14 @@
         {
           "name": "An Socach from Glen Clunie",
           "page": "https://www.walkhighlands.co.uk/cairngorms/an-socach.shtml",
+          "stats": {
+            "distanceKm": 15.75,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 655
+          },
           "munros": [
             {
               "number": 433,
@@ -1910,6 +2542,14 @@
         {
           "name": "Lochnagar from Spittal of Glenmuick",
           "page": "https://www.walkhighlands.co.uk/cairngorms/lochnagar.shtml",
+          "stats": {
+            "distanceKm": 19,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 930
+          },
           "munros": [
             {
               "number": 457,
@@ -1921,6 +2561,14 @@
         {
           "name": "The White Mounth Munros round",
           "page": "https://www.walkhighlands.co.uk/cairngorms/white-mounth.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1228
+          },
           "munros": [
             {
               "number": 457,
@@ -1952,6 +2600,14 @@
         {
           "name": "Creag an Dubh Loch and Broad Cairn, Glenmuick",
           "page": "https://www.walkhighlands.co.uk/cairngorms/creag-an-dubh-loch.shtml",
+          "stats": {
+            "distanceKm": 23,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 813
+          },
           "munros": [
             {
               "number": 470,
@@ -1974,6 +2630,14 @@
         {
           "name": "Glas Maol Munros from the Cairnwell Pass",
           "page": "https://www.walkhighlands.co.uk/cairngorms/glas-maol.shtml",
+          "stats": {
+            "distanceKm": 19.25,
+            "timeHours": {
+              "min": 6.5,
+              "max": 7.5
+            },
+            "ascentM": 891
+          },
           "munros": [
             {
               "number": 461,
@@ -2011,6 +2675,14 @@
         {
           "name": "Monega Hill and Glas Maol round from Glen Isla",
           "page": "https://www.walkhighlands.co.uk/angus/monega-glas-maol.shtml",
+          "stats": {
+            "distanceKm": 20.75,
+            "timeHours": {
+              "min": 7,
+              "max": 7.5
+            },
+            "ascentM": 1135
+          },
           "munros": [
             {
               "number": 461,
@@ -2038,6 +2710,14 @@
         {
           "name": "Tolmount and Tom Buidhe via Loch Callater",
           "page": "https://www.walkhighlands.co.uk/cairngorms/tolmount.shtml",
+          "stats": {
+            "distanceKm": 26.5,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 841
+          },
           "munros": [
             {
               "number": 479,
@@ -2065,6 +2745,14 @@
         {
           "name": "Driesh and Mayar from Glen Doll",
           "page": "https://www.walkhighlands.co.uk/angus/mayar-driesh.shtml",
+          "stats": {
+            "distanceKm": 14.5,
+            "timeHours": {
+              "min": 4.5,
+              "max": 5.5
+            },
+            "ascentM": 835
+          },
           "munros": [
             {
               "number": 483,
@@ -2092,6 +2780,14 @@
         {
           "name": "Mount Keen from Invermark, Glen Esk",
           "page": "https://www.walkhighlands.co.uk/angus/mount-keen.shtml",
+          "stats": {
+            "distanceKm": 17.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 681
+          },
           "munros": [
             {
               "number": 485,
@@ -2114,6 +2810,14 @@
         {
           "name": "Mount Keen from Glen Tanar",
           "page": "https://www.walkhighlands.co.uk/cairngorms/mount-keen.shtml",
+          "stats": {
+            "distanceKm": 29.5,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 870
+          },
           "munros": [
             {
               "number": 485,
@@ -2136,6 +2840,14 @@
         {
           "name": "Ben Macdui and Cairngorm from the ski centre",
           "page": "https://www.walkhighlands.co.uk/cairngorms/macdui-cairngorm.shtml",
+          "stats": {
+            "distanceKm": 17.5,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 932
+          },
           "munros": [
             {
               "number": 518,
@@ -2152,6 +2864,14 @@
         {
           "name": "Cairn Gorm via the Northern Corries",
           "page": "https://www.walkhighlands.co.uk/cairngorms/cairngorm.shtml",
+          "stats": {
+            "distanceKm": 11,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 775
+          },
           "munros": [
             {
               "number": 525,
@@ -2163,6 +2883,14 @@
         {
           "name": "The Fiacaill Ridge scramble to Cairn Lochan and Cairn Gorm",
           "page": "https://www.walkhighlands.co.uk/cairngorms/fiacaill-ridge.shtml",
+          "stats": {
+            "distanceKm": 10.25,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 775
+          },
           "munros": [
             {
               "number": 525,
@@ -2174,6 +2902,14 @@
         {
           "name": "Beinn Mheadhoin from Coire Cas via the Shelter Stone",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-mheadhoin.shtml",
+          "stats": {
+            "distanceKm": 19,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1560
+          },
           "munros": [
             {
               "number": 531,
@@ -2196,6 +2932,14 @@
         {
           "name": "Braeriach circuit from Whitewell",
           "page": "https://www.walkhighlands.co.uk/cairngorms/braeriach.shtml",
+          "stats": {
+            "distanceKm": 26,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1217
+          },
           "munros": [
             {
               "number": 519,
@@ -2218,6 +2962,14 @@
         {
           "name": "Cairn Toul and Braeriach traverse",
           "page": "https://www.walkhighlands.co.uk/cairngorms/cairn-toul.shtml",
+          "stats": {
+            "distanceKm": 36,
+            "timeHours": {
+              "min": 13,
+              "max": 13
+            },
+            "ascentM": 1820
+          },
           "munros": [
             {
               "number": 519,
@@ -2255,6 +3007,14 @@
         {
           "name": "Beinn a'Bhuird via Glen Quoich",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-a-bhuird.shtml",
+          "stats": {
+            "distanceKm": 28,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 959
+          },
           "munros": [
             {
               "number": 529,
@@ -2277,6 +3037,14 @@
         {
           "name": "Ben Avon via Gleann an-Slugain (Deeside)",
           "page": "https://www.walkhighlands.co.uk/cairngorms/ben-avon.shtml",
+          "stats": {
+            "distanceKm": 33.5,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1000
+          },
           "munros": [
             {
               "number": 536,
@@ -2299,6 +3067,14 @@
         {
           "name": "Ben Avon via Strath Avon (near Tomintoul)",
           "page": "https://www.walkhighlands.co.uk/cairngorms/ben-avon-tomintoul.shtml",
+          "stats": {
+            "distanceKm": 40.5,
+            "timeHours": {
+              "min": 10,
+              "max": 11
+            },
+            "ascentM": 1250
+          },
           "munros": [
             {
               "number": 536,
@@ -2321,6 +3097,14 @@
         {
           "name": "Beinn Bhrotain and Monadh Mòr from Glen Feshie",
           "page": "https://www.walkhighlands.co.uk/cairngorms/beinn-bhrotain.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1505
+          },
           "munros": [
             {
               "number": 538,
@@ -2337,6 +3121,14 @@
         {
           "name": "Mullach Clach a' Bhlàir from Glen Feshie",
           "page": "https://www.walkhighlands.co.uk/cairngorms/mullach-clach-a-bhlair.shtml",
+          "stats": {
+            "distanceKm": 21.75,
+            "timeHours": {
+              "min": 6.5,
+              "max": 7.5
+            },
+            "ascentM": 870
+          },
           "munros": [
             {
               "number": 571,
@@ -2359,6 +3151,14 @@
         {
           "name": "Sgòr Gaoith from Glen Feshie",
           "page": "https://www.walkhighlands.co.uk/cairngorms/sgor-gaoith.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 913
+          },
           "munros": [
             {
               "number": 548,
@@ -2381,6 +3181,14 @@
         {
           "name": "Bynack More from Glenmore Lodge",
           "page": "https://www.walkhighlands.co.uk/cairngorms/bynackmore.shtml",
+          "stats": {
+            "distanceKm": 22.5,
+            "timeHours": {
+              "min": 6.5,
+              "max": 7.5
+            },
+            "ascentM": 756
+          },
           "munros": [
             {
               "number": 557,
@@ -2403,6 +3211,14 @@
         {
           "name": "The Monadhliath Munros: a' Chailleach, Càrn Sgulain and Càrn Dearg from Glen Banchor",
           "page": "https://www.walkhighlands.co.uk/cairngorms/monadhliath.shtml",
+          "stats": {
+            "distanceKm": 24.5,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 946
+          },
           "munros": [
             {
               "number": 621,
@@ -2435,6 +3251,14 @@
         {
           "name": "Geal Chàrn from Garva Bridge",
           "page": "https://www.walkhighlands.co.uk/cairngorms/geal-charn.shtml",
+          "stats": {
+            "distanceKm": 12.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 625
+          },
           "munros": [
             {
               "number": 624,
@@ -2457,6 +3281,14 @@
         {
           "name": "Creag Meagaidh Munros circuit",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/creagmeagaidh.shtml",
+          "stats": {
+            "distanceKm": 21,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1080
+          },
           "munros": [
             {
               "number": 658,
@@ -2489,6 +3321,14 @@
         {
           "name": "Beinn a' Chaorainn & Beinn Teallach from Glen Spean",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/beinnachaorainn.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1172
+          },
           "munros": [
             {
               "number": 663,
@@ -2516,6 +3356,14 @@
         {
           "name": "Gleouraich & Spidean Mialach ",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/spideanmialach.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 1130
+          },
           "munros": [
             {
               "number": 683,
@@ -2543,6 +3391,14 @@
         {
           "name": "Sgùrr a'Mhaoraich from Loch Cuaich",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgurramhaoraich.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 1077
+          },
           "munros": [
             {
               "number": 684,
@@ -2565,6 +3421,14 @@
         {
           "name": "South Glen Shiel Ridge walk",
           "page": "https://www.walkhighlands.co.uk/kintail/Glenshielridge.shtml",
+          "stats": {
+            "distanceKm": 26.75,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1818
+          },
           "munros": [
             {
               "number": 685,
@@ -2617,6 +3481,14 @@
         {
           "name": "The Saddle via the Forcan Ridge, and Sgùrr na Sgìne",
           "page": "https://www.walkhighlands.co.uk/kintail/Thesaddle.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1440
+          },
           "munros": [
             {
               "number": 688,
@@ -2644,6 +3516,14 @@
         {
           "name": "Beinn Sgritheall from Arnisdale",
           "page": "https://www.walkhighlands.co.uk/kintail/Beinnsgritheall.shtml",
+          "stats": {
+            "distanceKm": 10,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 1095
+          },
           "munros": [
             {
               "number": 695,
@@ -2666,6 +3546,14 @@
         {
           "name": "Sgùrr na Cìche Munros from Loch Arkaig",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgurrnaciche.shtml",
+          "stats": {
+            "distanceKm": 26,
+            "timeHours": {
+              "min": 10,
+              "max": 12
+            },
+            "ascentM": 1523
+          },
           "munros": [
             {
               "number": 730,
@@ -2687,6 +3575,14 @@
         {
           "name": "Sgùrr Mòr and Sgùrr an Fhuarain from Loch Arkaig",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgurr-mor.shtml",
+          "stats": {
+            "distanceKm": 24,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1510
+          },
           "munros": [
             {
               "number": 733,
@@ -2709,6 +3605,14 @@
         {
           "name": "Ladhar Bheinn circuit via Aonach Sgoilite, from Inverie",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/ladhar-bheinn.shtml",
+          "stats": {
+            "distanceKm": 22.5,
+            "timeHours": {
+              "min": 9,
+              "max": 12
+            },
+            "ascentM": 1399
+          },
           "munros": [
             {
               "number": 731,
@@ -2720,6 +3624,14 @@
         {
           "name": "Luinne Bheinn and Meall Buidhe from Inverie",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/luinne-bheinn.shtml",
+          "stats": {
+            "distanceKm": 27,
+            "timeHours": {
+              "min": 11,
+              "max": 13
+            },
+            "ascentM": 1586
+          },
           "munros": [
             {
               "number": 737,
@@ -2747,6 +3659,14 @@
         {
           "name": "Gairich from Loch Quioch",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/gairich.shtml",
+          "stats": {
+            "distanceKm": 15.5,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 850
+          },
           "munros": [
             {
               "number": 741,
@@ -2769,6 +3689,14 @@
         {
           "name": "Sròn a' Choire Ghairbh & Meall na Teanga",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/lochlochymunros.shtml",
+          "stats": {
+            "distanceKm": 19,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1258
+          },
           "munros": [
             {
               "number": 758,
@@ -2796,6 +3724,14 @@
         {
           "name": "Gulvain via Gleann Fionnlighe",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/gulvain.shtml",
+          "stats": {
+            "distanceKm": 21,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1228
+          },
           "munros": [
             {
               "number": 773,
@@ -2818,6 +3754,14 @@
         {
           "name": "Sgùrr Thuilm & Sgùrr nan Coireachan ",
           "page": "https://www.walkhighlands.co.uk/fortwilliam/sgurrthuilm.shtml",
+          "stats": {
+            "distanceKm": 23.5,
+            "timeHours": {
+              "min": 9,
+              "max": 12
+            },
+            "ascentM": 1428
+          },
           "munros": [
             {
               "number": 774,
@@ -2845,6 +3789,14 @@
         {
           "name": "Càrn Eige, Mam Sodhail and Beinn Fhionnlaidh from Glen Affric",
           "page": "https://www.walkhighlands.co.uk/lochness/carn-eige.shtml",
+          "stats": {
+            "distanceKm": 28,
+            "timeHours": {
+              "min": 10,
+              "max": 13
+            },
+            "ascentM": 1727
+          },
           "munros": [
             {
               "number": 803,
@@ -2877,6 +3829,14 @@
         {
           "name": "Sgùrr nan Ceathreamhnan Munros from Alltbeithe",
           "page": "https://www.walkhighlands.co.uk/lochness/Ceathreamhnan.shtml",
+          "stats": {
+            "distanceKm": 20,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1484
+          },
           "munros": [
             {
               "number": 805,
@@ -2909,6 +3869,14 @@
         {
           "name": "Toll Creagach and Tom a' Chòinich from Glen Affric",
           "page": "https://www.walkhighlands.co.uk/lochness/Tollcreagach.shtml",
+          "stats": {
+            "distanceKm": 16.5,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1096
+          },
           "munros": [
             {
               "number": 810,
@@ -2936,6 +3904,14 @@
         {
           "name": "Five Sisters of Kintail traverse",
           "page": "https://www.walkhighlands.co.uk/kintail/Fivesisters.shtml",
+          "stats": {
+            "distanceKm": 12.4,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1400
+          },
           "munros": [
             {
               "number": 815,
@@ -2957,6 +3933,14 @@
         {
           "name": "Sgùrr a Bhealaich Dheirg and the Brothers of Kintail",
           "page": "https://www.walkhighlands.co.uk/kintail/Brothersridge.shtml",
+          "stats": {
+            "distanceKm": 10,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1274
+          },
           "munros": [
             {
               "number": 821,
@@ -2989,6 +3973,14 @@
         {
           "name": "Beinn Fhada from Morvich",
           "page": "https://www.walkhighlands.co.uk/kintail/Beinnfhada.shtml",
+          "stats": {
+            "distanceKm": 16.75,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 1234
+          },
           "munros": [
             {
               "number": 823,
@@ -3000,6 +3992,14 @@
         {
           "name": "a' Ghlas Bheinn and the Falls of Glomach from Morvich",
           "page": "https://www.walkhighlands.co.uk/kintail/Aghlasbheinn.shtml",
+          "stats": {
+            "distanceKm": 21,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1196
+          },
           "munros": [
             {
               "number": 846,
@@ -3022,6 +4022,14 @@
         {
           "name": "Ciste Dhubh and Am Bathach from the Cluanie Inn",
           "page": "https://www.walkhighlands.co.uk/kintail/Cistedhubh.shtml",
+          "stats": {
+            "distanceKm": 12.5,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 1040
+          },
           "munros": [
             {
               "number": 834,
@@ -3033,6 +4041,14 @@
         {
           "name": "a' Chralaig and Mullach Fraoch Choire from Cluanie",
           "page": "https://www.walkhighlands.co.uk/kintail/Achralaig.shtml",
+          "stats": {
+            "distanceKm": 14.5,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1150
+          },
           "munros": [
             {
               "number": 862,
@@ -3060,6 +4076,14 @@
         {
           "name": "Sgùrr nan Conbhairean from Loch Cluanie",
           "page": "https://www.walkhighlands.co.uk/kintail/sgurrnanconbhairean.shtml",
+          "stats": {
+            "distanceKm": 17.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1260
+          },
           "munros": [
             {
               "number": 863,
@@ -3092,6 +4116,14 @@
         {
           "name": "Circuit of the Strathfarrar Munros",
           "page": "https://www.walkhighlands.co.uk/lochness/strathfarrar-munros.shtml",
+          "stats": {
+            "distanceKm": 25,
+            "timeHours": {
+              "min": 7,
+              "max": 10
+            },
+            "ascentM": 1567
+          },
           "munros": [
             {
               "number": 884,
@@ -3129,6 +4161,14 @@
         {
           "name": "Sgùrr a' Chaorachain and Sgùrr Chòinnich from Achnashellach",
           "page": "https://www.walkhighlands.co.uk/torridon/Sgurrchoinnich.shtml",
+          "stats": {
+            "distanceKm": 20.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1251
+          },
           "munros": [
             {
               "number": 885,
@@ -3145,6 +4185,14 @@
         {
           "name": "Maoile Lunndaidh from Achnashellach",
           "page": "https://www.walkhighlands.co.uk/torridon/maoilelunndaidh.shtml",
+          "stats": {
+            "distanceKm": 26,
+            "timeHours": {
+              "min": 8,
+              "max": 11
+            },
+            "ascentM": 1005
+          },
           "munros": [
             {
               "number": 890,
@@ -3167,6 +4215,14 @@
         {
           "name": "Lurg Mhòr and Bidein a' Choire Sheasgaich, from Attadale via Bendronaig Lodge",
           "page": "https://www.walkhighlands.co.uk/torridon/bideinachoiresheasgaich.shtml",
+          "stats": {
+            "distanceKm": 38,
+            "timeHours": {
+              "min": 16,
+              "max": 16
+            },
+            "ascentM": 1530
+          },
           "munros": [
             {
               "number": 896,
@@ -3194,6 +4250,14 @@
         {
           "name": "Moruisg and Sgùrr nan Ceannaichean from Glen Carron",
           "page": "https://www.walkhighlands.co.uk/torridon/Moruisg.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 978
+          },
           "munros": [
             {
               "number": 899,
@@ -3216,6 +4280,14 @@
         {
           "name": "The Loch Mullardoch Munros circuit",
           "page": "https://www.walkhighlands.co.uk/lochness/mullardoch-munros.shtml",
+          "stats": {
+            "distanceKm": 29.2,
+            "timeHours": {
+              "min": 11,
+              "max": 14
+            },
+            "ascentM": 1820
+          },
           "munros": [
             {
               "number": 926,
@@ -3253,6 +4325,14 @@
         {
           "name": "Liathach traverse, Glen Torridon",
           "page": "https://www.walkhighlands.co.uk/torridon/Liathach.shtml",
+          "stats": {
+            "distanceKm": 11.5,
+            "timeHours": {
+              "min": 8,
+              "max": 10
+            },
+            "ascentM": 1326
+          },
           "munros": [
             {
               "number": 953,
@@ -3280,6 +4360,14 @@
         {
           "name": "Beinn Eighe via Coire Mhic Fhearchair",
           "page": "https://www.walkhighlands.co.uk/torridon/Beinneighe.shtml",
+          "stats": {
+            "distanceKm": 18,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1116
+          },
           "munros": [
             {
               "number": 955,
@@ -3307,6 +4395,14 @@
         {
           "name": "Beinn Alligin ridge traverse",
           "page": "https://www.walkhighlands.co.uk/torridon/Beinnalligin.shtml",
+          "stats": {
+            "distanceKm": 10.5,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1190
+          },
           "munros": [
             {
               "number": 957,
@@ -3334,6 +4430,14 @@
         {
           "name": "Sgòrr Ruadh from Achnashellach",
           "page": "https://www.walkhighlands.co.uk/torridon/Sgorrruadh.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 6.5,
+              "max": 7
+            },
+            "ascentM": 931
+          },
           "munros": [
             {
               "number": 981,
@@ -3345,6 +4449,14 @@
         {
           "name": "Beinn Liath Mhòr from Achnashellach",
           "page": "https://www.walkhighlands.co.uk/torridon/Beinnliathmhor.shtml",
+          "stats": {
+            "distanceKm": 15.25,
+            "timeHours": {
+              "min": 7,
+              "max": 8
+            },
+            "ascentM": 1054
+          },
           "munros": [
             {
               "number": 983,
@@ -3367,6 +4479,14 @@
         {
           "name": "Maol Chean-dearg from Coulags",
           "page": "https://www.walkhighlands.co.uk/torridon/Maolcheandearg.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 932
+          },
           "munros": [
             {
               "number": 982,
@@ -3389,6 +4509,14 @@
         {
           "name": "An Teallach traverse, Dundonnell",
           "page": "https://www.walkhighlands.co.uk/ullapool/anteallach.shtml",
+          "stats": {
+            "distanceKm": 20,
+            "timeHours": {
+              "min": 9,
+              "max": 10
+            },
+            "ascentM": 1415
+          },
           "munros": [
             {
               "number": 1003,
@@ -3416,6 +4544,14 @@
         {
           "name": "The Fisherfield 6, from Shenavall",
           "page": "https://www.walkhighlands.co.uk/ullapool/fisherfield-6.shtml",
+          "stats": {
+            "distanceKm": 29,
+            "timeHours": {
+              "min": 12,
+              "max": 18
+            },
+            "ascentM": 2254
+          },
           "munros": [
             {
               "number": 1007,
@@ -3458,6 +4594,14 @@
         {
           "name": "Beinn Tarsuinn and Mullach Coire Mhic Fhearchair from Incheril via Lochan Fada",
           "page": "https://www.walkhighlands.co.uk/torridon/mullach-coire-mhic-fhearchair.shtml",
+          "stats": {
+            "distanceKm": 32,
+            "timeHours": {
+              "min": 12,
+              "max": 13
+            },
+            "ascentM": 1370
+          },
           "munros": [
             {
               "number": 1007,
@@ -3474,6 +4618,14 @@
         {
           "name": "Slioch from Kinlochewe",
           "page": "https://www.walkhighlands.co.uk/torridon/Slioch.shtml",
+          "stats": {
+            "distanceKm": 19,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1144
+          },
           "munros": [
             {
               "number": 1010,
@@ -3496,6 +4648,14 @@
         {
           "name": "Sgùrr Bàn and Beinn a' Chlaidheimh via the slabs and Loch a' Bhraoin",
           "page": "https://www.walkhighlands.co.uk/ullapool/sgurr-ban-slabs.shtml",
+          "stats": {
+            "distanceKm": 32,
+            "timeHours": {
+              "min": 13,
+              "max": 15
+            },
+            "ascentM": 1390
+          },
           "munros": [
             {
               "number": 1009,
@@ -3507,6 +4667,14 @@
         {
           "name": "Sgùrr Breac and a' Chailleach from near Braemore",
           "page": "https://www.walkhighlands.co.uk/ullapool/sgurrbreac.shtml",
+          "stats": {
+            "distanceKm": 16,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1127
+          },
           "munros": [
             {
               "number": 1042,
@@ -3523,6 +4691,14 @@
         {
           "name": "Sgùrr nan Clach Geala ridge",
           "page": "https://www.walkhighlands.co.uk/ullapool/sgurrnanclachgeala.shtml",
+          "stats": {
+            "distanceKm": 18,
+            "timeHours": {
+              "min": 7,
+              "max": 9
+            },
+            "ascentM": 1153
+          },
           "munros": [
             {
               "number": 1041,
@@ -3555,6 +4731,14 @@
         {
           "name": "Sgùrr Mòr and the eastern Fannichs from the Dirrie Mòr",
           "page": "https://www.walkhighlands.co.uk/ullapool/fannichs.shtml",
+          "stats": {
+            "distanceKm": 24.75,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1435
+          },
           "munros": [
             {
               "number": 1040,
@@ -3581,6 +4765,14 @@
         {
           "name": "Am Faochagach from the Dirrie Mòr",
           "page": "https://www.walkhighlands.co.uk/ullapool/amfaochagach.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 700
+          },
           "munros": [
             {
               "number": 1066,
@@ -3603,6 +4795,14 @@
         {
           "name": "Fionn Bheinn from Achnasheen",
           "page": "https://www.walkhighlands.co.uk/torridon/Fionnbheinn.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 807
+          },
           "munros": [
             {
               "number": 1050,
@@ -3625,6 +4825,14 @@
         {
           "name": "Beinn Dearg Munros circuit from Inverlael",
           "page": "https://www.walkhighlands.co.uk/ullapool/beinndearg.shtml",
+          "stats": {
+            "distanceKm": 27,
+            "timeHours": {
+              "min": 9,
+              "max": 11
+            },
+            "ascentM": 1569
+          },
           "munros": [
             {
               "number": 1062,
@@ -3651,6 +4859,14 @@
         {
           "name": "Seana Bhràigh from Inverlael",
           "page": "https://www.walkhighlands.co.uk/ullapool/seana-bhraigh.shtml",
+          "stats": {
+            "distanceKm": 27,
+            "timeHours": {
+              "min": 9,
+              "max": 10
+            },
+            "ascentM": 1095
+          },
           "munros": [
             {
               "number": 1069,
@@ -3673,6 +4889,14 @@
         {
           "name": "Ben Wyvis from near Garbat",
           "page": "https://www.walkhighlands.co.uk/lochness/Benwyvis.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 4.5,
+              "max": 5.5
+            },
+            "ascentM": 935
+          },
           "munros": [
             {
               "number": 1088,
@@ -3695,6 +4919,14 @@
         {
           "name": "Ben Hope from Strathmore",
           "page": "https://www.walkhighlands.co.uk/sutherland/ben-hope.shtml",
+          "stats": {
+            "distanceKm": 7.5,
+            "timeHours": {
+              "min": 4,
+              "max": 6
+            },
+            "ascentM": 946
+          },
           "munros": [
             {
               "number": 1123,
@@ -3717,6 +4949,14 @@
         {
           "name": "Ben Klibreck from Strath Vagastie",
           "page": "https://www.walkhighlands.co.uk/sutherland/ben-klibreck.shtml",
+          "stats": {
+            "distanceKm": 14.25,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 930
+          },
           "munros": [
             {
               "number": 1165,
@@ -3739,6 +4979,14 @@
         {
           "name": "Ben More Assynt and Conival from Inchnadamph",
           "page": "https://www.walkhighlands.co.uk/ullapool/benmoreassynt.shtml",
+          "stats": {
+            "distanceKm": 17.25,
+            "timeHours": {
+              "min": 8.5,
+              "max": 10
+            },
+            "ascentM": 1077
+          },
           "munros": [
             {
               "number": 1183,
@@ -3766,6 +5014,14 @@
         {
           "name": "Sgùrr Alasdair via the Great Stone Chute",
           "page": "https://www.walkhighlands.co.uk/skye/sgurralasdair.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 992
+          },
           "munros": [
             {
               "number": 1239,
@@ -3777,6 +5033,14 @@
         {
           "name": "Sgùrr Mhic Chòinnich from Coire Lagan",
           "page": "https://www.walkhighlands.co.uk/skye/sgurr-mhic-choinnich.shtml",
+          "stats": {
+            "distanceKm": 11,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 950
+          },
           "munros": [
             {
               "number": 1248,
@@ -3788,6 +5052,14 @@
         {
           "name": "Sgùrr Dubh Mòr and Sgùrr nan Eag via Coire Ghrunnda",
           "page": "https://www.walkhighlands.co.uk/skye/sgurrnaneag.shtml",
+          "stats": {
+            "distanceKm": 15,
+            "timeHours": {
+              "min": 7,
+              "max": 11
+            },
+            "ascentM": 1159
+          },
           "munros": [
             {
               "number": 1250,
@@ -3815,6 +5087,14 @@
         {
           "name": "Sgùrr Dearg and the approach to the Inn Pinn",
           "page": "https://www.walkhighlands.co.uk/skye/innpinn.shtml",
+          "stats": {
+            "distanceKm": 8,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 1065
+          },
           "munros": [
             {
               "number": 1240,
@@ -3837,6 +5117,14 @@
         {
           "name": "Sgùrr a Ghreadaidh and Sgùrr a Mhadaidh via An Dorus",
           "page": "https://www.walkhighlands.co.uk/skye/sgurraghreadaidh.shtml",
+          "stats": {
+            "distanceKm": 9.5,
+            "timeHours": {
+              "min": 6,
+              "max": 8
+            },
+            "ascentM": 997
+          },
           "munros": [
             {
               "number": 1243,
@@ -3853,6 +5141,14 @@
         {
           "name": "Sgùrr na Banachdich via Coire nan Eich",
           "page": "https://www.walkhighlands.co.uk/skye/sgurrnabanachdich.shtml",
+          "stats": {
+            "distanceKm": 7.5,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 936
+          },
           "munros": [
             {
               "number": 1245,
@@ -3875,6 +5171,14 @@
         {
           "name": "Sgùrr nan Gillean via the Southeast Ridge (Tourist Route)",
           "page": "https://www.walkhighlands.co.uk/skye/sgurrnangillean.shtml",
+          "stats": {
+            "distanceKm": 12,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 985
+          },
           "munros": [
             {
               "number": 1246,
@@ -3886,6 +5190,14 @@
         {
           "name": "Am Basteir via the Bealach Basteir from Sligachan",
           "page": "https://www.walkhighlands.co.uk/skye/ambasteir.shtml",
+          "stats": {
+            "distanceKm": 14,
+            "timeHours": {
+              "min": 6,
+              "max": 7
+            },
+            "ascentM": 1175
+          },
           "munros": [
             {
               "number": 1254,
@@ -3908,6 +5220,14 @@
         {
           "name": "Bruach na Frithe via Fionn Coire or the Northwest Ridge",
           "page": "https://www.walkhighlands.co.uk/skye/bruachnafrithe.shtml",
+          "stats": {
+            "distanceKm": 13.75,
+            "timeHours": {
+              "min": 5,
+              "max": 7
+            },
+            "ascentM": 947
+          },
           "munros": [
             {
               "number": 1247,
@@ -3930,6 +5250,14 @@
         {
           "name": "Blà Bheinn via the normal route from Loch Slapin",
           "page": "https://www.walkhighlands.co.uk/skye/blabheinn.shtml",
+          "stats": {
+            "distanceKm": 8,
+            "timeHours": {
+              "min": 5,
+              "max": 6
+            },
+            "ascentM": 990
+          },
           "munros": [
             {
               "number": 1255,
@@ -3952,6 +5280,14 @@
         {
           "name": "Ben More from Dhiseig",
           "page": "https://www.walkhighlands.co.uk/mull/ben-more-mull.shtml",
+          "stats": {
+            "distanceKm": 9.25,
+            "timeHours": {
+              "min": 5,
+              "max": 6.5
+            },
+            "ascentM": 945
+          },
           "munros": [
             {
               "number": 1301,
@@ -3974,6 +5310,14 @@
         {
           "name": "Ben More via the A' Choich ridge",
           "page": "https://www.walkhighlands.co.uk/mull/ben-more-a-chioch.shtml",
+          "stats": {
+            "distanceKm": 14.5,
+            "timeHours": {
+              "min": 8,
+              "max": 9
+            },
+            "ascentM": 1255
+          },
           "munros": [
             {
               "number": 1301,
