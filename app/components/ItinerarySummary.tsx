@@ -62,22 +62,18 @@ export function ItinerarySummary({ outbound, return: returnItin, day }: Itinerar
   return (
     <div className="text-[13px] leading-relaxed">
       <div className="text-gray-700">
-        <span className="font-medium">{day.charAt(0) + day.slice(1).toLowerCase()}</span>
-        <span className="text-gray-600 text-xs ml-2">
-          ({formatDuration(timeAtTarget)} until departure)
-        </span>
-      </div>
-      <div className="text-gray-700">
-        Out: {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} ({formatDuration(outboundDuration)})
+        <span className="font-medium">Out:</span> {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} ({formatDuration(outboundDuration)})
         {outboundModes.length > 0 && (
           <span className="text-gray-500"> via {outboundModes.join(", ")}</span>
         )}
       </div>
       <div className="text-gray-700">
-        Return: {returnItin.startTime.slice(0, 5)}–{returnItin.endTime.slice(0, 5)} ({formatDuration(returnDuration)})
+        <span className="font-medium">Return:</span> {returnItin.startTime.slice(0, 5)}–{returnItin.endTime.slice(0, 5)} ({formatDuration(returnDuration)})
         {returnModes.length > 0 && (
           <span className="text-gray-500"> via {returnModes.join(", ")}</span>
         )}
+        <span className="text-gray-600"> · </span>
+        <span className="text-xs text-gray-600">{formatDuration(timeAtTarget)} until departure</span>
       </div>
     </div>
   );

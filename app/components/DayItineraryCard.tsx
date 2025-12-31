@@ -16,8 +16,10 @@ interface DayItineraryCardProps {
 
 export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
   const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+  const [showAll, setShowAll] = React.useState(false);
 
   const dayLabel = day.charAt(0) + day.slice(1).toLowerCase();
+  const displayOptions = showAll ? options : options.slice(0, 4);
 
   function parseTime(timeStr: string): number {
     const [hours, minutes] = timeStr.split(":").map(Number);
@@ -32,77 +34,139 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
     return `${hours}h ${mins}m`;
   }
 
+  function getUniqueModes(itinerary: any): string[] {
+    const modes = new Set(itinerary.modes);
+    modes.delete("WALK");
+    const abbrevs: Record<string, string> = {
+      RAIL: "Train",
+      BUS: "Bus",
+      COACH: "Coach",
+      FERRY: "Ferry",
+      BICYCLE: "Bike",
+      WALK: "Walk",
+      TRAM: "Tram",
+    };
+    return Array.from(modes).map(m => abbrevs[m] || m);
+  }
+
   return (
     <div className="border-b border-gray-200 pb-6">
       <h5 className="font-bold text-sm text-gray-800 mb-3">
         {dayLabel}
       </h5>
 
-      <div className="space-y-3">
-        {options.map((option, idx) => {
-          // Calculate time at target
-          let outboundEnd = parseTime(option.outbound.endTime);
-          const outboundStart = parseTime(option.outbound.startTime);
-          if (outboundEnd < outboundStart) outboundEnd += 24;
-          
-          let returnStart = parseTime(option.return.startTime);
-          if (returnStart < outboundEnd) returnStart += 24;
-          
-          const timeAtTarget = Math.round((returnStart - outboundEnd) * 60);
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b-2 border-gray-300">
+            <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Outbound</th>
+            <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Return</th>
+            <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Time between</th>
+            <th className="w-8"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {displayOptions.map((option, idx) => {
+            // Calculate time at target
+            let outboundEnd = parseTime(option.outbound.endTime);
+            const outboundStart = parseTime(option.outbound.startTime);
+            if (outboundEnd < outboundStart) outboundEnd += 24;
+            
+            let returnStart = parseTime(option.return.startTime);
+            if (returnStart < outboundEnd) returnStart += 24;
+            
+            const timeAtTarget = Math.round((returnStart - outboundEnd) * 60);
 
-          return (
-            <div key={idx} className="bg-gray-50 border border-gray-300 p-4">
-              {expandedIndex === idx ? (
-                <div>
-                  <div className="grid md:grid-cols-2 gap-4 mb-3">
-                    <div>
-                      <div className="text-xs font-bold text-gray-700 mb-2">
-                        Outbound
+            const outboundDuration = Math.round((outboundEnd - outboundStart) * 60);
+            let returnEnd = parseTime(option.return.endTime);
+            if (returnEnd < returnStart) returnEnd += 24;
+            const returnDuration = Math.round((returnEnd - returnStart) * 60);
+
+            const outboundModes = getUniqueModes(option.outbound);
+            const returnModes = getUniqueModes(option.return);
+
+            if (expandedIndex === idx) {
+              return (
+                <React.Fragment key={idx}>
+                  <tr className="border-b border-gray-200">
+                    <td colSpan={4} className="py-3">
+                      <div className="grid md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <div className="text-xs font-bold text-gray-700 mb-2">
+                            Outbound
+                          </div>
+                          <ItineraryDisplay
+                            itinerary={option.outbound}
+                            type="outbound"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-gray-700 mb-2">
+                            Return
+                          </div>
+                          <ItineraryDisplay
+                            itinerary={option.return}
+                            type="return"
+                          />
+                        </div>
                       </div>
-                      <ItineraryDisplay
-                        itinerary={option.outbound}
-                        type="outbound"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-gray-700 mb-2">
-                        Return
-                      </div>
-                      <ItineraryDisplay
-                        itinerary={option.return}
-                        type="return"
-                      />
-                    </div>
+                      <button
+                        onClick={() => setExpandedIndex(null)}
+                        className="text-theme-navy-700 underline text-xs hover:no-underline"
+                      >
+                        hide
+                      </button>
+                    </td>
+                  </tr>
+                </React.Fragment>
+              );
+            }
+
+            return (
+              <tr key={idx} className="border-b border-gray-200">
+                <td className="py-3 pr-3 align-top text-[13px]">
+                  <div className="text-gray-700">
+                    {option.outbound.startTime.slice(0, 5)}–{option.outbound.endTime.slice(0, 5)}
                   </div>
-                  <div className="text-xs text-gray-600 mb-3 pb-3 border-b border-gray-300">
-                    {formatDuration(timeAtTarget)} until departure
+                  <div className="text-xs text-gray-500">
+                    {formatDuration(outboundDuration)}
+                    {outboundModes.length > 0 && ` via ${outboundModes.join(", ")}`}
                   </div>
-                  <button
-                    onClick={() => setExpandedIndex(null)}
-                    className="text-theme-navy-700 underline text-sm hover:no-underline"
-                  >
-                    Show less
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <ItinerarySummary
-                    outbound={option.outbound}
-                    return={option.return}
-                    day={day}
-                  />
+                </td>
+                <td className="py-3 pr-3 align-top text-[13px]">
+                  <div className="text-gray-700">
+                    {option.return.startTime.slice(0, 5)}–{option.return.endTime.slice(0, 5)}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {formatDuration(returnDuration)}
+                    {returnModes.length > 0 && ` via ${returnModes.join(", ")}`}
+                  </div>
+                </td>
+                <td className="py-3 pr-3 align-top text-xs text-gray-600">
+                  {formatDuration(timeAtTarget)}
+                </td>
+                <td className="py-3 align-top">
                   <button
                     onClick={() => setExpandedIndex(idx)}
-                    className="text-theme-navy-700 underline text-sm hover:no-underline mt-3"
+                    className="text-gray-400 hover:text-theme-navy-700 text-xs"
+                    aria-label="Show details"
                   >
-                    Show details
+                    ⋯
                   </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {options.length > 4 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="text-theme-navy-700 underline text-xs hover:no-underline mt-3"
+        >
+          {showAll ? `Show top 4 only` : `Show all ${options.length} options`}
+        </button>
+      )}
     </div>
   );
 }
