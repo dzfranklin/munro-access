@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePreferences } from "~/preferences-context";
+import { START_LOCATION_ORDER } from "~/constants";
 
 type StartLocation = {
   id: string;
@@ -57,11 +58,15 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm bg-white"
                 >
                   <option value="">Use most recently selected location</option>
-                  {startLocations.map((start) => (
-                    <option key={start.id} value={start.id}>
-                      {start.name}
-                    </option>
-                  ))}
+                  {[...startLocations]
+                    .sort((a, b) => 
+                      START_LOCATION_ORDER.indexOf(a.name as any) - START_LOCATION_ORDER.indexOf(b.name as any)
+                    )
+                    .map((start) => (
+                      <option key={start.id} value={start.id}>
+                        {start.name}
+                      </option>
+                    ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1.5">
                   This will be the default tab when viewing routes. If not set,

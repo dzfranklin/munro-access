@@ -8,6 +8,7 @@ import { formatSamplePeriod } from "results/format-dates";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
 import { PreferencesPanel } from "~/components/PreferencesPanel";
+import { START_LOCATION_ORDER } from "~/constants";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,14 +26,16 @@ export async function loader({}: Route.LoaderArgs) {
   const targetsByStart = getTopTargetsPerStart(Infinity, DEFAULT_RANKING_PREFERENCES);
   const sampleDates = getSampleDates();
 
-  // Convert Map to array with start names
-  const targetsData = Array.from(targetsByStart.entries()).map(
-    ([startId, targets]) => ({
+  // Convert Map to array with start names, sorted by standard order
+  const targetsData = Array.from(targetsByStart.entries())
+    .map(([startId, targets]) => ({
       startId,
       startName: startMap.get(startId)?.name || startId,
       targets,
-    })
-  );
+    }))
+    .sort((a, b) => {
+      return START_LOCATION_ORDER.indexOf(a.startName as any) - START_LOCATION_ORDER.indexOf(b.startName as any);
+    });
 
   // Get all munros and targets for search
   const allMunros = Array.from(munroMap.values());
@@ -189,7 +192,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                     {filteredTargets.slice(0, 10).map((target) => (
                       <li key={target.id}>
                         <Link
-                          to={`/target/${target.id}`}
+                          to={`/target/${target.id}?start=${selectedStart}`}
                           className="text-theme-navy-700 underline text-sm"
                         >
                           {target.description}
@@ -322,7 +325,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                           <div>
                             <div className="text-[13px] leading-normal">
                               <Link
-                                to={`/target/${targetData.targetId}`}
+                                to={`/target/${targetData.targetId}?start=${selectedStart}`}
                                 className="text-theme-navy-700 underline font-bold"
                               >
                                 {targetData.targetName}
@@ -396,7 +399,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                               targetData.displayOptions.length && (
                               <div className="mt-2 text-xs">
                                 <Link
-                                  to={`/target/${targetData.targetId}`}
+                                  to={`/target/${targetData.targetId}?start=${selectedStart}`}
                                   className="text-gray-500 underline"
                                 >
                                   +{" "}

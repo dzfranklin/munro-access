@@ -1,11 +1,13 @@
 import { targetMap, startMap } from "results/parse";
 import type { Route } from "./+types/target";
-import { data, Link } from "react-router";
+import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
+import { TimelineModal } from "~/components/TimelineModal";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
+import { START_LOCATION_ORDER } from "~/constants";
 
 type StartInfo = {
   id: string;
@@ -42,7 +44,11 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
 
   const starts: StartInfo[] = Array.from(startIdsSet)
-    .sort()
+    .sort((a, b) => {
+      const aName = startMap.get(a)?.name || a;
+      const bName = startMap.get(b)?.name || b;
+      return START_LOCATION_ORDER.indexOf(aName as any) - START_LOCATION_ORDER.indexOf(bName as any);
+    })
     .map((id) => ({
       id,
       name: startMap.get(id)?.name || id,
@@ -54,19 +60,26 @@ export async function loader({ params }: Route.LoaderArgs) {
 export default function Target({ loaderData }: Route.ComponentProps) {
   const { target, bestItineraries, gmapsEmbedKey, starts } = loaderData;
   const { preferences } = usePreferences();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [timelineModalOpen, setTimelineModalOpen] = React.useState(false);
+  const [timelineDay, setTimelineDay] = React.useState<string | null>(null);
 
-  // Initialize selectedStart from preferences if available, otherwise use first option
-  const [selectedStart, setSelectedStart] = React.useState<string | null>(
-    () => {
-      if (
-        preferences.preferredStartLocation &&
-        starts.some((s) => s.id === preferences.preferredStartLocation)
-      ) {
-        return preferences.preferredStartLocation;
-      }
-      return starts.length > 0 ? starts[0].id : null;
+  // Read start from URL
+  const urlStart = searchParams.get("start");
+  
+  // Priority: URL > preferredStartLocation > first available start
+  const selectedStart = (() => {
+    if (urlStart && starts.some((s) => s.id === urlStart)) {
+      return urlStart;
     }
-  );
+    if (
+      preferences.preferredStartLocation &&
+      starts.some((s) => s.id === preferences.preferredStartLocation)
+    ) {
+      return preferences.preferredStartLocation;
+    }
+    return starts.length > 0 ? starts[0].id : null;
+  })();
 
   // Track when content is switching for fade effect
   const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -83,11 +96,24 @@ export default function Target({ loaderData }: Route.ComponentProps) {
     }
   }, [selectedStart]);
 
-  // When user clicks a tab, just update local state (don't save to preferences)
-  // Preferences are only updated when explicitly set in the PreferencesPanel
+  // When user clicks a tab, update URL but don't scroll
   const handleStartChange = (startId: string) => {
-    setSelectedStart(startId);
+    setSearchParams({ start: startId }, { preventScrollReset: true });
   };
+
+  // Open timeline modal for a specific day
+  const openTimeline = (day: string) => {
+    setTimelineDay(day);
+    setTimelineModalOpen(true);
+  };
+
+  // Get options for selected start and timeline day
+  const timelineOptions =
+    timelineModalOpen && bestItineraries && selectedStart && timelineDay
+      ? bestItineraries.bestOptions.filter(
+          (opt) => opt.startId === selectedStart && opt.day === timelineDay
+        )
+      : [];
 
   return (
     <>

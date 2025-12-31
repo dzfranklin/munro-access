@@ -61,7 +61,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
           <tr className="border-b-2 border-gray-300">
             <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Outbound</th>
             <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Return</th>
-            <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3">Time between</th>
+            <th className="text-left text-xs font-bold text-gray-700 pb-2 pr-3"></th>
             <th className="w-8"></th>
           </tr>
         </thead>
@@ -147,9 +147,10 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                     {returnModes.length > 0 && ` via ${returnModes.join(", ")}`}
                   </div>
                 </td>
-                <td className="py-3 pr-3 align-top text-xs">
-                  <div className={`font-medium ${percentileClass}`}>{percentileLabel}</div>
-                  <div className="text-gray-600">{formatDuration(timeAtTarget)}</div>
+                <td className="py-3 pr-3 align-top text-xs text-gray-600">
+                  <span className={`font-medium ${percentileClass}`}>{percentileLabel}</span>
+                  <span className="text-gray-600"> · </span>
+                  <span>{formatDuration(timeAtTarget)} until departure</span>
                 </td>
                 <td className="py-3 align-top">
                   <button
