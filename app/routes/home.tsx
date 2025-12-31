@@ -2,7 +2,7 @@ import type { Route } from "./+types/home";
 import { getTopTargetsPerStart } from "results/best-itineraries";
 import { DEFAULT_PREFERENCES } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { getSampleDates, startMap, munroMap, targetMap } from "results/parse";
 import { formatSamplePeriod } from "results/format-dates";
 import React from "react";
@@ -21,8 +21,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader({}: Route.LoaderArgs) {
-  // Get top targets (trailheads) for each starting location
-  const targetsByStart = getTopTargetsPerStart(10, DEFAULT_PREFERENCES);
+  // Get all targets (trailheads) for each starting location
+  const targetsByStart = getTopTargetsPerStart(Infinity, DEFAULT_PREFERENCES);
   const sampleDates = getSampleDates();
 
   // Convert Map to array with start names
@@ -43,21 +43,43 @@ export async function loader({}: Route.LoaderArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { targetsData, sampleDates, allMunros, allTargets } = loaderData;
-  const { preferences } = usePreferences();
+  const { preferences, updatePreferences } = usePreferences();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialize selectedStart from preferences or default to first option
-  const [selectedStart, setSelectedStart] = React.useState(
-    preferences.preferredStartLocation || targetsData[0]?.startId
-  );
   const [searchQuery, setSearchQuery] = React.useState("");
+  const itemsPerPage = 10;
 
-  // When user clicks a tab, just update local state (don't save to preferences)
-  // Preferences are only updated when explicitly set in the PreferencesPanel
+  // Read current state from URL or preferences
+  const urlStart = searchParams.get("start");
+  const urlPage = searchParams.get("page");
+  
+  // Priority: URL > preferredStartLocation > lastViewedStartLocation > first tab
+  const selectedStart = urlStart || 
+                        preferences.preferredStartLocation || 
+                        preferences.lastViewedStartLocation || 
+                        targetsData[0]?.startId;
+  const currentPage = urlPage ? parseInt(urlPage, 10) : 1;
+
+  // When user clicks a tab, update lastViewed and URL, reset to page 1, but don't scroll
   const handleStartChange = (startId: string) => {
-    setSelectedStart(startId);
+    updatePreferences({ lastViewedStartLocation: startId });
+    setSearchParams({ start: startId, page: "1" }, { preventScrollReset: true });
+  };
+
+  // When user changes page, update URL and scroll to top
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({ start: selectedStart, page: newPage.toString() });
+    window.scrollTo(0, 0);
   };
 
   const selectedData = targetsData.find((r) => r.startId === selectedStart);
+
+  // Pagination calculations
+  const totalItems = selectedData?.targets.length || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTargets = selectedData?.targets.slice(startIndex, endIndex) || [];
 
   // Get all available start locations for preferences panel
   const startLocations = targetsData.map(({ startId, startName }) => ({
@@ -267,7 +289,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedData.targets.map((targetData, idx) => {
+                  {paginatedTargets.map((targetData, idx) => {
                     if (targetData.displayOptions.length === 0) return null;
 
                     return (
@@ -276,7 +298,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         className="border-b border-gray-200"
                       >
                         <td className="py-4 px-2.5 align-top text-gray-600">
-                          {idx + 1}
+                          {startIndex + idx + 1}
                         </td>
                         <td className="py-4 px-2.5 align-top">
                           <div>
@@ -376,6 +398,42 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   })}
                 </tbody>
               </table>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mb-8 text-sm">
+                  <div className="text-gray-600">
+                    Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} routes
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1.5 border border-gray-300 ${
+                        currentPage === 1
+                          ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                          : "text-theme-navy-700 bg-white hover:bg-gray-50"
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    <div className="flex items-center px-3 text-gray-700">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <button
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1.5 border border-gray-300 ${
+                        currentPage === totalPages
+                          ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                          : "text-theme-navy-700 bg-white hover:bg-gray-50"
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           )}
         </div>

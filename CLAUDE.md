@@ -204,3 +204,7 @@ clean and trustworthy, avoiding modern trendy design patterns.
 - Custom colors defined as CSS custom properties in `@theme` block
 - System fonts only (no external font loading)
 - Semantic HTML5 elements
+
+## Development Process
+
+Use chrome-devtools mcp to manually test changes

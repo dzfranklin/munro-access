@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import {
   DEFAULT_PREFERENCES,
   type UserPreferences,
@@ -14,8 +14,10 @@ interface PreferencesContextType {
 const PreferencesContext = createContext<PreferencesContextType | null>(null);
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    // Try to load from localStorage
+  const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
+
+  // Load from localStorage after mount to avoid hydration mismatch
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("munro-access-preferences");
       if (saved) {
@@ -26,17 +28,15 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
             ...DEFAULT_PREFERENCES,
             ...parsed,
           });
-          return validated;
+          setPreferences(validated);
         } catch (error) {
           // If validation fails, clear the corrupted data and use defaults
           console.warn("Invalid preferences in localStorage, resetting:", error);
           localStorage.removeItem("munro-access-preferences");
-          return DEFAULT_PREFERENCES;
         }
       }
     }
-    return DEFAULT_PREFERENCES;
-  });
+  }, []);
 
   const updatePreferences = (updates: Partial<UserPreferences>) => {
     try {

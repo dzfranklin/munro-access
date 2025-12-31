@@ -14,8 +14,11 @@ const userPreferencesSchema = z.object({
   // Latest acceptable sunset time (hours, 24h format)
   sunset: z.number().min(12).max(24),
 
-  // Preferred start location (null means use most recently selected)
+  // Preferred start location (null means no preference)
   preferredStartLocation: z.string().nullable(),
+
+  // Most recently viewed start location (updated when tabs clicked)
+  lastViewedStartLocation: z.string().nullable(),
 
   // Preference weights (0-1, higher = more important)
   weights: z.object({
@@ -35,7 +38,8 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   walkingSpeed: 1.0, // Standard speed
   returnBuffer: 0.5, // 30 minutes
   sunset: 21, // 9pm in summer
-  preferredStartLocation: null, // Use most recently selected
+  preferredStartLocation: null, // No default preference
+  lastViewedStartLocation: null, // No last viewed
   weights: {
     departureTime: 0.2,
     hikeDuration: 1.0, // Most important
