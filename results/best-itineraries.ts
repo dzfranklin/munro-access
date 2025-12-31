@@ -1,5 +1,5 @@
 import { resultMap, targetMap, munroMap } from "./parse";
-import { selectBestItineraries, DEFAULT_PREFERENCES, type UserPreferences } from "./scoring";
+import { selectBestItineraries, calculatePercentiles, DEFAULT_RANKING_PREFERENCES, type RankingPreferences } from "./scoring";
 import type { Itinerary, Route, Munro } from "./schema";
 
 export interface ItineraryOption {
@@ -19,16 +19,6 @@ export interface TargetWithBestItineraries {
     route: Route;
     munros: Munro[];
   }>;
-  bestOptions: ItineraryOption[];
-  displayOptions?: ItineraryOption[];
-}
-
-export interface RouteWithBestItineraries {
-  route: Route;
-  targetId: string;
-  targetName: string;
-  targetDescription: string;
-  munros: Munro[];
   bestOptions: ItineraryOption[];
   displayOptions?: ItineraryOption[];
 }
@@ -93,11 +83,13 @@ function selectDiverseOptions(
  * the same target share the same access point.
  * 
  * @param maxPerStartDay - Maximum number of options to return per start/day combination (default: 10)
+ * @param globalPercentiles - Pre-calculated global percentile map (optional, will calculate if not provided)
  */
 export function getBestItinerariesForTarget(
   targetId: string,
-  prefs: UserPreferences = DEFAULT_PREFERENCES,
-  maxPerStartDay: number = 10
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
+  maxPerStartDay: number = 10,
+  globalPercentiles?: Map<number, number>
 ): TargetWithBestItineraries | null {
   const target = targetMap.get(targetId);
   if (!target) return null;
@@ -137,7 +129,7 @@ export function getBestItinerariesForTarget(
           day,
           outbound,
           return: returnItin,
-          score: score.total,
+          score: score.rawScore,
         });
       }
     }
@@ -145,6 +137,14 @@ export function getBestItinerariesForTarget(
 
   // Sort by score (best first)
   bestOptions.sort((a, b) => b.score - a.score);
+
+  // Apply percentiles if provided
+  if (globalPercentiles) {
+    for (const option of bestOptions) {
+      const percentile = globalPercentiles.get(option.score) ?? 0;
+      option.score = percentile;
+    }
+  }
 
   // Limit options per start/day combination to keep UI manageable
   const limitedOptions: ItineraryOption[] = [];
@@ -179,120 +179,68 @@ export function getBestItinerariesForTarget(
 }
 
 /**
+ * Calculate global percentiles for all itinerary scores
+ * Call this once before generating all targets
+ */
+export function calculateGlobalPercentiles(
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
+): Map<number, number> {
+  const allScores: number[] = [];
+
+  // Collect all scores from all targets
+  for (const [targetId, target] of targetMap.entries()) {
+    const longestRoute = target.routes.reduce((longest, route) => {
+      const longestMax = longest.stats.timeHours.max;
+      const routeMax = route.stats.timeHours.max;
+      return routeMax > longestMax ? route : longest;
+    }, target.routes[0]);
+
+    for (const result of resultMap.values()) {
+      if (result.target !== targetId) continue;
+
+      for (const [day, dayItineraries] of Object.entries(result.itineraries)) {
+        const { outbounds, returns } = dayItineraries;
+        if (outbounds.length === 0 || returns.length === 0) continue;
+
+        const viable = selectBestItineraries(
+          outbounds,
+          returns,
+          longestRoute,
+          prefs,
+          Infinity
+        );
+
+        for (const { score } of viable) {
+          allScores.push(score.rawScore);
+        }
+      }
+    }
+  }
+
+  return calculatePercentiles(allScores);
+}
+
+/**
  * Get all targets with their best itinerary options
+ * Scores are normalized to global percentiles
  */
 export function getAllTargetsWithBestItineraries(
-  prefs: UserPreferences = DEFAULT_PREFERENCES
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): TargetWithBestItineraries[] {
+  // First, calculate global percentiles
+  const globalPercentiles = calculateGlobalPercentiles(prefs);
+
   const targetsWithItineraries: TargetWithBestItineraries[] = [];
 
   // For each target (trailhead)
   for (const [targetId] of targetMap.entries()) {
-    const targetData = getBestItinerariesForTarget(targetId, prefs);
+    const targetData = getBestItinerariesForTarget(targetId, prefs, 10, globalPercentiles);
     if (targetData && targetData.bestOptions.length > 0) {
       targetsWithItineraries.push(targetData);
     }
   }
 
   return targetsWithItineraries;
-}
-
-/**
- * Get all routes with their best itinerary options
- * @deprecated Use getAllTargetsWithBestItineraries instead - routes share target transport
- */
-export function getAllRoutesWithBestItineraries(
-  prefs: UserPreferences = DEFAULT_PREFERENCES
-): RouteWithBestItineraries[] {
-  const routesWithItineraries: RouteWithBestItineraries[] = [];
-
-  // Get target-level data
-  const targets = getAllTargetsWithBestItineraries(prefs);
-
-  // Expand to route-level for backwards compatibility
-  for (const target of targets) {
-    for (const { route, munros } of target.routes) {
-      routesWithItineraries.push({
-        route,
-        targetId: target.targetId,
-        targetName: target.targetName,
-        targetDescription: target.targetDescription,
-        munros,
-        bestOptions: target.bestOptions,
-        displayOptions: target.displayOptions,
-      });
-    }
-  }
-
-  return routesWithItineraries;
-}
-
-/**
- * Get top N routes overall by best score
- */
-export function getTopRoutes(
-  n: number = 20,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
-): RouteWithBestItineraries[] {
-  const allRoutes = getAllRoutesWithBestItineraries(prefs);
-
-  // Sort by best score available for that route
-  allRoutes.sort((a, b) => {
-    const bestA = a.bestOptions[0]?.score || 0;
-    const bestB = b.bestOptions[0]?.score || 0;
-    return bestB - bestA;
-  });
-
-  return allRoutes.slice(0, n);
-}
-
-/**
- * Get top N routes for each starting location
- */
-export function getTopRoutesPerStart(
-  n: number = 10,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
-): Map<string, RouteWithBestItineraries[]> {
-  const allRoutes = getAllRoutesWithBestItineraries(prefs);
-  const routesByStart = new Map<string, RouteWithBestItineraries[]>();
-
-  // For each route, create a version filtered to each start location
-  for (const route of allRoutes) {
-    // Group options by start location
-    const optionsByStart = new Map<string, typeof route.bestOptions>();
-
-    for (const option of route.bestOptions) {
-      if (!optionsByStart.has(option.startId)) {
-        optionsByStart.set(option.startId, []);
-      }
-      optionsByStart.get(option.startId)!.push(option);
-    }
-
-    // Create a route entry for each start location
-    for (const [startId, options] of optionsByStart.entries()) {
-      if (!routesByStart.has(startId)) {
-        routesByStart.set(startId, []);
-      }
-
-      routesByStart.get(startId)!.push({
-        ...route,
-        bestOptions: options,
-        displayOptions: selectDiverseOptions(options, 3),
-      });
-    }
-  }
-
-  // Sort routes within each start location by best score
-  for (const [startId, routes] of routesByStart.entries()) {
-    routes.sort((a, b) => {
-      const bestA = a.bestOptions[0]?.score || 0;
-      const bestB = b.bestOptions[0]?.score || 0;
-      return bestB - bestA;
-    });
-    routesByStart.set(startId, routes.slice(0, n));
-  }
-
-  return routesByStart;
 }
 
 export interface TargetWithRoutes {
@@ -313,7 +261,7 @@ export interface TargetWithRoutes {
  */
 export function getTopTargetsPerStart(
   n: number = 10,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): Map<string, TargetWithRoutes[]> {
   const allTargets = getAllTargetsWithBestItineraries(prefs);
   const targetsByStart = new Map<string, TargetWithRoutes[]>();
@@ -358,31 +306,6 @@ export function getTopTargetsPerStart(
   }
 
   return targetsByStart;
-}
-
-/**
- * Get best itineraries for a specific route
- * @deprecated Use getBestItinerariesForTarget instead - routes share target transport
- */
-export function getBestItinerariesForRoute(
-  targetId: string,
-  routeName: string,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
-): RouteWithBestItineraries | null {
-  const targetData = getBestItinerariesForTarget(targetId, prefs);
-  if (!targetData) return null;
-
-  const routeInfo = targetData.routes.find(r => r.route.name === routeName);
-  if (!routeInfo) return null;
-
-  return {
-    route: routeInfo.route,
-    targetId: targetData.targetId,
-    targetName: targetData.targetName,
-    targetDescription: targetData.targetDescription,
-    munros: routeInfo.munros,
-    bestOptions: targetData.bestOptions,
-  };
 }
 
 /**

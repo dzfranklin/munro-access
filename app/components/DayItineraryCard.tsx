@@ -1,6 +1,7 @@
 import type { Itinerary } from "results/schema";
 import { ItinerarySummary } from "./ItinerarySummary";
 import { ItineraryDisplay } from "./ItineraryDisplay";
+import { getPercentileClasses } from "~/itineraryQuality";
 import React from "react";
 
 interface ItineraryOption {
@@ -83,6 +84,8 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
 
             const outboundModes = getUniqueModes(option.outbound);
             const returnModes = getUniqueModes(option.return);
+            
+            const { label: percentileLabel, textClass: percentileClass } = getPercentileClasses(option.score);
 
             if (expandedIndex === idx) {
               return (
@@ -115,6 +118,9 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                       >
                         hide
                       </button>
+                      <span className="text-xs text-gray-400 ml-3">
+                        score: {(option.score * 100).toFixed(0)}%
+                      </span>
                     </td>
                   </tr>
                 </React.Fragment>
@@ -141,8 +147,9 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                     {returnModes.length > 0 && ` via ${returnModes.join(", ")}`}
                   </div>
                 </td>
-                <td className="py-3 pr-3 align-top text-xs text-gray-600">
-                  {formatDuration(timeAtTarget)}
+                <td className="py-3 pr-3 align-top text-xs">
+                  <div className={`font-medium ${percentileClass}`}>{percentileLabel}</div>
+                  <div className="text-gray-600">{formatDuration(timeAtTarget)}</div>
                 </td>
                 <td className="py-3 align-top">
                   <button

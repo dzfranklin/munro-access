@@ -1,7 +1,8 @@
 import type { Itinerary, Route } from "./schema";
 import { z } from "zod";
 
-const userPreferencesSchema = z.object({
+// Preferences that affect itinerary scoring/ranking
+const rankingPreferencesSchema = z.object({
   // Earliest acceptable departure time (in hours, 24h format)
   earliestDeparture: z.number().min(0).max(24),
 
@@ -14,12 +15,6 @@ const userPreferencesSchema = z.object({
   // Latest acceptable sunset time (hours, 24h format)
   sunset: z.number().min(12).max(24),
 
-  // Preferred start location (null means no preference)
-  preferredStartLocation: z.string().nullable(),
-
-  // Most recently viewed start location (updated when tabs clicked)
-  lastViewedStartLocation: z.string().nullable(),
-
   // Preference weights (0-1, higher = more important)
   weights: z.object({
     departureTime: z.number().min(0).max(1),
@@ -29,17 +24,28 @@ const userPreferencesSchema = z.object({
   }),
 });
 
+// UI-only preferences (don't affect scoring)
+const uiPreferencesSchema = z.object({
+  // Preferred start location (null means no preference)
+  preferredStartLocation: z.string().nullable(),
+
+  // Most recently viewed start location (updated when tabs clicked)
+  lastViewedStartLocation: z.string().nullable(),
+});
+
+const userPreferencesSchema = rankingPreferencesSchema.merge(uiPreferencesSchema);
+
+export type RankingPreferences = z.infer<typeof rankingPreferencesSchema>;
+export type UIPreferences = z.infer<typeof uiPreferencesSchema>;
 export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 
-export { userPreferencesSchema };
+export { userPreferencesSchema, rankingPreferencesSchema, uiPreferencesSchema };
 
-export const DEFAULT_PREFERENCES: UserPreferences = {
+export const DEFAULT_RANKING_PREFERENCES: RankingPreferences = {
   earliestDeparture: 6, // 6am earliest
   walkingSpeed: 1.0, // Standard speed
   returnBuffer: 0.5, // 30 minutes
   sunset: 21, // 9pm in summer
-  preferredStartLocation: null, // No default preference
-  lastViewedStartLocation: null, // No last viewed
   weights: {
     departureTime: 0.2,
     hikeDuration: 1.0, // Most important
@@ -48,8 +54,19 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   },
 };
 
+export const DEFAULT_UI_PREFERENCES: UIPreferences = {
+  preferredStartLocation: null,
+  lastViewedStartLocation: null,
+};
+
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  ...DEFAULT_RANKING_PREFERENCES,
+  ...DEFAULT_UI_PREFERENCES,
+};
+
 interface ItineraryScore {
-  total: number;
+  rawScore: number;
+  percentile: number;
   components: {
     departureTime: number;
     hikeDuration: number;
@@ -74,12 +91,13 @@ function addHours(timeStr: string, hours: number): string {
 
 /**
  * Score an outbound + return itinerary pair
+ * Returns raw score (0-1) before percentile normalization
  */
 export function scoreItineraryPair(
   outbound: Itinerary,
   returnItin: Itinerary | null,
   route: Route,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): ItineraryScore {
   const components = {
     departureTime: 0,
@@ -99,7 +117,8 @@ export function scoreItineraryPair(
   // Check if departure is acceptable
   if (departureTime < prefs.earliestDeparture) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: `Departure too early (${outbound.startTime})`,
@@ -110,7 +129,8 @@ export function scoreItineraryPair(
   const arrivalTimeOfDay = arrivalTime % 24;
   if (arrivalTimeOfDay < prefs.earliestDeparture) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: `Arrival too early (${outbound.endTime})`,
@@ -124,7 +144,8 @@ export function scoreItineraryPair(
   // Check if hike would finish before sunset
   if (hikeEndTime > prefs.sunset) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: `Hike would finish after sunset (estimated ${hikeEndTime.toFixed(1)}h)`,
@@ -134,7 +155,8 @@ export function scoreItineraryPair(
   // If no return specified, can't evaluate return timing
   if (!returnItin) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: "No return itinerary",
@@ -147,7 +169,8 @@ export function scoreItineraryPair(
 
   if (returnUsesBike && !outboundUsesBike) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: "Cannot return via bike without taking bike on outbound journey",
@@ -169,7 +192,8 @@ export function scoreItineraryPair(
   const bufferTime = returnDepartureTime - hikeEndTime;
   if (bufferTime < prefs.returnBuffer) {
     return {
-      total: 0,
+      rawScore: 0,
+      percentile: 0,
       components,
       feasible: false,
       reason: `Insufficient buffer before return (${bufferTime.toFixed(1)}h < ${prefs.returnBuffer}h)`,
@@ -219,7 +243,8 @@ export function scoreItineraryPair(
   const weightSum = Object.values(prefs.weights).reduce((a, b) => a + b, 0);
 
   return {
-    total: total / weightSum,
+    rawScore: total / weightSum,
+    percentile: 0, // Will be calculated later
     components,
     feasible: true,
   };
@@ -232,7 +257,7 @@ export function selectBestItineraries(
   outbounds: Itinerary[],
   returns: Itinerary[],
   route: Route,
-  prefs: UserPreferences = DEFAULT_PREFERENCES,
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
   maxResults: number = 2
 ): Array<{
   outbound: Itinerary;
@@ -268,7 +293,7 @@ export function selectBestItineraries(
           score.components.returnOptions = 1.0;
           // Recalculate total
           const weightSum = Object.values(prefs.weights).reduce((a, b) => a + b, 0);
-          score.total = Object.entries(score.components)
+          score.rawScore = Object.entries(score.components)
             .reduce((sum, [key, val]) => sum + val * prefs.weights[key as keyof typeof prefs.weights], 0) / weightSum;
         }
 
@@ -278,6 +303,26 @@ export function selectBestItineraries(
   }
 
   // Sort by score and return top results
-  scored.sort((a, b) => b.score.total - a.score.total);
+  scored.sort((a, b) => b.score.rawScore - a.score.rawScore);
   return scored.slice(0, maxResults);
+}
+
+/**
+ * Calculate percentile for each score in a collection
+ * Percentile represents the percentage of scores that are lower than this score
+ */
+export function calculatePercentiles(scores: number[]): Map<number, number> {
+  const sortedScores = [...scores].sort((a, b) => a - b);
+  const percentileMap = new Map<number, number>();
+  
+  for (let i = 0; i < sortedScores.length; i++) {
+    const score = sortedScores[i];
+    // Don't overwrite if we've already seen this score (use first occurrence for duplicate scores)
+    if (!percentileMap.has(score)) {
+      const percentile = (i / Math.max(1, sortedScores.length - 1));
+      percentileMap.set(score, percentile);
+    }
+  }
+  
+  return percentileMap;
 }

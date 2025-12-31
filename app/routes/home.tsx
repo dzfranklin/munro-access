@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { getTopTargetsPerStart } from "results/best-itineraries";
-import { DEFAULT_PREFERENCES } from "results/scoring";
+import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams } from "react-router";
 import { getSampleDates, startMap, munroMap, targetMap } from "results/parse";
@@ -22,7 +22,7 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({}: Route.LoaderArgs) {
   // Get all targets (trailheads) for each starting location
-  const targetsByStart = getTopTargetsPerStart(Infinity, DEFAULT_PREFERENCES);
+  const targetsByStart = getTopTargetsPerStart(Infinity, DEFAULT_RANKING_PREFERENCES);
   const sampleDates = getSampleDates();
 
   // Convert Map to array with start names
@@ -49,7 +49,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const itemsPerPage = 10;
 
-  // Read current state from URL or preferences
+  // Read current state from URL
   const urlStart = searchParams.get("start");
   const urlPage = searchParams.get("page");
   
@@ -59,6 +59,21 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         preferences.lastViewedStartLocation || 
                         targetsData[0]?.startId;
   const currentPage = urlPage ? parseInt(urlPage, 10) : 1;
+
+  // Track when content is switching for fade effect
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const prevStartRef = React.useRef(selectedStart);
+  
+  React.useEffect(() => {
+    if (prevStartRef.current !== selectedStart) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        prevStartRef.current = selectedStart;
+      }, 75);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedStart]);
 
   // When user clicks a tab, update lastViewed and URL, reset to page 1, but don't scroll
   const handleStartChange = (startId: string) => {
@@ -266,7 +281,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
           {/* Tab content */}
           {selectedData && (
-            <section>
+            <section 
+              className="transition-opacity duration-75"
+              style={{ opacity: isTransitioning ? 0 : 1 }}
+            >
               <table className="w-full border-collapse mb-8 text-sm table-fixed">
                 <colgroup>
                   <col className="w-8" />
@@ -369,6 +387,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                 outbound={option.outbound}
                                 return={option.return}
                                 day={option.day}
+                                score={option.score}
                               />
                             ))}
                           </div>

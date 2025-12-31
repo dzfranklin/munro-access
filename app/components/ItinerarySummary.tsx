@@ -1,9 +1,11 @@
 import type { Itinerary } from "results/schema";
+import { getPercentileClasses } from "~/itineraryQuality";
 
 interface ItinerarySummaryProps {
   outbound: Itinerary;
   return: Itinerary;
   day: string;
+  score?: number;
 }
 
 function formatDuration(minutes: number): string {
@@ -39,7 +41,7 @@ function getUniqueModes(itinerary: Itinerary): string[] {
   return Array.from(modes).map(getModeAbbrev);
 }
 
-export function ItinerarySummary({ outbound, return: returnItin, day }: ItinerarySummaryProps) {
+export function ItinerarySummary({ outbound, return: returnItin, day, score }: ItinerarySummaryProps) {
   // Calculate durations
   const outboundStart = parseTime(outbound.startTime);
   let outboundEnd = parseTime(outbound.endTime);
@@ -59,6 +61,15 @@ export function ItinerarySummary({ outbound, return: returnItin, day }: Itinerar
   const outboundModes = getUniqueModes(outbound);
   const returnModes = getUniqueModes(returnItin);
 
+  // Get percentile label and class if score is provided
+  let percentileLabel = null;
+  let percentileClass = "";
+  if (score !== undefined) {
+    const { label, textClass } = getPercentileClasses(score);
+    percentileLabel = label;
+    percentileClass = textClass;
+  }
+
   return (
     <div className="text-[13px] leading-relaxed">
       <div className="text-gray-700">
@@ -72,8 +83,15 @@ export function ItinerarySummary({ outbound, return: returnItin, day }: Itinerar
         {returnModes.length > 0 && (
           <span className="text-gray-500"> via {returnModes.join(", ")}</span>
         )}
-        <span className="text-gray-600"> · </span>
-        <span className="text-xs text-gray-600">{formatDuration(timeAtTarget)} until departure</span>
+      </div>
+      <div className="text-xs text-gray-600">
+        {percentileLabel && (
+          <>
+            <span className={`font-medium ${percentileClass}`}>{percentileLabel}</span>
+            <span className="text-gray-600"> · </span>
+          </>
+        )}
+        <span>{formatDuration(timeAtTarget)} until departure</span>
       </div>
     </div>
   );

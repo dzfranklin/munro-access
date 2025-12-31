@@ -24,6 +24,12 @@
   /* Muted greens for links */
   --color-theme-green-600: #2f855a;
   --color-theme-green-700: #276749;
+
+  /* Percentile indicators - traffic light colors (dark, muted) */
+  --color-percentile-top: #2d5016;
+  --color-percentile-good: #5a5a00;
+  --color-percentile-fair: #8b4513;
+  --color-percentile-bottom: #8b0000;
 }
 
 html,

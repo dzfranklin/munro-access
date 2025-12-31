@@ -2,7 +2,7 @@ import { targetMap, startMap } from "results/parse";
 import type { Route } from "./+types/target";
 import { data, Link } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
-import { DEFAULT_PREFERENCES } from "results/scoring";
+import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
@@ -29,7 +29,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
 
   // Get best itineraries for this target
-  const bestItineraries = getBestItinerariesForTarget(params.id, DEFAULT_PREFERENCES);
+  const bestItineraries = getBestItinerariesForTarget(params.id, DEFAULT_RANKING_PREFERENCES);
 
   const gmapsEmbedKey = process.env.GOOGLE_MAPS_EMBED_KEY;
 
@@ -67,6 +67,21 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       return starts.length > 0 ? starts[0].id : null;
     }
   );
+
+  // Track when content is switching for fade effect
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const prevStartRef = React.useRef(selectedStart);
+  
+  React.useEffect(() => {
+    if (prevStartRef.current !== selectedStart) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        prevStartRef.current = selectedStart;
+      }, 75);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedStart]);
 
   // When user clicks a tab, just update local state (don't save to preferences)
   // Preferences are only updated when explicitly set in the PreferencesPanel
@@ -199,7 +214,10 @@ export default function Target({ loaderData }: Route.ComponentProps) {
             )}
 
             {/* Itineraries for selected start location */}
-            <div className="space-y-6">
+            <div 
+              className="space-y-6 transition-opacity duration-75"
+              style={{ opacity: isTransitioning ? 0 : 1 }}
+            >
               {(() => {
                 // Filter options for selected start location
                 const optionsForStart = bestItineraries.bestOptions.filter(

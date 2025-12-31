@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useLayoutEffect, type ReactNode } from "react";
 import {
   DEFAULT_PREFERENCES,
   type UserPreferences,
@@ -16,8 +16,8 @@ const PreferencesContext = createContext<PreferencesContextType | null>(null);
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
 
-  // Load from localStorage after mount to avoid hydration mismatch
-  useEffect(() => {
+  // Load from localStorage synchronously before paint to avoid flash
+  useLayoutEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("munro-access-preferences");
       if (saved) {

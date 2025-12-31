@@ -8,9 +8,10 @@ interface ItineraryCardProps {
   return: Itinerary;
   day: string;
   startName: string;
+  score?: number;
 }
 
-export function ItineraryCard({ outbound, return: returnItin, day, startName }: ItineraryCardProps) {
+export function ItineraryCard({ outbound, return: returnItin, day, startName, score }: ItineraryCardProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
@@ -53,6 +54,11 @@ export function ItineraryCard({ outbound, return: returnItin, day, startName }: 
           >
             Show less
           </button>
+          {score !== undefined && (
+            <span className="text-xs text-gray-400 ml-3">
+              score: {(score * 100).toFixed(0)}%
+            </span>
+          )}
         </div>
       ) : (
         <div>
@@ -60,6 +66,7 @@ export function ItineraryCard({ outbound, return: returnItin, day, startName }: 
             outbound={outbound}
             return={returnItin}
             day={day}
+            score={score}
           />
           <button
             onClick={() => setIsExpanded(true)}
