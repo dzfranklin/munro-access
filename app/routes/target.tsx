@@ -1,7 +1,7 @@
 import { targetMap, startMap } from "results/parse";
 import type { Route } from "./+types/target";
 import { data, Link } from "react-router";
-import { getBestItinerariesForRoute } from "results/best-itineraries";
+import { getBestItinerariesForTarget } from "results/best-itineraries";
 import { DEFAULT_PREFERENCES } from "results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
 import React from "react";
@@ -28,25 +28,16 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
 
-  // Get best itineraries for each route from this target
-  const routesWithItineraries = target.routes.map((route) => {
-    const best = getBestItinerariesForRoute(
-      params.id,
-      route.name,
-      DEFAULT_PREFERENCES
-    );
-    return { route, bestItineraries: best };
-  });
+  // Get best itineraries for this target
+  const bestItineraries = getBestItinerariesForTarget(params.id, DEFAULT_PREFERENCES);
 
   const gmapsEmbedKey = process.env.GOOGLE_MAPS_EMBED_KEY;
 
   // Get all unique start locations with their names
   const startIdsSet = new Set<string>();
-  for (const { bestItineraries } of routesWithItineraries) {
-    if (bestItineraries) {
-      for (const option of bestItineraries.bestOptions) {
-        startIdsSet.add(option.startId);
-      }
+  if (bestItineraries) {
+    for (const option of bestItineraries.bestOptions) {
+      startIdsSet.add(option.startId);
     }
   }
 
@@ -57,11 +48,11 @@ export async function loader({ params }: Route.LoaderArgs) {
       name: startMap.get(id)?.name || id,
     }));
 
-  return { target, routesWithItineraries, gmapsEmbedKey, starts };
+  return { target, bestItineraries, gmapsEmbedKey, starts };
 }
 
 export default function Target({ loaderData }: Route.ComponentProps) {
-  const { target, routesWithItineraries, gmapsEmbedKey, starts } = loaderData;
+  const { target, bestItineraries, gmapsEmbedKey, starts } = loaderData;
   const { preferences } = usePreferences();
 
   // Initialize selectedStart from preferences if available, otherwise use first option
@@ -122,14 +113,67 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       )}
 
       {/* Routes */}
-      <section>
+      <section className="mb-12">
         <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
           Routes from {target.name}
         </h2>
 
-        {starts.length === 0 ? (
+        {target.routes.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
-            No routes found with viable public transport options.
+            No routes available.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {target.routes.map((route) => (
+              <div key={route.page}>
+                <div className="font-serif text-sm text-gray-700">
+                  {route.name}
+                  <span className="text-gray-500"> • </span>
+                  <a
+                    href={route.page}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-traditional-navy-700 underline text-[13px] font-sans"
+                  >
+                    walkhighlands
+                  </a>
+                </div>
+                <div className="text-[13px]">
+                  {route.munros.map((munro, idx) => (
+                    <span key={munro.number}>
+                      {idx > 0 && <span className="text-gray-400"> • </span>}
+                      <Link
+                        to={`/munro/${munro.number}-${munro.name
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")
+                          .replace(/[^a-z0-9-]/g, "")}`}
+                        className="text-traditional-navy-700 underline"
+                      >
+                        {munro.name}
+                      </Link>
+                    </span>
+                  ))}
+                  <span className="text-gray-600">
+                    {" "}
+                    • {route.stats.distanceKm}km • {route.stats.timeHours.min}-
+                    {route.stats.timeHours.max}h • {route.stats.ascentM}m
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Public Transport Options */}
+      <section>
+        <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+          Public Transport to {target.name}
+        </h2>
+
+        {!bestItineraries || bestItineraries.bestOptions.length === 0 ? (
+          <div className="text-center py-10 text-gray-500">
+            No viable public transport options found.
           </div>
         ) : (
           <div>
@@ -154,116 +198,50 @@ export default function Target({ loaderData }: Route.ComponentProps) {
               </div>
             )}
 
-            {/* Routes for selected start location */}
-            <div className="space-y-8">
-              {routesWithItineraries
-                .map(({ route, bestItineraries }) => {
-                  if (
-                    !bestItineraries ||
-                    bestItineraries.bestOptions.length === 0
-                  ) {
-                    return null;
-                  }
+            {/* Itineraries for selected start location */}
+            <div className="space-y-6">
+              {(() => {
+                // Filter options for selected start location
+                const optionsForStart = bestItineraries.bestOptions.filter(
+                  (opt) => opt.startId === selectedStart
+                );
 
-                  // Filter options for selected start location
-                  const optionsForStart = bestItineraries.bestOptions.filter(
-                    (opt) => opt.startId === selectedStart
-                  );
-
-                  if (optionsForStart.length === 0) return null;
-
-                  // Group by day
-                  const optionsByDay = new Map<
-                    string,
-                    typeof optionsForStart
-                  >();
-                  for (const option of optionsForStart) {
-                    if (!optionsByDay.has(option.day)) {
-                      optionsByDay.set(option.day, []);
-                    }
-                    optionsByDay.get(option.day)!.push(option);
-                  }
-
-                  // Sort days
-                  const dayOrder = [
-                    "WEDNESDAY",
-                    "FRIDAY",
-                    "SATURDAY",
-                    "SUNDAY",
-                  ];
-                  const sortedDays = Array.from(optionsByDay.keys()).sort(
-                    (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
-                  );
-
-                  return { route, optionsByDay, sortedDays };
-                })
-                .filter((item) => item !== null)
-                .map((item, idx, arr) => {
-                  const isLast = idx === arr.length - 1;
-
+                if (optionsForStart.length === 0) {
                   return (
-                    <div
-                      key={item.route.page}
-                      className={
-                        isLast ? "pb-6" : "border-b border-gray-200 pb-6"
-                      }
-                    >
-                      {/* Route header */}
-                      <div className="mb-4">
-                        <h3 className="font-serif text-base mb-2">
-                          <span className="font-semibold text-gray-700">
-                            {item.route.name}
-                          </span>
-                          <span className="text-gray-500"> • </span>
-                          <a
-                            href={item.route.page}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-traditional-navy-700 underline text-[13px] font-sans"
-                          >
-                            walkhighlands
-                          </a>
-                        </h3>
-                        <div className="text-sm text-gray-600 mb-2">
-                          Distance: {item.route.stats.distanceKm}km | Time:{" "}
-                          {item.route.stats.timeHours.min}-
-                          {item.route.stats.timeHours.max}h | Ascent:{" "}
-                          {item.route.stats.ascentM}m
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-gray-600">Munros: </span>
-                          {item.route.munros.map((munro, idx) => (
-                            <span key={munro.number}>
-                              {idx > 0 && (
-                                <span className="text-gray-400"> • </span>
-                              )}
-                              <Link
-                                to={`/munro/${munro.number}-${munro.name
-                                  .toLowerCase()
-                                  .replace(/\s+/g, "-")
-                                  .replace(/[^a-z0-9-]/g, "")}`}
-                                className="text-traditional-green-600 underline text-[13px]"
-                              >
-                                {munro.name}
-                              </Link>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Options grouped by day */}
-                      <div className="space-y-6">
-                        {item.sortedDays.map((day) => (
-                          <DayItineraryCard
-                            key={day}
-                            day={day}
-                            options={item.optionsByDay.get(day)!}
-                          />
-                        ))}
-                      </div>
+                    <div className="text-center py-10 text-gray-500">
+                      No options available from this location.
                     </div>
                   );
-                })}
+                }
+
+                // Group by day
+                const optionsByDay = new Map<string, typeof optionsForStart>();
+                for (const option of optionsForStart) {
+                  if (!optionsByDay.has(option.day)) {
+                    optionsByDay.set(option.day, []);
+                  }
+                  optionsByDay.get(option.day)!.push(option);
+                }
+
+                // Sort days
+                const dayOrder = [
+                  "WEDNESDAY",
+                  "FRIDAY",
+                  "SATURDAY",
+                  "SUNDAY",
+                ];
+                const sortedDays = Array.from(optionsByDay.keys()).sort(
+                  (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
+                );
+
+                return sortedDays.map((day) => (
+                  <DayItineraryCard
+                    key={day}
+                    day={day}
+                    options={optionsByDay.get(day)!}
+                  />
+                ));
+              })()}
             </div>
           </div>
         )}

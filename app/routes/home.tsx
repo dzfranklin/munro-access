@@ -248,12 +248,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 </thead>
                 <tbody>
                   {selectedData.targets.map((targetData, idx) => {
-                    // Get the best route for display
-                    const bestRoute = targetData.routes[0];
-                    if (!bestRoute) return null;
-
-                    const displayOptions = bestRoute.displayOptions || [];
-                    if (displayOptions.length === 0) return null;
+                    if (targetData.displayOptions.length === 0) return null;
 
                     return (
                       <tr
@@ -326,7 +321,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         </td>
                         <td className="py-4 px-2.5 align-top text-[13px]">
                           <div className="space-y-2">
-                            {displayOptions.map((option, i) => (
+                            {targetData.displayOptions.map((option, i) => (
                               <ItinerarySummary
                                 key={i}
                                 outbound={option.outbound}
@@ -335,19 +330,19 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                               />
                             ))}
                           </div>
-                          {bestRoute.bestOptions.length >
-                            displayOptions.length && (
+                          {targetData.bestOptions.length >
+                            targetData.displayOptions.length && (
                             <div className="mt-2 text-xs">
                               <Link
                                 to={`/target/${targetData.targetId}`}
                                 className="text-gray-500 underline"
                               >
                                 +{" "}
-                                {bestRoute.bestOptions.length -
-                                  displayOptions.length}{" "}
+                                {targetData.bestOptions.length -
+                                  targetData.displayOptions.length}{" "}
                                 more option
-                                {bestRoute.bestOptions.length -
-                                  displayOptions.length >
+                                {targetData.bestOptions.length -
+                                  targetData.displayOptions.length >
                                 1
                                   ? "s"
                                   : ""}

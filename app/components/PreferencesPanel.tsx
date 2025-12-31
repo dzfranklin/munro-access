@@ -135,28 +135,6 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                     Time needed to get back to trailhead + safety margin
                   </p>
                 </div>
-
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1.5">
-                    Connection Buffer (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    step="5"
-                    min="0"
-                    max="30"
-                    value={preferences.connectionBuffer}
-                    onChange={(e) =>
-                      updatePreferences({
-                        connectionBuffer: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
-                  />
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Minimum time for changing buses/trains
-                  </p>
-                </div>
               </div>
             </div>
 

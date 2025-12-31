@@ -11,9 +11,6 @@ const userPreferencesSchema = z.object({
   // Minimum buffer time after hike finishes before catching return (in hours)
   returnBuffer: z.number().min(0).max(6),
 
-  // Additional buffer for tight connections (in minutes)
-  connectionBuffer: z.number().int().min(0).max(60),
-
   // Latest acceptable sunset time (hours, 24h format)
   sunset: z.number().min(12).max(24),
 
@@ -25,7 +22,6 @@ const userPreferencesSchema = z.object({
     departureTime: z.number().min(0).max(1),
     hikeDuration: z.number().min(0).max(1),
     returnOptions: z.number().min(0).max(1),
-    connectionTime: z.number().min(0).max(1),
     totalDuration: z.number().min(0).max(1),
   }),
 });
@@ -35,17 +31,15 @@ export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 export { userPreferencesSchema };
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
-  earliestDeparture: 6,      // 6am earliest
-  walkingSpeed: 1.0,         // Standard speed
-  returnBuffer: 1.5,         // 1.5 hours after hike completion
-  connectionBuffer: 10,      // 10 minutes for connections
-  sunset: 21,                // 9pm in summer
-  preferredStartLocation: null,  // Use most recently selected
+  earliestDeparture: 6, // 6am earliest
+  walkingSpeed: 1.0, // Standard speed
+  returnBuffer: 1,
+  sunset: 21, // 9pm in summer
+  preferredStartLocation: null, // Use most recently selected
   weights: {
     departureTime: 0.7,
-    hikeDuration: 1.0,       // Most important
+    hikeDuration: 1.0, // Most important
     returnOptions: 0.8,
-    connectionTime: 0.6,
     totalDuration: 0.5,
   },
 };
@@ -56,7 +50,6 @@ interface ItineraryScore {
     departureTime: number;
     hikeDuration: number;
     returnOptions: number;
-    connectionTime: number;
     totalDuration: number;
   };
   feasible: boolean;
@@ -88,7 +81,6 @@ export function scoreItineraryPair(
     departureTime: 0,
     hikeDuration: 0,
     returnOptions: 0,
-    connectionTime: 0,
     totalDuration: 0,
   };
 
@@ -199,35 +191,7 @@ export function scoreItineraryPair(
   // Will be set to 1.0 if multiple viable returns exist, 0.5 if only one
   components.returnOptions = 0.5;
 
-  // 4. Connection time score (penalize tight connections)
-  let minConnectionMinutes = Infinity;
-  for (let i = 1; i < outbound.legs.length; i++) {
-    if (!outbound.legs[i].interlineWithPreviousLeg) {
-      const prevEnd = parseTime(outbound.legs[i - 1].endTime);
-      const nextStart = parseTime(outbound.legs[i].startTime);
-      const connectionMinutes = (nextStart - prevEnd) * 60;
-      minConnectionMinutes = Math.min(minConnectionMinutes, connectionMinutes);
-    }
-  }
-  for (let i = 1; i < returnItin.legs.length; i++) {
-    if (!returnItin.legs[i].interlineWithPreviousLeg) {
-      const prevEnd = parseTime(returnItin.legs[i - 1].endTime);
-      const nextStart = parseTime(returnItin.legs[i].startTime);
-      const connectionMinutes = (nextStart - prevEnd) * 60;
-      minConnectionMinutes = Math.min(minConnectionMinutes, connectionMinutes);
-    }
-  }
-
-  if (minConnectionMinutes < Infinity) {
-    const bufferScore = minConnectionMinutes < prefs.connectionBuffer
-      ? 0
-      : Math.min(1, (minConnectionMinutes - prefs.connectionBuffer) / 30);
-    components.connectionTime = bufferScore;
-  } else {
-    components.connectionTime = 1.0; // No connections needed
-  }
-
-  // 5. Total duration score (prefer shorter total journey)
+  // 4. Total duration score (prefer shorter total journey)
   const totalHours = (returnArrivalTime >= departureTime)
     ? returnArrivalTime - departureTime
     : (24 - departureTime) + returnArrivalTime;
@@ -240,7 +204,6 @@ export function scoreItineraryPair(
     components.departureTime * prefs.weights.departureTime +
     components.hikeDuration * prefs.weights.hikeDuration +
     components.returnOptions * prefs.weights.returnOptions +
-    components.connectionTime * prefs.weights.connectionTime +
     components.totalDuration * prefs.weights.totalDuration;
 
   // Normalize by sum of weights

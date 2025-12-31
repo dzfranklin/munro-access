@@ -15,8 +15,8 @@ Edinburgh, Glasgow, and Stirling.
    sunset constraints
 2. **Top Route Rankings** - Home page shows best routes ranked by score across
    all starting locations
-3. **Detailed Route Pages** - Individual trailhead pages show all routes with
-   top 3 public transport options
+3. **Detailed Target Pages** - Individual trailhead pages show all available
+   routes first, then public transport options to reach that trailhead
 4. **Detailed Itineraries** - Full journey breakdowns with times, transport
    modes, and connections
 
@@ -60,7 +60,7 @@ results/
 app/
   routes/
     home.tsx           - Landing page with top routes
-    target.tsx         - Individual trailhead pages
+    target.tsx         - Trailhead pages: routes first, then transport options
     munro.tsx          - Individual munro pages
   components/
     ItineraryDisplay.tsx - Shows journey details
