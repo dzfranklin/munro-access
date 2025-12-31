@@ -28,15 +28,15 @@ export default function Targets({ loaderData }: Route.ComponentProps) {
       <nav className="mb-6">
         <Link
           to="/"
-          className="text-traditional-navy-700 underline text-sm hover:no-underline"
+          className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
           Back to all routes
         </Link>
       </nav>
 
       {/* Header */}
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           All Route Locations
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
@@ -73,7 +73,7 @@ export default function Targets({ loaderData }: Route.ComponentProps) {
                 <td className="py-3 px-2.5 align-top">
                   <Link
                     to={`/target/${target.id}`}
-                    className="text-traditional-navy-700 underline font-bold"
+                    className="text-theme-navy-700 underline font-bold"
                   >
                     {target.description}
                   </Link>

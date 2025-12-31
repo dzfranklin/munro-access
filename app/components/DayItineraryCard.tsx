@@ -79,7 +79,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                   </div>
                   <button
                     onClick={() => setExpandedIndex(null)}
-                    className="text-traditional-navy-700 underline text-sm hover:no-underline"
+                    className="text-theme-navy-700 underline text-sm hover:no-underline"
                   >
                     Show less
                   </button>
@@ -93,7 +93,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                   />
                   <button
                     onClick={() => setExpandedIndex(idx)}
-                    className="text-traditional-navy-700 underline text-sm hover:no-underline mt-3"
+                    className="text-theme-navy-700 underline text-sm hover:no-underline mt-3"
                   >
                     Show details
                   </button>

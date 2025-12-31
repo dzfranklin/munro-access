@@ -80,15 +80,15 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       <nav className="mb-6">
         <Link
           to="/"
-          className="text-traditional-navy-700 underline text-sm hover:no-underline"
+          className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
           Back to all routes
         </Link>
       </nav>
 
       {/* Header */}
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           {target.name}
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
@@ -114,7 +114,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
       {/* Routes */}
       <section className="mb-12">
-        <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+        <h2 className="font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
           Routes from {target.name}
         </h2>
 
@@ -133,7 +133,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                     href={route.page}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-traditional-navy-700 underline text-[13px] font-sans"
+                    className="text-theme-navy-700 underline text-[13px] font-sans"
                   >
                     walkhighlands
                   </a>
@@ -147,7 +147,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                           .toLowerCase()
                           .replace(/\s+/g, "-")
                           .replace(/[^a-z0-9-]/g, "")}`}
-                        className="text-traditional-navy-700 underline"
+                        className="text-theme-navy-700 underline"
                       >
                         {munro.name}
                       </Link>
@@ -167,7 +167,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
       {/* Public Transport Options */}
       <section>
-        <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+        <h2 className="font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
           Public Transport to {target.name}
         </h2>
 
@@ -187,7 +187,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                       onClick={() => handleStartChange(start.id)}
                       className={`px-4 py-2 text-sm font-bold border-b-2 -mb-0.5 ${
                         selectedStart === start.id
-                          ? "border-traditional-navy-700 text-traditional-navy-900"
+                          ? "border-theme-navy-700 text-theme-navy-900"
                           : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
                       }`}
                     >

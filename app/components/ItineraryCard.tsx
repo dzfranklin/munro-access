@@ -49,7 +49,7 @@ export function ItineraryCard({ outbound, return: returnItin, day, startName }: 
           </div>
           <button
             onClick={() => setIsExpanded(false)}
-            className="text-traditional-navy-700 underline text-sm hover:no-underline"
+            className="text-theme-navy-700 underline text-sm hover:no-underline"
           >
             Show less
           </button>
@@ -63,7 +63,7 @@ export function ItineraryCard({ outbound, return: returnItin, day, startName }: 
           />
           <button
             onClick={() => setIsExpanded(true)}
-            className="text-traditional-navy-700 underline text-sm hover:no-underline mt-3"
+            className="text-theme-navy-700 underline text-sm hover:no-underline mt-3"
           >
             Show details
           </button>

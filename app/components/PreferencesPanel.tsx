@@ -18,7 +18,7 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
     <div className="mb-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-1.5 bg-traditional-navy-700 text-white text-sm hover:bg-traditional-navy-900 underline"
+        className="px-3 py-1.5 bg-theme-navy-700 text-white text-sm hover:bg-theme-navy-900 underline"
       >
         {isOpen ? "Hide" : "Show"} Preferences
       </button>
@@ -26,12 +26,12 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
       {isOpen && (
         <div className="mt-4 p-5 bg-gray-50 border border-gray-300">
           <div className="border-b-2 border-gray-300 pb-3 mb-5">
-            <h3 className="font-serif text-lg font-bold text-traditional-navy-900 inline">
+            <h3 className="font-serif text-lg font-bold text-theme-navy-900 inline">
               Your Preferences
             </h3>
             <button
               onClick={resetPreferences}
-              className="text-sm text-traditional-navy-700 underline hover:no-underline float-right"
+              className="text-sm text-theme-navy-700 underline hover:no-underline float-right"
             >
               Reset to defaults
             </button>
@@ -116,23 +116,24 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
 
                 <div>
                   <label className="block text-sm text-gray-600 mb-1.5">
-                    Return Buffer (hours after hike)
+                    Buffer before return transport (minutes)
                   </label>
                   <input
                     type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="4"
-                    value={preferences.returnBuffer}
+                    step="5"
+                    min="15"
+                    max="240"
+                    value={Math.round(preferences.returnBuffer * 60)}
                     onChange={(e) =>
                       updatePreferences({
-                        returnBuffer: parseFloat(e.target.value),
+                        returnBuffer: parseInt(e.target.value) / 60,
                       })
                     }
                     className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Time needed to get back to trailhead + safety margin
+                    Time needed after hike completion (using max Walkhighlands
+                    time) before catching return transport
                   </p>
                 </div>
               </div>

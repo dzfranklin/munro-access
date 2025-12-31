@@ -102,12 +102,12 @@ clean and trustworthy, avoiding modern trendy design patterns.
 ### Color Palette
 
 **Primary (Navy Blues):**
-- Headers/Important text: `traditional-navy-900` (#1a365d)
-- Links/Accents: `traditional-navy-700` (#334e68)
+- Headers/Important text: `theme-navy-900` (#1a365d)
+- Links/Accents: `theme-navy-700` (#334e68)
 - Full scale: 50-950 defined in theme
 
 **Secondary (Muted Green):**
-- Secondary links: `traditional-green-600` (#2f855a)
+- Secondary links: `theme-green-600` (#2f855a)
 
 **Grays:**
 - Use standard Tailwind grays (gray-50 to gray-800)
@@ -147,8 +147,8 @@ clean and trustworthy, avoiding modern trendy design patterns.
 
 **Styling:**
 - `underline` by default (all links should be underlined)
-- Navy for primary links: `text-traditional-navy-700`
-- Green for secondary links: `text-traditional-green-600`
+- Navy for primary links: `text-theme-navy-700`
+- Green for secondary links: `text-theme-green-600`
 - Use `hover:no-underline` if a hover effect is desired, but underline by
   default is required
 

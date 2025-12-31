@@ -46,15 +46,15 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
       <nav className="mb-6">
         <Link
           to="/"
-          className="text-traditional-navy-700 underline text-sm hover:no-underline"
+          className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
           Back to all routes
         </Link>
       </nav>
 
       {/* Header */}
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0">
           {munro.name}
         </h1>
       </header>
@@ -65,7 +65,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
           href={munro.page}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-traditional-navy-700 underline text-sm"
+          className="text-theme-navy-700 underline text-sm"
         >
           View on walkhighlands
         </a>
@@ -73,7 +73,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
 
       {/* Routes section */}
       <section>
-        <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+        <h2 className="font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
           Routes to {munro.name}
         </h2>
 
@@ -88,10 +88,10 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
                 key={target.id}
                 className="border-b border-gray-200 pb-6"
               >
-                <h3 className="font-serif text-lg font-bold text-traditional-navy-900 mb-3">
+                <h3 className="font-serif text-lg font-bold text-theme-navy-900 mb-3">
                   <Link
                     to={`/target/${target.id}`}
-                    className="text-traditional-navy-700 underline"
+                    className="text-theme-navy-700 underline"
                   >
                     {target.description}
                   </Link>
@@ -109,7 +109,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
                           href={route.page}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-traditional-navy-700 underline text-sm"
+                          className="text-theme-navy-700 underline text-sm"
                         >
                           {route.name}
                         </a>
@@ -129,7 +129,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
                                       .toLowerCase()
                                       .replace(/\s+/g, "-")
                                       .replace(/[^a-z0-9-]/g, "")}`}
-                                    className="text-traditional-green-600 underline"
+                                    className="text-theme-green-600 underline"
                                   >
                                     {m.name}
                                   </Link>

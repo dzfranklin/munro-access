@@ -9,21 +9,21 @@
   --font-sans: Verdana, Geneva, sans-serif;
 
   /* Traditional color palette - navy blues and muted grays */
-  --color-traditional-navy-50: #f0f4f8;
-  --color-traditional-navy-100: #d9e2ec;
-  --color-traditional-navy-200: #bcccdc;
-  --color-traditional-navy-300: #9fb3c8;
-  --color-traditional-navy-400: #829ab1;
-  --color-traditional-navy-500: #627d98;
-  --color-traditional-navy-600: #486581;
-  --color-traditional-navy-700: #334e68;
-  --color-traditional-navy-800: #243b53;
-  --color-traditional-navy-900: #1a365d;
-  --color-traditional-navy-950: #102a43;
+  --color-theme-navy-50: #f0f4f8;
+  --color-theme-navy-100: #d9e2ec;
+  --color-theme-navy-200: #bcccdc;
+  --color-theme-navy-300: #9fb3c8;
+  --color-theme-navy-400: #829ab1;
+  --color-theme-navy-500: #627d98;
+  --color-theme-navy-600: #486581;
+  --color-theme-navy-700: #334e68;
+  --color-theme-navy-800: #243b53;
+  --color-theme-navy-900: #1a365d;
+  --color-theme-navy-950: #102a43;
 
   /* Muted greens for links */
-  --color-traditional-green-600: #2f855a;
-  --color-traditional-green-700: #276749;
+  --color-theme-green-600: #2f855a;
+  --color-theme-green-700: #276749;
 }
 
 html,

@@ -57,8 +57,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <div className="max-w-240 mx-auto px-5 py-5">
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           {message}
         </h1>
       </header>
@@ -76,7 +76,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       )}
 
       <nav className="mt-6">
-        <a href="/" className="text-traditional-navy-700 underline text-sm">
+        <a href="/" className="text-theme-navy-700 underline text-sm">
           Return to home page
         </a>
       </nav>

@@ -33,7 +33,7 @@ export { userPreferencesSchema };
 export const DEFAULT_PREFERENCES: UserPreferences = {
   earliestDeparture: 6, // 6am earliest
   walkingSpeed: 1.0, // Standard speed
-  returnBuffer: 1,
+  returnBuffer: 0.5, // 30 minutes
   sunset: 21, // 9pm in summer
   preferredStartLocation: null, // Use most recently selected
   weights: {
@@ -184,9 +184,9 @@ export function scoreItineraryPair(
     components.departureTime = Math.max(0, 0.9 * (departureTime - prefs.earliestDeparture) / (7 - prefs.earliestDeparture));
   }
 
-  // 2. Hike duration score (prefer having plenty of time, 1.5x route time is ideal)
+  // 2. Hike duration score (prefer having plenty of time, 1.2x route time is ideal)
   const availableHikeTime = returnDepartureTime - prefs.returnBuffer - arrivalTime;
-  const idealHikeTime = route.stats.timeHours.max * 1.5 / prefs.walkingSpeed;
+  const idealHikeTime = route.stats.timeHours.max * 1.2 / prefs.walkingSpeed;
   const timeRatio = availableHikeTime / idealHikeTime;
   components.hikeDuration = timeRatio >= 1
     ? 1.0

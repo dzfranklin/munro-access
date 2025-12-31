@@ -86,8 +86,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <>
       {/* Header */}
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           Munro Access
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
@@ -110,7 +110,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Enter munro or route name..."
-          className="w-full px-3 py-2 border-2 border-gray-300 text-sm focus:outline-none focus:border-traditional-navy-700"
+          className="w-full px-3 py-2 border-2 border-gray-300 text-sm focus:outline-none focus:border-theme-navy-700"
         />
       </div>
 
@@ -129,7 +129,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       <li key={munro.number}>
                         <Link
                           to={`/munro/${munro.slug}`}
-                          className="text-traditional-green-600 underline text-sm"
+                          className="text-theme-green-600 underline text-sm"
                         >
                           {munro.name}
                         </Link>
@@ -153,7 +153,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       <li key={target.id}>
                         <Link
                           to={`/target/${target.id}`}
-                          className="text-traditional-navy-700 underline text-sm"
+                          className="text-theme-navy-700 underline text-sm"
                         >
                           {target.description}
                         </Link>
@@ -195,6 +195,20 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           are backup options if you take longer than expected, transit time, and
           some other factors.
         </p>
+        <p className="text-sm text-gray-600 m-0 mb-3">
+          Walkhighlands data on this site will be outdated, any errors
+          introduced are mine. My goal is to help you find interesting routes to
+          look into further on{" "}
+          <a
+            href="http://walkhighlands.co.uk/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-theme-navy-700 underline"
+          >
+            walkhighlands.co.uk
+          </a>
+          .
+        </p>
         <p className="text-[13px] text-gray-600 m-0">
           <strong>Note:</strong> These results are based on sample schedules
           from {formatSamplePeriod(sampleDates)}. They are intended to help you
@@ -218,7 +232,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   onClick={() => handleStartChange(startId)}
                   className={`px-4 py-2 text-sm font-bold border-b-2 -mb-0.5 ${
                     selectedStart === startId
-                      ? "border-traditional-navy-700 text-traditional-navy-900"
+                      ? "border-theme-navy-700 text-theme-navy-900"
                       : "border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300"
                   }`}
                 >
@@ -269,7 +283,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                             <div className="text-[13px] leading-normal">
                               <Link
                                 to={`/target/${targetData.targetId}`}
-                                className="text-traditional-navy-700 underline font-bold"
+                                className="text-theme-navy-700 underline font-bold"
                               >
                                 {targetData.targetName}
                               </Link>
@@ -296,7 +310,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                   href={routeData.route.page}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-traditional-navy-700 underline text-[13px] font-sans"
+                                  className="text-theme-navy-700 underline text-[13px] font-sans"
                                 >
                                   walkhighlands
                                 </a>
@@ -306,7 +320,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                   <span key={munro.number}>
                                     <Link
                                       to={`/munro/${munro.slug}`}
-                                      className="text-traditional-navy-700 underline text-[13px]"
+                                      className="text-theme-navy-700 underline text-[13px]"
                                     >
                                       {munro.name}
                                     </Link>
@@ -327,7 +341,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         </td>
                         <td className="py-4 px-2.5 align-top text-[13px]">
                           <div className="space-y-2">
-                            {targetData.displayOptions.map((option, i) => (
+                            {targetData.displayOptions?.map((option, i) => (
                               <ItinerarySummary
                                 key={i}
                                 outbound={option.outbound}
@@ -336,25 +350,26 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                               />
                             ))}
                           </div>
-                          {targetData.bestOptions.length >
-                            targetData.displayOptions.length && (
-                            <div className="mt-2 text-xs">
-                              <Link
-                                to={`/target/${targetData.targetId}`}
-                                className="text-gray-500 underline"
-                              >
-                                +{" "}
-                                {targetData.bestOptions.length -
-                                  targetData.displayOptions.length}{" "}
-                                more option
-                                {targetData.bestOptions.length -
-                                  targetData.displayOptions.length >
-                                1
-                                  ? "s"
-                                  : ""}
-                              </Link>
-                            </div>
-                          )}
+                          {targetData.displayOptions &&
+                            targetData.bestOptions.length >
+                              targetData.displayOptions.length && (
+                              <div className="mt-2 text-xs">
+                                <Link
+                                  to={`/target/${targetData.targetId}`}
+                                  className="text-gray-500 underline"
+                                >
+                                  +{" "}
+                                  {targetData.bestOptions.length -
+                                    targetData.displayOptions.length}{" "}
+                                  more option
+                                  {targetData.bestOptions.length -
+                                    targetData.displayOptions.length >
+                                  1
+                                    ? "s"
+                                    : ""}
+                                </Link>
+                              </div>
+                            )}
                         </td>
                       </tr>
                     );

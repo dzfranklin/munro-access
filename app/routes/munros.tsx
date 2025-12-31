@@ -28,15 +28,15 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
       <nav className="mb-6">
         <Link
           to="/"
-          className="text-traditional-navy-700 underline text-sm hover:no-underline"
+          className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
           Back to all routes
         </Link>
       </nav>
 
       {/* Header */}
-      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
-        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+      <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           All Munros
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
@@ -67,7 +67,7 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
                 <td className="py-3 px-2.5">
                   <Link
                     to={`/munro/${munro.slug}`}
-                    className="text-traditional-navy-700 underline font-bold"
+                    className="text-theme-navy-700 underline font-bold"
                   >
                     {munro.name}
                   </Link>
@@ -77,7 +77,7 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
                     href={munro.page}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-traditional-green-600 underline text-[13px]"
+                    className="text-theme-green-600 underline text-[13px]"
                   >
                     walkhighlands
                   </a>
