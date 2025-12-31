@@ -91,10 +91,13 @@ function selectDiverseOptions(
  * Get best itineraries for a specific target (trailhead)
  * This computes transport options once per target, since all routes from
  * the same target share the same access point.
+ * 
+ * @param maxPerStartDay - Maximum number of options to return per start/day combination (default: 10)
  */
 export function getBestItinerariesForTarget(
   targetId: string,
-  prefs: UserPreferences = DEFAULT_PREFERENCES
+  prefs: UserPreferences = DEFAULT_PREFERENCES,
+  maxPerStartDay: number = 10
 ): TargetWithBestItineraries | null {
   const target = targetMap.get(targetId);
   if (!target) return null;
@@ -118,16 +121,16 @@ export function getBestItinerariesForTarget(
 
       if (outbounds.length === 0 || returns.length === 0) continue;
 
-      // Get best 1-2 itinerary pairs for this day
-      const best = selectBestItineraries(
+      // Get all viable itinerary pairs for this day
+      const viable = selectBestItineraries(
         outbounds,
         returns,
         longestRoute,
         prefs,
-        2
+        Infinity // No limit - return all viable pairs
       );
 
-      for (const { outbound, return: returnItin, score } of best) {
+      for (const { outbound, return: returnItin, score } of viable) {
         bestOptions.push({
           startId: result.start,
           startName: result.start,
@@ -140,8 +143,21 @@ export function getBestItinerariesForTarget(
     }
   }
 
-  // Sort by score
+  // Sort by score (best first)
   bestOptions.sort((a, b) => b.score - a.score);
+
+  // Limit options per start/day combination to keep UI manageable
+  const limitedOptions: ItineraryOption[] = [];
+  const countsByStartDay = new Map<string, number>();
+
+  for (const option of bestOptions) {
+    const key = `${option.startId}-${option.day}`;
+    const count = countsByStartDay.get(key) || 0;
+    if (count < maxPerStartDay) {
+      limitedOptions.push(option);
+      countsByStartDay.set(key, count + 1);
+    }
+  }
 
   // Resolve route details
   const routes = target.routes.map(route => {
@@ -158,7 +174,7 @@ export function getBestItinerariesForTarget(
     targetName: target.name,
     targetDescription: target.description,
     routes,
-    bestOptions: bestOptions.slice(0, 20), // Keep top 20 options
+    bestOptions: limitedOptions,
   };
 }
 
@@ -320,11 +336,14 @@ export function getTopTargetsPerStart(
         targetsByStart.set(startId, []);
       }
 
+      const routeBoost = 1 + (target.routes.length - 1) * 0.05;
+      const boostedScore = (options[0]?.score || 0) * routeBoost;
+
       targetsByStart.get(startId)!.push({
         targetId: target.targetId,
         targetName: target.targetName,
         targetDescription: target.targetDescription,
-        bestScore: options[0]?.score || 0,
+        bestScore: boostedScore,
         routes: target.routes,
         bestOptions: options,
         displayOptions: selectDiverseOptions(options, 3),
@@ -332,7 +351,7 @@ export function getTopTargetsPerStart(
     }
   }
 
-  // Sort targets within each start location by best score
+  // Sort targets within each start location by boosted score
   for (const [startId, targets] of targetsByStart.entries()) {
     targets.sort((a, b) => b.bestScore - a.bestScore);
     targetsByStart.set(startId, targets.slice(0, n));

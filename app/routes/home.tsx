@@ -188,12 +188,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           How it works
         </h2>
         <p className="text-sm text-gray-600 m-0 mb-3">
-          I used National Rail and DFT data to compute public transport
-          itineraries to every Munro route on walkhighlands for a few sample
-          days. Itineraries are ranked based on how early you have to leave, how
-          well the return matches the hike duration, whether there are backup
-          options if you take longer than expected, transit time, and some other
-          factors.
+          I used National Rail and bus timetable data to compute public
+          transport itineraries to every Munro route on walkhighlands for a few
+          sample days. Itineraries are ranked based on how early you have to
+          leave, how well the return matches the hike duration, whether there
+          are backup options if you take longer than expected, transit time, and
+          some other factors.
         </p>
         <p className="text-[13px] text-gray-600 m-0">
           <strong>Note:</strong> These results are based on sample schedules
@@ -231,7 +231,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           {/* Tab content */}
           {selectedData && (
             <section>
-              <table className="w-full border-collapse mb-8 text-sm">
+              <table className="w-full border-collapse mb-8 text-sm table-fixed">
+                <colgroup>
+                  <col className="w-8" />
+                  <col className="w-40" />
+                  <col className="w-56" />
+                  <col className="w-80" />
+                </colgroup>
                 <thead>
                   <tr className="bg-gray-100 border-b-2 border-gray-300">
                     <th className="py-2.5 px-2.5 text-left font-bold">#</th>

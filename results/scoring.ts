@@ -37,10 +37,10 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   sunset: 21, // 9pm in summer
   preferredStartLocation: null, // Use most recently selected
   weights: {
-    departureTime: 0.7,
+    departureTime: 0.2,
     hikeDuration: 1.0, // Most important
     returnOptions: 0.8,
-    totalDuration: 0.5,
+    totalDuration: 0.6,
   },
 };
 
@@ -174,10 +174,15 @@ export function scoreItineraryPair(
 
   // Now calculate scoring components (all 0-1, higher is better)
 
-  // 1. Departure time score (prefer 8am-10am, penalize very early/late)
-  const idealDeparture = 9;
-  const departureOffset = Math.abs(departureTime - idealDeparture);
-  components.departureTime = Math.max(0, 1 - departureOffset / 6);
+  // 1. Departure time score (penalize very early starts, slight preference for 8am+)
+  // 8am+ = 1.0, 7am = 0.9, earlier = linear penalty down to earliestDeparture
+  if (departureTime >= 8) {
+    components.departureTime = 1.0;
+  } else if (departureTime >= 7) {
+    components.departureTime = 0.9 + 0.1 * (departureTime - 7);
+  } else {
+    components.departureTime = Math.max(0, 0.9 * (departureTime - prefs.earliestDeparture) / (7 - prefs.earliestDeparture));
+  }
 
   // 2. Hike duration score (prefer having plenty of time, 1.5x route time is ideal)
   const availableHikeTime = returnDepartureTime - prefs.returnBuffer - arrivalTime;

@@ -46,10 +46,14 @@ export function ItinerarySummary({ outbound, return: returnItin, day }: Itinerar
   if (outboundEnd < outboundStart) outboundEnd += 24;
   const outboundDuration = Math.round((outboundEnd - outboundStart) * 60);
 
-  const returnStart = parseTime(returnItin.startTime);
+  let returnStart = parseTime(returnItin.startTime);
   let returnEnd = parseTime(returnItin.endTime);
+  if (returnStart < outboundEnd) returnStart += 24;
   if (returnEnd < returnStart) returnEnd += 24;
   const returnDuration = Math.round((returnEnd - returnStart) * 60);
+
+  // Calculate time at target (arrival to return departure)
+  const timeAtTarget = Math.round((returnStart - outboundEnd) * 60);
 
   // Get unique transport modes
   const outboundModes = getUniqueModes(outbound);
@@ -59,7 +63,11 @@ export function ItinerarySummary({ outbound, return: returnItin, day }: Itinerar
     <div className="text-[13px] leading-relaxed">
       <div className="text-gray-700">
         <span className="font-medium">{day.charAt(0) + day.slice(1).toLowerCase()}</span>
-        {" • "}
+        <span className="text-gray-600 text-xs ml-2">
+          ({formatDuration(timeAtTarget)} until departure)
+        </span>
+      </div>
+      <div className="text-gray-700">
         Out: {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} ({formatDuration(outboundDuration)})
         {outboundModes.length > 0 && (
           <span className="text-gray-500"> via {outboundModes.join(", ")}</span>
