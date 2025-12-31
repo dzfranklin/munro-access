@@ -9,19 +9,9 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { PreferencesProvider } from "./preferences-context";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
-];
+export const links: Route.LinksFunction = () => [];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -42,16 +32,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <PreferencesProvider>
+      <Outlet />
+    </PreferencesProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
+  let message = "Error";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "Page Not Found" : "Error";
     details =
       error.status === 404
         ? "The requested page could not be found."
@@ -62,14 +56,30 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <div className="max-w-240 mx-auto px-5 py-5">
+      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0 mb-2.5">
+          {message}
+        </h1>
+      </header>
+
+      <div className="bg-gray-50 border border-gray-300 p-5 mb-8">
+        <p className="text-sm text-gray-700 m-0">{details}</p>
+      </div>
+
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
+        <div className="bg-gray-50 border border-gray-300 p-5">
+          <pre className="text-xs overflow-x-auto m-0">
+            <code>{stack}</code>
+          </pre>
+        </div>
       )}
-    </main>
+
+      <nav className="mt-6">
+        <a href="/" className="text-traditional-navy-700 underline text-sm">
+          Return to home page
+        </a>
+      </nav>
+    </div>
   );
 }

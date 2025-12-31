@@ -1,11 +1,16 @@
-import { data } from "react-router";
+import { data, Link } from "react-router";
 import type { Route } from "./+types/munro";
 import { munroMap, targetMap } from "results/parse";
 import type { Target } from "results/schema";
-import RouteNameComponent from "~/RouteNameComponent";
 
 export function meta({ loaderData }: Route.MetaArgs) {
-  return [{ title: loaderData.munro.name }];
+  return [
+    { title: `${loaderData.munro.name} - Munro Access` },
+    {
+      name: "description",
+      content: `Routes to climb ${loaderData.munro.name} by public transport`,
+    },
+  ];
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -34,22 +39,115 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export default function Munro({ loaderData }: Route.ComponentProps) {
   const { munro, targets } = loaderData;
+
   return (
-    <div className="prose max-w-4xl">
-      <h1>{munro.name}</h1>
-      <h2>Route starting locations</h2>
-      <ul>
-        {targets.map((t) => (
-          <li key={t.id}>
-            <a href={`/target/${t.id}`}>{t.description}</a>
-            <ul>
-              {t.routes.map((r) => (
-                <RouteNameComponent key={r.name} route={r} />
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      {/* Navigation */}
+      <nav className="mb-6">
+        <Link
+          to="/"
+          className="text-traditional-navy-700 underline text-sm hover:no-underline"
+        >
+          Back to all routes
+        </Link>
+      </nav>
+
+      {/* Header */}
+      <header className="border-b-[3px] border-traditional-navy-700 pb-4 mb-6">
+        <h1 className="font-serif text-[2rem] font-normal text-traditional-navy-900 m-0">
+          {munro.name}
+        </h1>
+      </header>
+
+      {/* Munro info */}
+      <div className="mb-8">
+        <a
+          href={munro.page}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-traditional-navy-700 underline text-sm"
+        >
+          View on walkhighlands
+        </a>
+      </div>
+
+      {/* Routes section */}
+      <section>
+        <h2 className="font-serif text-2xl font-normal text-traditional-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+          Routes to {munro.name}
+        </h2>
+
+        {targets.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-300 p-5 text-sm text-gray-600">
+            No routes found for this munro.
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {targets.map((target) => (
+              <div
+                key={target.id}
+                className="border-b border-gray-200 pb-6"
+              >
+                <h3 className="font-serif text-lg font-bold text-traditional-navy-900 mb-3">
+                  <Link
+                    to={`/target/${target.id}`}
+                    className="text-traditional-navy-700 underline"
+                  >
+                    {target.description}
+                  </Link>
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">{target.name}</p>
+
+                <div className="pl-4">
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">
+                    Routes from this location:
+                  </h4>
+                  <ul className="list-none m-0 p-0 space-y-2">
+                    {target.routes.map((route) => (
+                      <li key={route.page}>
+                        <a
+                          href={route.page}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-traditional-navy-700 underline text-sm"
+                        >
+                          {route.name}
+                        </a>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {route.stats.distanceKm}km • {route.stats.timeHours.min}-
+                          {route.stats.timeHours.max}h • {route.stats.ascentM}m ascent
+                        </div>
+                        {route.munros.length > 1 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Also includes:{" "}
+                            {route.munros
+                              .filter((m) => m.number !== munro.number)
+                              .map((m, idx, arr) => (
+                                <span key={m.number}>
+                                  <Link
+                                    to={`/munro/${m.number}-${m.name
+                                      .toLowerCase()
+                                      .replace(/\s+/g, "-")
+                                      .replace(/[^a-z0-9-]/g, "")}`}
+                                    className="text-traditional-green-600 underline"
+                                  >
+                                    {m.name}
+                                  </Link>
+                                  {idx < arr.length - 1 && ", "}
+                                </span>
+                              ))}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+    </>
   );
 }

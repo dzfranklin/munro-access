@@ -2,16 +2,33 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans:
-    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Traditional serif font for headings */
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  /* Classic sans-serif for body text */
+  --font-sans: Verdana, Geneva, sans-serif;
+
+  /* Traditional color palette - navy blues and muted grays */
+  --color-traditional-navy-50: #f0f4f8;
+  --color-traditional-navy-100: #d9e2ec;
+  --color-traditional-navy-200: #bcccdc;
+  --color-traditional-navy-300: #9fb3c8;
+  --color-traditional-navy-400: #829ab1;
+  --color-traditional-navy-500: #627d98;
+  --color-traditional-navy-600: #486581;
+  --color-traditional-navy-700: #334e68;
+  --color-traditional-navy-800: #243b53;
+  --color-traditional-navy-900: #1a365d;
+  --color-traditional-navy-950: #102a43;
+
+  /* Muted greens for links */
+  --color-traditional-green-600: #2f855a;
+  --color-traditional-green-700: #276749;
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
-
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+  @apply bg-white;
+  font-family: var(--font-sans);
+  color: #2d3748;
 }

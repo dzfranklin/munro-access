@@ -63,6 +63,18 @@ function parseResults(): Map<string, Result> {
 }
 export const resultMap = parseResults();
 
+export function getSampleDates(): string[] {
+  const dates = new Set<string>();
+  for (const result of resultMap.values()) {
+    for (const dayItineraries of Object.values(result.itineraries)) {
+      for (const itinerary of dayItineraries.outbounds) {
+        dates.add(itinerary.date);
+      }
+    }
+  }
+  return Array.from(dates).sort();
+}
+
 if (import.meta.main) {
   console.log("Stats\n-------");
   console.log("starts: " + startMap.size);

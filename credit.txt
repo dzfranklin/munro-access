@@ -1,11 +1,12 @@
-opendata.nationalrail.co.uk
-I agree to attribute NRE using the Brand Guidelines & Logos provided:
-https://web.archive.org/web/20171216155936/http://www.nationalrail.co.uk/static/documents/Brand_Guidelines_Logos.zip
+Route data from [walkhighlands](http://walkhighlands.co.uk/). Data will be outdated,
+any errors introduced are mine. My goal is to help you find interesting routes to
+look into further on [walkhighlands.co.uk](http://walkhighlands.co.uk/).
 
-TODO bus open data
+Rail data from [National Rail Enquiries](https://wiki.openraildata.com/index.php/About_the_National_Rail_Feeds)
+Must include public/NRE_Powered_logo.png
 
-TODO os terrain 50
+Bus data from [bus-data.dft.gov.uk](https://www.bus-data.dft.gov.uk/)
 
-TODO OSM
+Streets data from [OpenStreetMap](https://download.geofabrik.de/europe/united-kingdom/scotland.html)
 
-TODO walkhighlands - also note data is outdated, may be modified, refer to current
+Elevation data from [Ordnance Survey](https://www.ordnancesurvey.co.uk/products/os-terrain-50)

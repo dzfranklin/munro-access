@@ -88,6 +88,8 @@ export const itinerarySchema = z.object({
   legs: z.array(legSchema),
 });
 
+export type Itinerary = z.infer<typeof itinerarySchema>;
+
 export const dayItinerariesSchema = z.object({
   outbounds: z.array(itinerarySchema),
   returns: z.array(itinerarySchema),

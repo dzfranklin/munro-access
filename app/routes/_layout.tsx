@@ -1,0 +1,20 @@
+import { Outlet } from "react-router";
+import type { Route } from "./+types/_layout";
+import { getSampleDates } from "results/parse";
+import { formatSamplePeriod } from "results/format-dates";
+import { Footer } from "~/components/Footer";
+
+export async function loader({}: Route.LoaderArgs) {
+  const sampleDates = getSampleDates();
+  const samplePeriod = formatSamplePeriod(sampleDates);
+  return { samplePeriod };
+}
+
+export default function Layout({ loaderData }: Route.ComponentProps) {
+  return (
+    <div className="max-w-240 mx-auto px-5 py-5">
+      <Outlet />
+      <Footer samplePeriod={loaderData.samplePeriod} />
+    </div>
+  );
+}
