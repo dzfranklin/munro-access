@@ -5,7 +5,6 @@ import {
   getDaysBetween,
   calculateDuration,
   isOvernightJourney,
-  parseTime,
 } from "../app/utils/format";
 
 // Preferences that affect itinerary scoring/ranking
@@ -118,11 +117,11 @@ export function scoreItineraryPair(
     finishTime: 0,
   };
 
-  const departureTime = parseTime(outbound.startTime);
-  let arrivalTime = parseTime(outbound.endTime);
+  const departureTime = outbound.startTimeHours;
+  let arrivalTime = outbound.endTimeHours;
 
   // Handle overnight journeys - check if the journey crosses midnight
-  if (isOvernightJourney(outbound)) {
+  if (outbound.isOvernight) {
     arrivalTime += 24;
   }
 
@@ -205,15 +204,15 @@ export function scoreItineraryPair(
     };
   }
 
-  let returnDepartureTime = parseTime(returnItin.startTime);
-  let returnArrivalTime = parseTime(returnItin.endTime);
+  let returnDepartureTime = returnItin.startTimeHours;
+  let returnArrivalTime = returnItin.endTimeHours;
 
   // Adjust return times based on actual date differences
   const daysBetween = getDaysBetween(outbound, returnItin);
   returnDepartureTime += daysBetween * 24;
 
   // Handle overnight return journey (within the return journey itself)
-  if (isOvernightJourney(returnItin)) {
+  if (returnItin.isOvernight) {
     returnArrivalTime += 24;
   }
   // Also add the days between if not an overnight journey
@@ -331,14 +330,17 @@ export function selectBestItineraries(
       const score = scoreItineraryPair(outbound, returnItin, route, prefs);
       if (score.feasible) {
         // Check if this return offers redundancy
-        const arrivalTime = parseTime(outbound.endTime);
+        let arrivalTime = outbound.endTimeHours;
+        if (outbound.isOvernight) {
+          arrivalTime += 24;
+        }
         const routeTimeMax = route.stats.timeHours.max / prefs.walkingSpeed;
         const hikeEndTime = arrivalTime + routeTimeMax;
 
         // Count how many return options exist within 2 hours of this one
-        const returnTime = parseTime(returnItin.startTime);
+        const returnTime = returnItin.startTimeHours;
         const alternativeReturns = returns.filter((r) => {
-          const rt = parseTime(r.startTime);
+          const rt = r.startTimeHours;
           return (
             rt > hikeEndTime + prefs.returnBuffer &&
             Math.abs(rt - returnTime) <= 2

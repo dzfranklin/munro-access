@@ -44,6 +44,11 @@ export function parseTime(timeStr: string): number {
   return hours + minutes / 60;
 }
 
+// Fast version using precomputed values
+export function parseTimeFast(itinerary: Itinerary, field: 'start' | 'end'): number {
+  return field === 'start' ? itinerary._startTimeHours : itinerary._endTimeHours;
+}
+
 // Date formatting and calculations
 
 export function formatSamplePeriod(dates: string[]): string {
@@ -77,9 +82,7 @@ export function isNextDay(outbound: Itinerary, returnItin: Itinerary): boolean {
 }
 
 export function getDaysBetween(outbound: Itinerary, returnItin: Itinerary): number {
-  const outboundDate = new Date(outbound.date);
-  const returnDate = new Date(returnItin.date);
-  const diffMs = returnDate.getTime() - outboundDate.getTime();
+  const diffMs = returnItin.dateMs - outbound.dateMs;
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
@@ -96,7 +99,5 @@ export function calculateDuration(
 }
 
 export function isOvernightJourney(itinerary: Itinerary): boolean {
-  const start = new Date(`${itinerary.date}T${itinerary.startTime}`);
-  const end = new Date(`${itinerary.date}T${itinerary.endTime}`);
-  return end < start;
+  return itinerary.isOvernight;
 }

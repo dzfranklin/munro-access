@@ -88,7 +88,14 @@ export const itinerarySchema = z.object({
   legs: z.array(legSchema),
 });
 
-export type Itinerary = z.infer<typeof itinerarySchema>;
+// Enhanced runtime type with parsed numeric values
+export interface Itinerary extends z.infer<typeof itinerarySchema> {
+  // Numeric representations for fast computation
+  startTimeHours: number;  // e.g., 9.5 for "09:30:00"
+  endTimeHours: number;    // e.g., 11.75 for "11:45:00"
+  isOvernight: boolean;    // true if journey crosses midnight
+  dateMs: number;          // milliseconds since epoch for date comparison
+}
 
 export const dayItinerariesSchema = z.object({
   outbounds: z.array(itinerarySchema),

@@ -4,6 +4,7 @@ import {
   resultSchema,
   startsSchema,
   targetsWrapperSchema,
+  type Itinerary,
   type Munro,
   type Result,
   type RouteMunro,
@@ -11,6 +12,26 @@ import {
   type Target,
 } from "./schema";
 import { slugify } from "../app/utils/format";
+
+function parseTime(timeStr: string): number {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours + minutes / 60;
+}
+
+function enhanceItinerary(itin: Omit<Itinerary, 'startTimeHours' | 'endTimeHours' | 'isOvernight' | 'dateMs'>): Itinerary {
+  const startTimeHours = parseTime(itin.startTime);
+  const endTimeHours = parseTime(itin.endTime);
+  const dateMs = new Date(itin.date).getTime();
+  const isOvernight = endTimeHours < startTimeHours;
+  
+  return {
+    ...itin,
+    startTimeHours,
+    endTimeHours,
+    isOvernight,
+    dateMs,
+  };
+}
 
 function parseStarts(): Map<string, Start> {
   const contents = fs.readFileSync("starts.json", "utf-8");
@@ -57,7 +78,17 @@ function parseResults(): Map<string, Result> {
       console.error(line);
       throw new Error("parse error");
     }
-    out.set(resultID(parsed.data), parsed.data);
+    
+    // Enhance all itineraries with precomputed values
+    const result = parsed.data;
+    for (const [day, dayItins] of Object.entries(result.itineraries)) {
+      result.itineraries[day as keyof typeof result.itineraries] = {
+        outbounds: dayItins.outbounds.map(enhanceItinerary),
+        returns: dayItins.returns.map(enhanceItinerary),
+      };
+    }
+    
+    out.set(resultID(result), result);
   }
   return out;
 }

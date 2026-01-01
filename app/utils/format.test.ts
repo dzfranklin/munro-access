@@ -96,8 +96,8 @@ describe("format utils", () => {
 
   describe("getDaysBetween", () => {
     it("calculates days between itineraries", () => {
-      const outbound = { date: "2026-02-14" } as any;
-      const returnItin = { date: "2026-02-15" } as any;
+      const outbound = { date: "2026-02-14", dateMs: new Date("2026-02-14").getTime() } as any;
+      const returnItin = { date: "2026-02-15", dateMs: new Date("2026-02-15").getTime() } as any;
       expect(getDaysBetween(outbound, returnItin)).toBe(1);
     });
   });
@@ -116,12 +116,12 @@ describe("format utils", () => {
 
   describe("isOvernightJourney", () => {
     it("returns true when end time is before start time", () => {
-      const itin = { date: "2026-02-14", startTime: "23:00", endTime: "02:00" } as any;
+      const itin = { date: "2026-02-14", startTime: "23:00", endTime: "02:00", isOvernight: true } as any;
       expect(isOvernightJourney(itin)).toBe(true);
     });
 
     it("returns false for normal same-day journey", () => {
-      const itin = { date: "2026-02-14", startTime: "09:00", endTime: "15:00" } as any;
+      const itin = { date: "2026-02-14", startTime: "09:00", endTime: "15:00", isOvernight: false } as any;
       expect(isOvernightJourney(itin)).toBe(false);
     });
   });
