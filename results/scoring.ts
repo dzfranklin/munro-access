@@ -95,28 +95,18 @@ interface ItineraryScore {
     totalDuration: number;
     finishTime: number;
   };
-  feasible: boolean;
-  reason?: string;
 }
 
 /**
  * Score an outbound + return itinerary pair
- * Returns raw score (0-1) before percentile normalization
+ * Returns score object if feasible, null if infeasible
  */
 export function scoreItineraryPair(
   outbound: Itinerary,
   returnItin: Itinerary | null,
   route: Route,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
-): ItineraryScore {
-  const components = {
-    departureTime: 0,
-    hikeDuration: 0,
-    returnOptions: 0,
-    totalDuration: 0,
-    finishTime: 0,
-  };
-
+): ItineraryScore | null {
   const departureTime = outbound.startTimeHours;
   let arrivalTime = outbound.endTimeHours;
 
@@ -127,13 +117,7 @@ export function scoreItineraryPair(
 
   // Check if departure is acceptable
   if (departureTime < prefs.earliestDeparture) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: `Departure too early (${outbound.startTime})`,
-    };
+    return null;
   }
 
   // Check cycling preference
@@ -142,26 +126,14 @@ export function scoreItineraryPair(
       outbound.modes.includes("BICYCLE") ||
       (returnItin?.modes.includes("BICYCLE") ?? false);
     if (usesBike) {
-      return {
-        rawScore: 0,
-        percentile: 0,
-        components,
-        feasible: false,
-        reason: "Cycling not allowed by preferences",
-      };
+      return null;
     }
   }
 
   // Reject overnight arrivals (arrivals between midnight and earliest acceptable departure)
   const arrivalTimeOfDay = arrivalTime % 24;
   if (arrivalTimeOfDay < prefs.earliestDeparture) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: `Arrival too early (${outbound.endTime})`,
-    };
+    return null;
   }
 
   // Calculate adjusted hike duration based on walking speed
@@ -170,24 +142,12 @@ export function scoreItineraryPair(
 
   // Hard cutoff - reject if hike would finish after hard latest end time
   if (hikeEndTime > prefs.hardLatestEnd) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: `Hike would finish too late (estimated ${hikeEndTime.toFixed(1)}h)`,
-    };
+    return null;
   }
 
   // If no return specified, can't evaluate return timing
   if (!returnItin) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: "No return itinerary",
-    };
+    return null;
   }
 
   // Can't return via bike if you didn't leave via bike
@@ -195,13 +155,7 @@ export function scoreItineraryPair(
   const returnUsesBike = returnItin.modes.includes("BICYCLE");
 
   if (returnUsesBike && !outboundUsesBike) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: "Cannot return via bike without taking bike on outbound journey",
-    };
+    return null;
   }
 
   let returnDepartureTime = returnItin.startTimeHours;
@@ -221,16 +175,17 @@ export function scoreItineraryPair(
   // Check if there's enough buffer time before return
   const bufferTime = returnDepartureTime - hikeEndTime;
   if (bufferTime < prefs.returnBuffer) {
-    return {
-      rawScore: 0,
-      percentile: 0,
-      components,
-      feasible: false,
-      reason: `Insufficient buffer before return (${bufferTime.toFixed(1)}h < ${prefs.returnBuffer}h)`,
-    };
+    return null;
   }
 
   // Now calculate scoring components (all 0-1, higher is better)
+  const components = {
+    departureTime: 0,
+    hikeDuration: 0,
+    returnOptions: 0,
+    totalDuration: 0,
+    finishTime: 0,
+  };
 
   // 1. Departure time score (penalize very early starts, slight preference for 8am+)
   // 8am+ = 1.0, 7am = 0.9, earlier = linear penalty down to earliestDeparture
@@ -300,7 +255,6 @@ export function scoreItineraryPair(
     rawScore: finalScore,
     percentile: 0, // Will be calculated later
     components,
-    feasible: true,
   };
 }
 
@@ -328,7 +282,7 @@ export function selectBestItineraries(
   for (const outbound of outbounds) {
     for (const returnItin of returns) {
       const score = scoreItineraryPair(outbound, returnItin, route, prefs);
-      if (score.feasible) {
+      if (score) {
         // Check if this return offers redundancy
         let arrivalTime = outbound.endTimeHours;
         if (outbound.isOvernight) {

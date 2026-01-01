@@ -65,9 +65,9 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(true);
-    expect(result.rawScore).toBeGreaterThan(0);
-    expect(result.components).toBeDefined();
+    expect(result).not.toBeNull();
+    expect(result!.rawScore).toBeGreaterThan(0);
+    expect(result!.components).toBeDefined();
   });
 
   it("should reject if departure is too early", () => {
@@ -84,8 +84,8 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(false);
-    expect(result.reason).toContain("Departure too early");
+    expect(result).toBeNull();
+    
   });
 
   it("should reject if arrival is too early (overnight arrival)", () => {
@@ -102,8 +102,8 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(false);
-    expect(result.reason).toContain("Arrival too early");
+    expect(result).toBeNull();
+    
   });
 
   it("should reject if hike finishes too late", () => {
@@ -120,8 +120,8 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(false);
-    expect(result.reason).toContain("Hike would finish too late");
+    expect(result).toBeNull();
+    
   });
 
   it("should reject if return buffer is insufficient", () => {
@@ -138,8 +138,8 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(false);
-    expect(result.reason).toContain("Insufficient buffer");
+    expect(result).toBeNull();
+    
   });
 
   it("should reject if returning by bike without outbound bike", () => {
@@ -149,8 +149,8 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(false);
-    expect(result.reason).toContain("Cannot return via bike");
+    expect(result).toBeNull();
+    
   });
 
   it("should allow returning by bike if outbound has bike", () => {
@@ -168,7 +168,7 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(true);
+    expect(result).not.toBeNull();
   });
 
   it("should handle overnight trips correctly", () => {
@@ -188,7 +188,7 @@ describe("scoreItineraryPair", () => {
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
-    expect(result.feasible).toBe(true);
+    expect(result).not.toBeNull();
     // Should have overnight penalty applied
     // We can't easily assert the exact score but we can check if it's less than a same-day equivalent
     // actually, let's just ensure it computes.
