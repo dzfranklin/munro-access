@@ -13,6 +13,10 @@ export default {
       (t) => `/target/${t.id}`
     );
 
-    return [...getStaticPaths(), ...munroRoutes, ...targetRoutes];
+    const allItinerariesRoutes = Array.from(targetMap.values()).map(
+      (t) => `/target/${t.id}/all-itineraries`
+    );
+
+    return [...getStaticPaths(), ...munroRoutes, ...targetRoutes, ...allItinerariesRoutes];
   },
 } satisfies Config;

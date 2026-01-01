@@ -1,6 +1,7 @@
 import type { Route } from "./+types/targets";
 import { targetMap as parsedTargets } from "results/parse.server";
 import { Link } from "react-router";
+import { pluralize } from "~/text-utils";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -79,8 +80,7 @@ export default function Targets({ loaderData }: Route.ComponentProps) {
                   </Link>
                 </td>
                 <td className="py-3 px-2.5 align-top text-gray-600">
-                  {target.routes.length} route
-                  {target.routes.length !== 1 ? "s" : ""}
+                  {pluralize(target.routes.length, 'route')}
                 </td>
               </tr>
             ))}

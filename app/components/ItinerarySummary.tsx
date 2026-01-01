@@ -1,44 +1,13 @@
 import type { Itinerary } from "results/schema";
 import { getPercentileClasses } from "~/itineraryQuality";
+import { formatDuration, parseTime } from "~/time-utils";
+import { getUniqueModes } from "~/mode-utils";
 
 interface ItinerarySummaryProps {
   outbound: Itinerary;
   return: Itinerary;
   day: string;
   score?: number;
-}
-
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours === 0) return `${mins}m`;
-  if (mins === 0) return `${hours}h`;
-  return `${hours}h ${mins}m`;
-}
-
-function parseTime(timeStr: string): number {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return hours + minutes / 60;
-}
-
-function getModeAbbrev(mode: string): string {
-  const abbrevs: Record<string, string> = {
-    RAIL: "Train",
-    BUS: "Bus",
-    COACH: "Coach",
-    FERRY: "Ferry",
-    BICYCLE: "Bike",
-    WALK: "Walk",
-    TRAM: "Tram",
-  };
-  return abbrevs[mode] || mode;
-}
-
-function getUniqueModes(itinerary: Itinerary): string[] {
-  const modes = new Set(itinerary.modes);
-  // Remove WALK as it's typically not interesting
-  modes.delete("WALK");
-  return Array.from(modes).map(getModeAbbrev);
 }
 
 export function ItinerarySummary({ outbound, return: returnItin, day, score }: ItinerarySummaryProps) {
@@ -58,8 +27,8 @@ export function ItinerarySummary({ outbound, return: returnItin, day, score }: I
   const timeAtTarget = Math.round((returnStart - outboundEnd) * 60);
 
   // Get unique transport modes
-  const outboundModes = getUniqueModes(outbound);
-  const returnModes = getUniqueModes(returnItin);
+  const outboundModes = getUniqueModes(outbound.modes);
+  const returnModes = getUniqueModes(returnItin.modes);
 
   // Get percentile label and class if score is provided
   let percentileLabel = null;
@@ -73,7 +42,7 @@ export function ItinerarySummary({ outbound, return: returnItin, day, score }: I
   return (
     <div className="text-[13px] leading-relaxed">
       <div className="text-gray-700">
-        <span className="font-medium">Out:</span> {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} ({formatDuration(outboundDuration)})
+        <span className="font-medium">{day}:</span> {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} ({formatDuration(outboundDuration)})
         {outboundModes.length > 0 && (
           <span className="text-gray-500"> via {outboundModes.join(", ")}</span>
         )}

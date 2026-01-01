@@ -52,19 +52,37 @@ traveling
 
 ```
 results/
-  scoring.ts           - Scoring algorithm and preferences
-  best-itineraries.ts  - Logic to find top options
-  schema.ts            - Data types
-  parse.ts             - Load data from JSON files
+  scoring.ts            - Scoring algorithm and preferences
+  best-itineraries.ts   - Logic to find top options
+  itinerary-utils.ts    - Shared utilities for filtering returns
+  schema.ts             - Data types
+  parse.ts              - Load data from JSON files
 
 app/
+  time-utils.ts         - Time utilities: formatDuration(), parseTime()
   routes/
-    home.tsx           - Landing page with top routes
-    target.tsx         - Trailhead pages: routes first, then transport options
-    munro.tsx          - Individual munro pages
+    home.tsx            - Landing page with top routes
+    target.tsx          - Trailhead pages: routes first, then transport options
+    munro.tsx           - Individual munro pages
   components/
     ItineraryDisplay.tsx - Shows journey details
+    TimelineModal.tsx    - Interactive timeline view
 ```
+
+### Utility Functions
+
+**Time utilities** (`app/time-utils.ts`):
+- `formatDuration(minutes: number): string` - Formats minutes as "Xh Ym" (e.g.,
+  "2h 43m")
+- `parseTime(timeStr: string): number` - Parses "HH:MM" to decimal hours (e.g.,
+  "09:30" → 9.5)
+
+**Itinerary utilities** (`results/itinerary-utils.ts`):
+- `getViableReturns(outbound, allReturns, route)` - Filters returns allowing
+  ≥50% of min route time
+
+⚠️ **Always use existing utilities** - Don't reimplement parseTime or
+formatDuration!
 
 ## Style Guide
 
@@ -207,4 +225,4 @@ clean and trustworthy, avoiding modern trendy design patterns.
 
 ## Development Process
 
-Use chrome-devtools mcp to manually test changes
+After changes manually test using the chrome-devtools mcp. Exercise edge cases.

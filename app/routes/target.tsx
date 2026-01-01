@@ -120,9 +120,9 @@ export default function Target({ loaderData }: Route.ComponentProps) {
   return (
     <>
       {/* Navigation */}
-      <nav className="mb-6">
+      <nav className="mb-6 flex justify-between items-center">
         <Link
-          to="/"
+          to={urlStart ? `/?start=${urlStart}` : "/"}
           className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
           Back to all routes
@@ -210,8 +210,18 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
       {/* Public Transport Options */}
       <section>
-        <h2 className="font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
-          Public Transport to {target.name}
+        <h2 className="flex justify-between items-baseline font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
+          Public Transport to {target.name}{" "}
+          <Link
+            to={
+              urlStart
+                ? `/target/${target.id}/all-itineraries?start=${urlStart}`
+                : `/target/${target.id}/all-itineraries`
+            }
+            className="text-theme-navy-700 underline text-sm hover:no-underline"
+          >
+            View all transport options
+          </Link>
         </h2>
 
         {!bestItineraries || bestItineraries.bestOptions.length === 0 ? (
@@ -242,7 +252,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
             )}
 
             {/* Itineraries for selected start location */}
-            <div 
+            <div
               className="space-y-6 transition-opacity duration-75"
               style={{ opacity: isTransitioning ? 0 : 1 }}
             >
@@ -270,12 +280,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                 }
 
                 // Sort days
-                const dayOrder = [
-                  "WEDNESDAY",
-                  "FRIDAY",
-                  "SATURDAY",
-                  "SUNDAY",
-                ];
+                const dayOrder = ["WEDNESDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
                 const sortedDays = Array.from(optionsByDay.keys()).sort(
                   (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
                 );
@@ -311,8 +316,13 @@ export default function Target({ loaderData }: Route.ComponentProps) {
         onClose={() => setTimelineModalOpen(false)}
         options={timelineOptions}
         day={timelineDay || ""}
-        startName={selectedStart ? (starts.find(s => s.id === selectedStart)?.name || selectedStart) : ""}
+        startName={
+          selectedStart
+            ? starts.find((s) => s.id === selectedStart)?.name || selectedStart
+            : ""
+        }
         targetName={target.name}
+        routes={bestItineraries?.routes || []}
       />
     </>
   );

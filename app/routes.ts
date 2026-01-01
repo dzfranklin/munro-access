@@ -6,6 +6,7 @@ export default [
     route("munros", "routes/munros.tsx"),
     route("munro/:slug", "routes/munro.tsx"),
     route("target/:id", "routes/target.tsx"),
+    route("target/:id/all-itineraries", "routes/target.$id.all-itineraries.tsx"),
     route("targets", "routes/targets.tsx"),
   ]),
 ] satisfies RouteConfig;

@@ -2,6 +2,9 @@ import type { Itinerary } from "results/schema";
 import { ItinerarySummary } from "./ItinerarySummary";
 import { ItineraryDisplay } from "./ItineraryDisplay";
 import { getPercentileClasses } from "~/itineraryQuality";
+import { formatDuration, parseTime } from "~/time-utils";
+import { getUniqueModes } from "~/mode-utils";
+import { pluralize } from "~/text-utils";
 import React from "react";
 
 interface ItineraryOption {
@@ -22,40 +25,8 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
   const dayLabel = day.charAt(0) + day.slice(1).toLowerCase();
   const displayOptions = showAll ? options : options.slice(0, 4);
 
-  function parseTime(timeStr: string): number {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    return hours + minutes / 60;
-  }
-
-  function formatDuration(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours === 0) return `${mins}m`;
-    if (mins === 0) return `${hours}h`;
-    return `${hours}h ${mins}m`;
-  }
-
-  function getUniqueModes(itinerary: { modes: string[] }): string[] {
-    const modes = new Set(itinerary.modes);
-    modes.delete("WALK");
-    const abbrevs: Record<string, string> = {
-      RAIL: "Train",
-      BUS: "Bus",
-      COACH: "Coach",
-      FERRY: "Ferry",
-      BICYCLE: "Bike",
-      WALK: "Walk",
-      TRAM: "Tram",
-    };
-    return Array.from(modes).map((m: string) => abbrevs[m] || m);
-  }
-
   return (
-    <div className="border-b border-gray-200 pb-6">
-      <h5 className="font-bold text-sm text-gray-800 mb-3">
-        {dayLabel}
-      </h5>
-
+    <div className="pb-6">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b-2 border-gray-300">
@@ -73,7 +44,8 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
             if (outboundEnd < outboundStart) outboundEnd += 24;
             
             let returnStart = parseTime(option.return.startTime);
-            if (returnStart < outboundEnd) returnStart += 24;
+            const isNextDayReturn = returnStart < outboundEnd;
+            if (isNextDayReturn) returnStart += 24;
             
             const timeAtTarget = Math.round((returnStart - outboundEnd) * 60);
 
@@ -141,6 +113,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                 <td className="py-3 pr-3 align-top text-[13px]">
                   <div className="text-gray-700">
                     {option.return.startTime.slice(0, 5)}–{option.return.endTime.slice(0, 5)}
+                    {isNextDayReturn && <span className="text-xs text-gray-500 ml-1">+1 day</span>}
                   </div>
                   <div className="text-xs text-gray-500">
                     {formatDuration(returnDuration)}
@@ -172,7 +145,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
           onClick={() => setShowAll(!showAll)}
           className="text-theme-navy-700 underline text-xs hover:no-underline mt-3"
         >
-          {showAll ? `Show top 4 only` : `Show all ${options.length} options`}
+          {showAll ? `Show top 4 only` : `Show ${pluralize(options.length - 4, 'more option')}`}
         </button>
       )}
     </div>

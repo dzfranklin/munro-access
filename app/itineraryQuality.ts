@@ -21,11 +21,17 @@ export function getPercentileLevel(percentile: number): PercentileLevel {
 }
 
 /**
- * Format percentile as "Top X%" label
+ * Format percentile as "Top X%" or "Bottom X%" label
  */
 export function formatPercentileLabel(percentile: number): string {
   const percent = Math.round(percentile * 100);
-  return `Top ${100 - percent}%`;
+  const topPercent = 100 - percent;
+  
+  // Use "Bottom" for lower half, "Top" for upper half
+  if (topPercent > 50) {
+    return `Bottom ${topPercent}%`;
+  }
+  return `Top ${topPercent}%`;
 }
 
 /**
