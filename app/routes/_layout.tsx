@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 import type { Route } from "./+types/_layout";
-import { getSampleDates } from "results/parse";
+import { getSampleDates } from "results/parse.server";
 import { formatSamplePeriod } from "results/format-dates";
 import { Footer } from "~/components/Footer";
 

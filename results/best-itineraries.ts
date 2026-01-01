@@ -1,4 +1,4 @@
-import { resultMap, targetMap, munroMap } from "./parse";
+import { resultMap, targetMap, munroMap } from "./parse.server";
 import { selectBestItineraries, calculatePercentiles, DEFAULT_RANKING_PREFERENCES, type RankingPreferences } from "./scoring";
 import type { Itinerary, Route, Munro } from "./schema";
 

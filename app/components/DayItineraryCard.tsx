@@ -35,7 +35,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
     return `${hours}h ${mins}m`;
   }
 
-  function getUniqueModes(itinerary: any): string[] {
+  function getUniqueModes(itinerary: { modes: string[] }): string[] {
     const modes = new Set(itinerary.modes);
     modes.delete("WALK");
     const abbrevs: Record<string, string> = {
@@ -47,7 +47,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
       WALK: "Walk",
       TRAM: "Tram",
     };
-    return Array.from(modes).map(m => abbrevs[m] || m);
+    return Array.from(modes).map((m: string) => abbrevs[m] || m);
   }
 
   return (

@@ -1,4 +1,4 @@
-import { targetMap, startMap } from "results/parse";
+import { targetMap, startMap } from "results/parse.server";
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
@@ -103,13 +103,15 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
   // Open timeline modal for a specific day
   const openTimeline = (day: string) => {
+    console.log('openTimeline called with day:', day);
     setTimelineDay(day);
     setTimelineModalOpen(true);
+    console.log('State set - modalOpen should be true');
   };
 
   // Get options for selected start and timeline day
   const timelineOptions =
-    timelineModalOpen && bestItineraries && selectedStart && timelineDay
+    bestItineraries && selectedStart && timelineDay
       ? bestItineraries.bestOptions.filter(
           (opt) => opt.startId === selectedStart && opt.day === timelineDay
         )
@@ -279,17 +281,39 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                 );
 
                 return sortedDays.map((day) => (
-                  <DayItineraryCard
-                    key={day}
-                    day={day}
-                    options={optionsByDay.get(day)!}
-                  />
+                  <div key={day}>
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-sans text-base font-bold text-theme-navy-900">
+                        {day.charAt(0) + day.slice(1).toLowerCase()}
+                      </h3>
+                      <button
+                        onClick={() => openTimeline(day)}
+                        className="text-[13px] text-theme-navy-700 underline hover:no-underline"
+                      >
+                        View Timeline
+                      </button>
+                    </div>
+                    <DayItineraryCard
+                      day={day}
+                      options={optionsByDay.get(day)!}
+                    />
+                  </div>
                 ));
               })()}
             </div>
           </div>
         )}
       </section>
+
+      {/* Timeline Modal */}
+      <TimelineModal
+        isOpen={timelineModalOpen}
+        onClose={() => setTimelineModalOpen(false)}
+        options={timelineOptions}
+        day={timelineDay || ""}
+        startName={selectedStart ? (starts.find(s => s.id === selectedStart)?.name || selectedStart) : ""}
+        targetName={target.name}
+      />
     </>
   );
 }

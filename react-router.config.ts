@@ -1,6 +1,6 @@
 import type { Config } from "@react-router/dev/config";
 
-import { startMap, targetMap, munroMap, resultMap } from "./results/parse";
+import { startMap, targetMap, munroMap, resultMap } from "./results/parse.server";
 
 export default {
   ssr: false,

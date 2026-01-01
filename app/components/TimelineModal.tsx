@@ -122,21 +122,21 @@ export function TimelineModal({
             </h3>
 
             {/* Timeline axis */}
-            <div className="relative mb-2 h-6">
-              <div className="absolute inset-0 flex">
-                {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => {
-                  const hour = START_HOUR + i;
-                  return (
-                    <div
-                      key={hour}
-                      className="flex-1 text-[11px] text-gray-500 border-l border-gray-300"
-                      style={{ textAlign: "left", paddingLeft: "2px" }}
-                    >
-                      {hour}:00
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="relative mb-2 h-6 border-b border-gray-300">
+              {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => {
+                const hour = START_HOUR + i;
+                const position = (i / TOTAL_HOURS) * 100;
+                return (
+                  <div
+                    key={hour}
+                    className="absolute text-[11px] text-gray-500"
+                    style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+                  >
+                    <div className="border-l border-gray-300 h-2 mb-1" style={{ marginLeft: '50%' }} />
+                    {hour}:00
+                  </div>
+                );
+              })}
             </div>
 
             {/* Outbound timeline bars */}
@@ -182,21 +182,21 @@ export function TimelineModal({
               </h3>
 
               {/* Timeline axis */}
-              <div className="relative mb-2 h-6">
-                <div className="absolute inset-0 flex">
-                  {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => {
-                    const hour = START_HOUR + i;
-                    return (
-                      <div
-                        key={hour}
-                        className="flex-1 text-[11px] text-gray-500 border-l border-gray-300"
-                        style={{ textAlign: "left", paddingLeft: "2px" }}
-                      >
-                        {hour}:00
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="relative mb-2 h-6 border-b border-gray-300">
+                {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => {
+                  const hour = START_HOUR + i;
+                  const position = (i / TOTAL_HOURS) * 100;
+                  return (
+                    <div
+                      key={hour}
+                      className="absolute text-[11px] text-gray-500"
+                      style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+                    >
+                      <div className="border-l border-gray-300 h-2 mb-1" style={{ marginLeft: '50%' }} />
+                      {hour}:00
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Return timeline bars */}
@@ -212,7 +212,7 @@ export function TimelineModal({
                       className="relative w-full h-12 border-2 border-gray-300 bg-gray-50"
                     >
                       <div
-                        className="absolute h-full bg-traditional-green-600"
+                        className="absolute h-full bg-theme-green-600"
                         style={style}
                       />
                       <div className="absolute inset-0 flex items-center justify-between px-2 text-[13px]">
@@ -237,14 +237,14 @@ export function TimelineModal({
                 <div className="space-y-6">
                   <div>
                     <div className="text-sm font-bold text-gray-700 mb-2">Outbound</div>
-                    <ItineraryDisplay itinerary={selectedOutbound} />
+                    <ItineraryDisplay itinerary={selectedOutbound} type="outbound" />
                   </div>
                   {compatibleReturns.length > 0 && (
                     <div>
                       <div className="text-sm font-bold text-gray-700 mb-2">
                         First Return Option
                       </div>
-                      <ItineraryDisplay itinerary={compatibleReturns[0]} />
+                      <ItineraryDisplay itinerary={compatibleReturns[0]} type="return" />
                     </div>
                   )}
                 </div>

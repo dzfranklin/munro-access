@@ -3,7 +3,7 @@ import { getTopTargetsPerStart } from "results/best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams } from "react-router";
-import { getSampleDates, startMap, munroMap, targetMap } from "results/parse";
+import { getSampleDates, startMap, munroMap, targetMap } from "results/parse.server";
 import { formatSamplePeriod } from "results/format-dates";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
@@ -311,7 +311,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 </thead>
                 <tbody>
                   {paginatedTargets.map((targetData, idx) => {
-                    if (targetData.displayOptions.length === 0) return null;
+                    if (
+                      !targetData.displayOptions ||
+                      targetData.displayOptions.length === 0
+                    )
+                      return null;
 
                     return (
                       <tr
