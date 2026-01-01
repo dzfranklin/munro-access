@@ -1,4 +1,11 @@
-import { targetMap, startMap, munroMap, resultMap } from "results/parse.server";
+import {
+  targetMap,
+  startMap,
+  munroMap,
+  resultMap,
+  targetCacheForDefaultPrefs,
+  percentileMapForDefaultPrefs,
+} from "results/parse.server";
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
@@ -37,7 +44,10 @@ export async function loader({ params }: Route.LoaderArgs) {
     resultMap,
     targetMap,
     munroMap,
-    DEFAULT_RANKING_PREFERENCES
+    DEFAULT_RANKING_PREFERENCES,
+    10,
+    percentileMapForDefaultPrefs,
+    targetCacheForDefaultPrefs
   );
 
   const gmapsEmbedKey = process.env.GOOGLE_MAPS_EMBED_KEY;
@@ -64,11 +74,27 @@ export async function loader({ params }: Route.LoaderArgs) {
       name: startMap.get(id)?.name || id,
     }));
 
-  return { target, bestItineraries, gmapsEmbedKey, starts, resultMap, targetMap, munroMap };
+  return {
+    target,
+    bestItineraries,
+    gmapsEmbedKey,
+    starts,
+    resultMap,
+    targetMap,
+    munroMap,
+  };
 }
 
 export default function Target({ loaderData }: Route.ComponentProps) {
-  const { target, bestItineraries: initialBestItineraries, gmapsEmbedKey, starts, resultMap, targetMap, munroMap } = loaderData;
+  const {
+    target,
+    bestItineraries: initialBestItineraries,
+    gmapsEmbedKey,
+    starts,
+    resultMap,
+    targetMap,
+    munroMap,
+  } = loaderData;
   const { preferences } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
   const [timelineModalOpen, setTimelineModalOpen] = React.useState(false);
@@ -97,7 +123,14 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       munroMap,
       preferences
     );
-  }, [preferences, initialBestItineraries, target.id, resultMap, targetMap, munroMap]);
+  }, [
+    preferences,
+    initialBestItineraries,
+    target.id,
+    resultMap,
+    targetMap,
+    munroMap,
+  ]);
 
   // Read start from URL
   const urlStart = searchParams.get("start");

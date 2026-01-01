@@ -9,6 +9,8 @@ import {
   munroMap,
   targetMap,
   resultMap,
+  targetCacheForDefaultPrefs,
+  percentileMapForDefaultPrefs,
 } from "results/parse.server";
 import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
@@ -34,7 +36,9 @@ export async function loader({}: Route.LoaderArgs) {
     targetMap,
     munroMap,
     Infinity,
-    DEFAULT_RANKING_PREFERENCES
+    DEFAULT_RANKING_PREFERENCES,
+    targetCacheForDefaultPrefs,
+    percentileMapForDefaultPrefs
   );
   const sampleDates = getSampleDates();
 

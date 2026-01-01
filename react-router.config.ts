@@ -1,6 +1,11 @@
 import type { Config } from "@react-router/dev/config";
 
-import { startMap, targetMap, munroMap, resultMap } from "./results/parse.server";
+import {
+  startMap,
+  targetMap,
+  munroMap,
+  resultMap,
+} from "./results/parse.server";
 
 export default {
   ssr: false,
@@ -17,6 +22,11 @@ export default {
       (t) => `/target/${t.id}/all-itineraries`
     );
 
-    return [...getStaticPaths(), ...munroRoutes, ...targetRoutes, ...allItinerariesRoutes];
+    return [
+      ...getStaticPaths(),
+      ...munroRoutes,
+      ...targetRoutes,
+      ...allItinerariesRoutes,
+    ];
   },
 } satisfies Config;

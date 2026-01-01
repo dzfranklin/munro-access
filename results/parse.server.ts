@@ -12,18 +12,25 @@ import {
   type Target,
 } from "./schema";
 import { slugify } from "../app/utils/format";
+import { computeAllTargetItineraries } from "./best-itineraries";
+import { DEFAULT_RANKING_PREFERENCES } from "./scoring";
 
 function parseTime(timeStr: string): number {
   const [hours, minutes] = timeStr.split(":").map(Number);
   return hours + minutes / 60;
 }
 
-function enhanceItinerary(itin: Omit<Itinerary, 'startTimeHours' | 'endTimeHours' | 'isOvernight' | 'dateMs'>): Itinerary {
+function enhanceItinerary(
+  itin: Omit<
+    Itinerary,
+    "startTimeHours" | "endTimeHours" | "isOvernight" | "dateMs"
+  >
+): Itinerary {
   const startTimeHours = parseTime(itin.startTime);
   const endTimeHours = parseTime(itin.endTime);
   const dateMs = new Date(itin.date).getTime();
   const isOvernight = endTimeHours < startTimeHours;
-  
+
   return {
     ...itin,
     startTimeHours,
@@ -78,7 +85,7 @@ function parseResults(): Map<string, Result> {
       console.error(line);
       throw new Error("parse error");
     }
-    
+
     // Enhance all itineraries with precomputed values
     const result = parsed.data;
     for (const [day, dayItins] of Object.entries(result.itineraries)) {
@@ -87,12 +94,23 @@ function parseResults(): Map<string, Result> {
         returns: dayItins.returns.map(enhanceItinerary),
       };
     }
-    
+
     out.set(resultID(result), result);
   }
   return out;
 }
 export const resultMap = parseResults();
+
+// Pre-compute all target itineraries and percentiles once at load time
+const {
+  targetCache: targetCacheForDefaultPrefs,
+  percentileMap: percentileMapForDefaultPrefs,
+} = computeAllTargetItineraries(
+  resultMap,
+  targetMap,
+  DEFAULT_RANKING_PREFERENCES
+);
+export { targetCacheForDefaultPrefs, percentileMapForDefaultPrefs };
 
 export function getSampleDates(): string[] {
   const dates = new Set<string>();

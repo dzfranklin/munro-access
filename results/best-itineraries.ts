@@ -58,6 +58,7 @@ function selectDiverseOptions(
  * 
  * @param maxPerStartDay - Maximum number of options to return per start/day combination (default: 10)
  * @param globalPercentiles - Pre-calculated global percentile map (optional, will calculate if not provided)
+ * @param cachedItineraries - Pre-computed itinerary cache (optional, for performance optimization)
  */
 export function getBestItinerariesForTarget(
   targetId: string,
@@ -66,61 +67,92 @@ export function getBestItinerariesForTarget(
   munroMap: Map<number, Munro>,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
   maxPerStartDay: number = 10,
-  globalPercentiles?: Map<number, number>
+  globalPercentiles?: Map<number, number>,
+  cachedItineraries?: Map<string, TargetItinerariesCache>
 ): TargetWithBestItineraries | null {
   const target = targetMap.get(targetId);
   if (!target) return null;
 
-  const bestOptions: ItineraryOption[] = [];
+  // Use cached itineraries if available and preferences match defaults
+  const usingDefaults = Object.keys(DEFAULT_RANKING_PREFERENCES).every(
+    (key) => prefs[key as keyof typeof prefs] === DEFAULT_RANKING_PREFERENCES[key as keyof typeof DEFAULT_RANKING_PREFERENCES]
+  );
 
-  // Use the longest route for scoring (most conservative estimate)
-  const longestRoute = target.routes.reduce((longest, route) => {
-    const longestMax = longest.stats.timeHours.max;
-    const routeMax = route.stats.timeHours.max;
-    return routeMax > longestMax ? route : longest;
-  }, target.routes[0]);
+  let bestOptions: ItineraryOption[];
+  let percentileMap: Map<number, number>;
 
-  // Check itineraries from all start cities
-  for (const result of resultMap.values()) {
-    if (result.target !== targetId) continue;
+  if (usingDefaults && cachedItineraries && globalPercentiles) {
+    // Fast path: use pre-computed cache
+    const cached = cachedItineraries.get(targetId);
+    if (!cached) {
+      return null;
+    }
 
-    // Check each day of the week
-    for (const [day, dayItineraries] of Object.entries(result.itineraries)) {
-      const { outbounds, returns } = dayItineraries;
+    percentileMap = globalPercentiles;
+    bestOptions = cached.options.map(opt => ({
+      startId: opt.startId,
+      startName: opt.startId,
+      day: opt.day,
+      outbound: opt.outbound,
+      return: opt.return,
+      score: percentileMap.get(opt.rawScore) ?? 0,
+    }));
+  } else {
+    // Slow path: compute from scratch (for custom preferences)
+    bestOptions = [];
 
-      if (outbounds.length === 0 || returns.length === 0) continue;
+    // Use the longest route for scoring (most conservative estimate)
+    const longestRoute = target.routes.reduce((longest, route) => {
+      const longestMax = longest.stats.timeHours.max;
+      const routeMax = route.stats.timeHours.max;
+      return routeMax > longestMax ? route : longest;
+    }, target.routes[0]);
 
-      // Get all viable itinerary pairs for this day
-      const viable = selectBestItineraries(
-        outbounds,
-        returns,
-        longestRoute,
-        prefs,
-        Infinity // No limit - return all viable pairs
-      );
+    // Check itineraries from all start cities
+    for (const result of resultMap.values()) {
+      if (result.target !== targetId) continue;
 
-      for (const { outbound, return: returnItin, score } of viable) {
-        bestOptions.push({
-          startId: result.start,
-          startName: result.start,
-          day,
-          outbound,
-          return: returnItin,
-          score: score.rawScore,
-        });
+      // Check each day of the week
+      for (const [day, dayItineraries] of Object.entries(result.itineraries)) {
+        const { outbounds, returns } = dayItineraries;
+
+        if (outbounds.length === 0 || returns.length === 0) continue;
+
+        // Get all viable itinerary pairs for this day
+        const viable = selectBestItineraries(
+          outbounds,
+          returns,
+          longestRoute,
+          prefs,
+          Infinity // No limit - return all viable pairs
+        );
+
+        for (const { outbound, return: returnItin, score } of viable) {
+          bestOptions.push({
+            startId: result.start,
+            startName: result.start,
+            day,
+            outbound,
+            return: returnItin,
+            score: score.rawScore,
+          });
+        }
       }
+    }
+
+    // Sort by score (best first)
+    bestOptions.sort((a, b) => b.score - a.score);
+
+    // Calculate percentiles if not provided, then apply them
+    percentileMap = globalPercentiles ?? calculateGlobalPercentiles(resultMap, targetMap, prefs);
+    for (const option of bestOptions) {
+      const percentile = percentileMap.get(option.score) ?? 0;
+      option.score = percentile;
     }
   }
 
-  // Sort by score (best first)
+  // Sort by percentile score
   bestOptions.sort((a, b) => b.score - a.score);
-
-  // Calculate percentiles if not provided, then apply them
-  const percentileMap = globalPercentiles ?? calculateGlobalPercentiles(resultMap, targetMap, prefs);
-  for (const option of bestOptions) {
-    const percentile = percentileMap.get(option.score) ?? 0;
-    option.score = percentile;
-  }
 
   // Limit options per start/day combination to keep UI manageable
   const limitedOptions: ItineraryOption[] = [];
@@ -249,10 +281,28 @@ export function getAllTargetsWithBestItineraries(
   resultMap: Map<string, Result>,
   targetMap: Map<string, Target>,
   munroMap: Map<number, Munro>,
-  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
+  cachedItineraries?: Map<string, TargetItinerariesCache>,
+  cachedPercentiles?: Map<number, number>
 ): TargetWithBestItineraries[] {
-  // Compute all itineraries and percentiles in one pass
-  const { targetCache, percentileMap } = computeAllTargetItineraries(resultMap, targetMap, prefs);
+  // Use cache if provided and preferences match defaults
+  const usingDefaults = Object.keys(DEFAULT_RANKING_PREFERENCES).every(
+    (key) => prefs[key as keyof typeof prefs] === DEFAULT_RANKING_PREFERENCES[key as keyof typeof DEFAULT_RANKING_PREFERENCES]
+  );
+
+  let targetCache: Map<string, TargetItinerariesCache>;
+  let percentileMap: Map<number, number>;
+
+  if (usingDefaults && cachedItineraries && cachedPercentiles) {
+    // Use pre-computed cache
+    targetCache = cachedItineraries;
+    percentileMap = cachedPercentiles;
+  } else {
+    // Compute all itineraries and percentiles in one pass
+    const computed = computeAllTargetItineraries(resultMap, targetMap, prefs);
+    targetCache = computed.targetCache;
+    percentileMap = computed.percentileMap;
+  }
   
   const targetsWithItineraries: TargetWithBestItineraries[] = [];
 
@@ -331,9 +381,18 @@ export function getTopTargetsPerStart(
   targetMap: Map<string, Target>,
   munroMap: Map<number, Munro>,
   n: number = 10,
-  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
+  cachedItineraries?: Map<string, TargetItinerariesCache>,
+  cachedPercentiles?: Map<number, number>
 ): Map<string, TargetWithRoutes[]> {
-  const allTargets = getAllTargetsWithBestItineraries(resultMap, targetMap, munroMap, prefs);
+  const allTargets = getAllTargetsWithBestItineraries(
+    resultMap,
+    targetMap,
+    munroMap,
+    prefs,
+    cachedItineraries,
+    cachedPercentiles
+  );
   const targetsByStart = new Map<string, TargetWithRoutes[]>();
 
   // For each target, create filtered versions per start location
