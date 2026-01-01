@@ -5,10 +5,13 @@ import {
   resultMap,
   targetCacheForDefaultPrefs,
   percentileMapForDefaultPrefs,
+  minimalTargetCache,
+  minimalRoutes,
 } from "results/parse.server";
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
+import { recomputeBestItinerariesForTarget, recomputePercentiles } from "results/client-scoring";
 import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
 import { TimelineModal } from "~/components/TimelineModal";
@@ -79,9 +82,10 @@ export async function loader({ params }: Route.LoaderArgs) {
     bestItineraries,
     gmapsEmbedKey,
     starts,
-    resultMap,
-    targetMap,
-    munroMap,
+    // Only send minimal data needed for client-side recomputation
+    // (Still large because we need all targets for global percentiles)
+    minimalTargetCache,
+    minimalRoutes,
   };
 }
 
@@ -91,9 +95,8 @@ export default function Target({ loaderData }: Route.ComponentProps) {
     bestItineraries: initialBestItineraries,
     gmapsEmbedKey,
     starts,
-    resultMap,
-    targetMap,
-    munroMap,
+    minimalTargetCache,
+    minimalRoutes,
   } = loaderData;
   const { preferences } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,21 +118,33 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       return initialBestItineraries;
     }
 
-    // Re-compute with user preferences
-    return getBestItinerariesForTarget(
-      target.id,
-      resultMap,
-      targetMap,
-      munroMap,
+    // Recompute global percentiles with new preferences
+    const newPercentileMap = recomputePercentiles(
+      minimalTargetCache,
+      minimalRoutes,
       preferences
     );
+
+    // Recompute best options for this target
+    const bestOptions = recomputeBestItinerariesForTarget(
+      target.id,
+      minimalTargetCache,
+      minimalRoutes,
+      newPercentileMap,
+      preferences,
+      10
+    );
+
+    return {
+      ...initialBestItineraries,
+      bestOptions,
+    };
   }, [
     preferences,
     initialBestItineraries,
     target.id,
-    resultMap,
-    targetMap,
-    munroMap,
+    minimalTargetCache,
+    minimalRoutes,
   ]);
 
   // Read start from URL

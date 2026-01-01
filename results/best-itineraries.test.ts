@@ -17,14 +17,31 @@ describe('best-itineraries', () => {
     munroMap.clear();
   });
 
-  const createItinerary = (overrides: Partial<Itinerary> = {}): Itinerary => ({
-    date: "2025-06-01",
-    startTime: "09:00:00",
-    endTime: "11:00:00",
-    modes: ["BUS"],
-    legs: [],
-    ...overrides,
-  });
+  const parseTime = (timeStr: string): number => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours + minutes / 60;
+  };
+
+  const createItinerary = (overrides: Partial<Itinerary> = {}): Itinerary => {
+    const date = overrides.date || "2025-06-01";
+    const startTime = overrides.startTime || "09:00:00";
+    const endTime = overrides.endTime || "11:00:00";
+    const startTimeHours = parseTime(startTime);
+    const endTimeHours = parseTime(endTime);
+
+    return {
+      date,
+      startTime,
+      endTime,
+      modes: overrides.modes || ["BUS"],
+      legs: overrides.legs || [],
+      startTimeHours,
+      endTimeHours,
+      isOvernight: endTimeHours < startTimeHours,
+      dateMs: new Date(date).getTime(),
+      ...overrides,
+    } as Itinerary;
+  };
 
   const createRoute = (): Route => ({
     name: "Route 1",

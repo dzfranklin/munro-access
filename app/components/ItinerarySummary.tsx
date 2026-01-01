@@ -92,6 +92,14 @@ export function ItinerarySummary({
         {formatDayLabel(day)}
         <span className="text-xs text-gray-500 font-normal ml-1.5">
           {formatDuration(timeAtTarget)} hike window
+          {percentileLabel && (
+            <>
+              <span className="text-gray-600"> · </span>
+              <span className={`font-medium ${percentileClass}`}>
+                {percentileLabel}
+              </span>
+            </>
+          )}
         </span>
       </div>
       <div className="text-gray-700">

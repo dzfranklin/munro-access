@@ -1,15 +1,15 @@
-import type { Itinerary, Route } from "./schema";
+import type { Itinerary, Route, MinimalItinerary } from "./schema";
 import { parseTime, calculateDuration } from "../app/utils/format";
 
 /**
  * Filter return journeys to show all returns that allow at least 50% of the shorter route time
  * This gives users flexibility to explore faster hiking options
  */
-export function getViableReturns(
-  outbound: Itinerary,
-  allReturns: Itinerary[],
+export function getViableReturns<T extends MinimalItinerary>(
+  outbound: T,
+  allReturns: T[],
   route: Route
-): Itinerary[] {
+): T[] {
   const minHikeTime = route.stats.timeHours.min * 0.5; // 50% of shorter time estimate
 
   return allReturns

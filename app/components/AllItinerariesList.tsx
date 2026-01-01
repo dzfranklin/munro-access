@@ -1,6 +1,6 @@
 import type { Itinerary } from "results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
-import { formatDuration } from "~/utils/format";
+import { formatDuration, formatTime } from "~/utils/format";
 import { formatModes } from "~/utils/transport";
 import React from "react";
 
@@ -9,26 +9,35 @@ interface AllItinerariesListProps {
   returns: Itinerary[];
 }
 
-function ItineraryRow({ itinerary, type }: { itinerary: Itinerary; type: "outbound" | "return" }) {
+function ItineraryRow({
+  itinerary,
+  type,
+}: {
+  itinerary: Itinerary;
+  type: "outbound" | "return";
+}) {
   const [isExpanded, setIsExpanded] = React.useState(false);
-  
-  const startTime = itinerary.startTime.slice(0, 5);
-  const endTime = itinerary.endTime.slice(0, 5);
-  
+
+  const startTime = formatTime(itinerary.startTime);
+  const endTime = formatTime(itinerary.endTime);
+
   // Calculate duration handling overnight journeys
   let duration: number;
-  const startMs = new Date(`${itinerary.date}T${itinerary.startTime}`).getTime();
+  const startMs = new Date(
+    `${itinerary.date}T${itinerary.startTime}`
+  ).getTime();
   let endMs = new Date(`${itinerary.date}T${itinerary.endTime}`).getTime();
-  
+
   // If end time is before start time, it's an overnight journey
   if (endMs < startMs) {
     endMs += 24 * 60 * 60 * 1000; // Add 24 hours
   }
-  
+
   duration = Math.round((endMs - startMs) / 60000);
-  const transfers = itinerary.legs.filter(leg => leg.mode !== "WALK").length - 1;
+  const transfers =
+    itinerary.legs.filter((leg) => leg.mode !== "WALK").length - 1;
   const modes = formatModes(itinerary.modes);
-  
+
   return (
     <div className="border-b border-gray-200 last:border-b-0">
       <button
@@ -53,7 +62,7 @@ function ItineraryRow({ itinerary, type }: { itinerary: Itinerary; type: "outbou
               </span>
             </div>
           </div>
-          <span className="text-gray-500 flex-shrink-0 pt-0.5">
+          <span className="text-gray-500 shrink-0 pt-0.5">
             {isExpanded ? "−" : "+"}
           </span>
         </div>

@@ -170,6 +170,7 @@ export function TimelineModal({
       <div
         className="bg-white border border-theme-navy-700 max-w-300 w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
       >
         {/* Header */}
         <div className="border-b-2 border-gray-300 p-5">

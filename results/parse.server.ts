@@ -7,12 +7,13 @@ import {
   type Itinerary,
   type Munro,
   type Result,
+  type ResultFromSchema,
   type RouteMunro,
   type Start,
   type Target,
 } from "./schema";
 import { slugify } from "../app/utils/format";
-import { computeAllTargetItineraries } from "./best-itineraries";
+import { computeAllTargetItineraries, toMinimalCache, toMinimalRoutes, toMinimalItinerary } from "./best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "./scoring";
 
 function parseTime(timeStr: string): number {
@@ -87,13 +88,29 @@ function parseResults(): Map<string, Result> {
     }
 
     // Enhance all itineraries with precomputed values
-    const result = parsed.data;
-    for (const [day, dayItins] of Object.entries(result.itineraries)) {
-      result.itineraries[day as keyof typeof result.itineraries] = {
-        outbounds: dayItins.outbounds.map(enhanceItinerary),
-        returns: dayItins.returns.map(enhanceItinerary),
-      };
-    }
+    const resultFromSchema: ResultFromSchema = parsed.data;
+    const result: Result = {
+      start: resultFromSchema.start,
+      target: resultFromSchema.target,
+      itineraries: {
+        WEDNESDAY: {
+          outbounds: resultFromSchema.itineraries.WEDNESDAY.outbounds.map(enhanceItinerary),
+          returns: resultFromSchema.itineraries.WEDNESDAY.returns.map(enhanceItinerary),
+        },
+        FRIDAY: {
+          outbounds: resultFromSchema.itineraries.FRIDAY.outbounds.map(enhanceItinerary),
+          returns: resultFromSchema.itineraries.FRIDAY.returns.map(enhanceItinerary),
+        },
+        SATURDAY: {
+          outbounds: resultFromSchema.itineraries.SATURDAY.outbounds.map(enhanceItinerary),
+          returns: resultFromSchema.itineraries.SATURDAY.returns.map(enhanceItinerary),
+        },
+        SUNDAY: {
+          outbounds: resultFromSchema.itineraries.SUNDAY.outbounds.map(enhanceItinerary),
+          returns: resultFromSchema.itineraries.SUNDAY.returns.map(enhanceItinerary),
+        },
+      },
+    };
 
     out.set(resultID(result), result);
   }
@@ -110,7 +127,13 @@ const {
   targetMap,
   DEFAULT_RANKING_PREFERENCES
 );
+
 export { targetCacheForDefaultPrefs, percentileMapForDefaultPrefs };
+
+// Export minimal versions for client-side use (much smaller serialization)
+export const minimalTargetCache = toMinimalCache(targetCacheForDefaultPrefs);
+export const minimalRoutes = toMinimalRoutes(targetMap);
+export { toMinimalItinerary };
 
 export function getSampleDates(): string[] {
   const dates = new Set<string>();

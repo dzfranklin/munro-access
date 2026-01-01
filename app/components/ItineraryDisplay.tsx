@@ -1,5 +1,10 @@
 import type { Itinerary } from "results/schema";
-import { formatDuration, parseTime, isOvernightJourney } from "~/utils/format";
+import {
+  formatDuration,
+  parseTime,
+  isOvernightJourney,
+  formatTime,
+} from "~/utils/format";
 import { formatMode } from "~/utils/transport";
 
 interface ItineraryDisplayProps {
@@ -56,7 +61,7 @@ export function ItineraryDisplay({ itinerary, type }: ItineraryDisplayProps) {
   return (
     <div className="text-[13px]">
       <div className="text-gray-600 mb-1.5">
-        {itinerary.startTime.slice(0, 5)} → {itinerary.endTime.slice(0, 5)}
+        {formatTime(itinerary.startTime)} → {formatTime(itinerary.endTime)}
         <span className="text-xs text-gray-500 ml-1">
           ({formatDuration(durationMinutes)})
         </span>
@@ -71,11 +76,11 @@ export function ItineraryDisplay({ itinerary, type }: ItineraryDisplayProps) {
                 className="text-xs text-gray-500 leading-relaxed italic"
               >
                 <span className="text-gray-400 inline-block w-10">
-                  {entry.startTime.slice(0, 5)}
+                  {formatTime(entry.startTime)}
                 </span>
                 <span>
                   Wait {formatDuration(entry.waitMinutes!)} until{" "}
-                  {entry.endTime.slice(0, 5)}
+                  {formatTime(entry.endTime)}
                 </span>
               </div>
             );
@@ -88,7 +93,7 @@ export function ItineraryDisplay({ itinerary, type }: ItineraryDisplayProps) {
               className="text-xs text-gray-600 leading-relaxed"
             >
               <span className="text-gray-400 inline-block w-10">
-                {leg.startTime.slice(0, 5)}
+                {formatTime(leg.startTime)}
               </span>
               <span className="font-medium">{formatMode(leg.mode)}:</span>
               <span>

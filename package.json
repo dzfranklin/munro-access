@@ -7,10 +7,10 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "test": "npm run vitest -- --run && npm run test:e2e",
+    "test": "npm run typecheck && npm run vitest -- --run && npm run test:e2e",
     "vitest": "vitest",
     "test:ui": "vitest --ui",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --fully-parallel --reporter list",
     "test:e2e:ui": "playwright test --ui",
     "bench": "vitest bench"
   },

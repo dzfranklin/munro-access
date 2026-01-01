@@ -7,8 +7,8 @@ import {
 import {
   getTopTargetsPerStart,
   computeAllTargetItineraries,
-  DEFAULT_RANKING_PREFERENCES,
 } from './best-itineraries';
+import { DEFAULT_RANKING_PREFERENCES } from './scoring';
 
 describe('Homepage Computation Benchmarks', () => {
   bench('Full homepage computation (getTopTargetsPerStart)', () => {
@@ -33,7 +33,8 @@ describe('Homepage Computation Benchmarks', () => {
         count += dayItineraries.outbounds.length + dayItineraries.returns.length;
       }
     }
-    return count;
+    // Prevent optimization from eliminating the loop
+    if (count < 0) throw new Error();
   });
 });
 

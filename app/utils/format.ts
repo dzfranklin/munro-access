@@ -1,4 +1,4 @@
-import type { Itinerary } from "results/schema";
+import type { MinimalItinerary } from "results/schema";
 
 // Text formatting
 
@@ -44,11 +44,6 @@ export function parseTime(timeStr: string): number {
   return hours + minutes / 60;
 }
 
-// Fast version using precomputed values
-export function parseTimeFast(itinerary: Itinerary, field: 'start' | 'end'): number {
-  return field === 'start' ? itinerary._startTimeHours : itinerary._endTimeHours;
-}
-
 // Date formatting and calculations
 
 export function formatSamplePeriod(dates: string[]): string {
@@ -57,31 +52,42 @@ export function formatSamplePeriod(dates: string[]): string {
   const start = new Date(dates[0]);
   const end = new Date(dates[dates.length - 1]);
 
-  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-    return start.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  if (
+    start.getMonth() === end.getMonth() &&
+    start.getFullYear() === end.getFullYear()
+  ) {
+    return start.toLocaleDateString("en-GB", {
+      month: "long",
+      year: "numeric",
+    });
   }
 
   if (start.getFullYear() === end.getFullYear()) {
-    return `${start.toLocaleDateString('en-GB', { month: 'long' })}-${end.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`;
+    return `${start.toLocaleDateString("en-GB", { month: "long" })}-${end.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`;
   }
 
-  return `${start.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} - ${end.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`;
+  return `${start.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} - ${end.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`;
 }
 
-export function isSameDay(itin1: Itinerary, itin2: Itinerary): boolean {
+export function isSameDay(itin1: MinimalItinerary, itin2: MinimalItinerary): boolean {
   return itin1.date === itin2.date;
 }
 
-export function isNextDay(outbound: Itinerary, returnItin: Itinerary): boolean {
+export function isNextDay(outbound: MinimalItinerary, returnItin: MinimalItinerary): boolean {
   const outboundDate = new Date(outbound.date);
   const returnDate = new Date(returnItin.date);
   const nextDay = new Date(outboundDate);
   nextDay.setDate(nextDay.getDate() + 1);
 
-  return nextDay.toISOString().slice(0, 10) === returnDate.toISOString().slice(0, 10);
+  return (
+    nextDay.toISOString().slice(0, 10) === returnDate.toISOString().slice(0, 10)
+  );
 }
 
-export function getDaysBetween(outbound: Itinerary, returnItin: Itinerary): number {
+export function getDaysBetween(
+  outbound: MinimalItinerary,
+  returnItin: MinimalItinerary
+): number {
   const diffMs = returnItin.dateMs - outbound.dateMs;
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
@@ -98,6 +104,6 @@ export function calculateDuration(
   return durationMs / (1000 * 60 * 60);
 }
 
-export function isOvernightJourney(itinerary: Itinerary): boolean {
+export function isOvernightJourney(itinerary: MinimalItinerary): boolean {
   return itinerary.isOvernight;
 }

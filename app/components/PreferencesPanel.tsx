@@ -20,6 +20,7 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="px-3 py-1.5 bg-theme-navy-700 text-white text-sm hover:bg-theme-navy-900 underline"
+        data-testid="preferences-toggle"
       >
         {isOpen ? "Hide" : "Show"} Preferences
       </button>

@@ -14,7 +14,7 @@ export function formatMode(mode: string): string {
 function getUniqueModesFormatted(modes: string[]): string[] {
   const modeSet = new Set(modes);
   modeSet.delete("WALK");
-  return Array.from(modeSet).map(formatMode);
+  return Array.from(modeSet).sort().map(formatMode);
 }
 
 export function formatModes(modes: string[]): string {

@@ -69,6 +69,8 @@ const modeSchema = z.enum([
   "WALK",
 ]);
 
+export type Mode = z.infer<typeof modeSchema>;
+
 export const legSchema = z.object({
   from: placeSchema,
   to: placeSchema,
@@ -88,13 +90,22 @@ export const itinerarySchema = z.object({
   legs: z.array(legSchema),
 });
 
+// Minimal itinerary data needed for scoring (no leg details)
+export interface MinimalItinerary {
+  date: string;
+  startTime: string;
+  endTime: string;
+  modes: Mode[];
+  startTimeHours: number;
+  endTimeHours: number;
+  isOvernight: boolean;
+  dateMs: number;
+}
+
 // Enhanced runtime type with parsed numeric values
-export interface Itinerary extends z.infer<typeof itinerarySchema> {
-  // Numeric representations for fast computation
-  startTimeHours: number;  // e.g., 9.5 for "09:30:00"
-  endTimeHours: number;    // e.g., 11.75 for "11:45:00"
-  isOvernight: boolean;    // true if journey crosses midnight
-  dateMs: number;          // milliseconds since epoch for date comparison
+// Extends MinimalItinerary and adds legs for full itinerary details
+export interface Itinerary extends MinimalItinerary, Omit<z.infer<typeof itinerarySchema>, keyof MinimalItinerary> {
+  // legs property comes from itinerarySchema
 }
 
 export const dayItinerariesSchema = z.object({
@@ -113,7 +124,20 @@ export const resultSchema = z.object({
   }),
 });
 
-export type Result = z.infer<typeof resultSchema>;
+// Base Result type from schema (itineraries don't have enhanced fields yet)
+export type ResultFromSchema = z.infer<typeof resultSchema>;
+
+// Enhanced Result type with precomputed itinerary fields
+export interface Result {
+  start: string;
+  target: string;
+  itineraries: {
+    WEDNESDAY: { outbounds: Itinerary[]; returns: Itinerary[] };
+    FRIDAY: { outbounds: Itinerary[]; returns: Itinerary[] };
+    SATURDAY: { outbounds: Itinerary[]; returns: Itinerary[] };
+    SUNDAY: { outbounds: Itinerary[]; returns: Itinerary[] };
+  };
+}
 
 export function resultID(start: string, target: string): string;
 export function resultID(result: Result): string;

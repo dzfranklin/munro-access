@@ -6,6 +6,7 @@ import {
   parseTime,
   pluralize,
   formatDayLabel,
+  formatTime,
 } from "~/utils/format";
 import React from "react";
 import { formatModes } from "~/utils/transport";
@@ -116,18 +117,17 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
               <tr key={idx} className="border-b border-gray-200">
                 <td className="py-3 pr-3 align-top text-[13px]">
                   <div className="text-gray-700">
-                    {option.outbound.startTime.slice(0, 5)}–
-                    {option.outbound.endTime.slice(0, 5)}
+                    {formatTime(option.outbound.startTime)} –{" "}
+                    {formatTime(option.outbound.endTime)}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {formatDuration(outboundDuration)}
-                    via {outboundModes}
+                    {formatDuration(outboundDuration)} via {outboundModes}
                   </div>
                 </td>
                 <td className="py-3 pr-3 align-top text-[13px]">
                   <div className="text-gray-700">
-                    {option.return.startTime.slice(0, 5)}–
-                    {option.return.endTime.slice(0, 5)}
+                    {formatTime(option.return.startTime)} –{" "}
+                    {formatTime(option.return.endTime)}
                     {isNextDayReturn && (
                       <span className="text-xs text-gray-500 ml-1">+1 day</span>
                     )}
