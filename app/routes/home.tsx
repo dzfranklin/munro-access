@@ -334,12 +334,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           How it works
         </h2>
         <p className="text-sm text-gray-600 m-0 mb-3">
-          I used National Rail and bus timetable data to compute public
-          transport itineraries to every Munro route on walkhighlands for a few
-          sample days. Itineraries are ranked based on how early you have to
-          leave, how well the return matches the hike duration, whether there
-          are backup options if you take longer than expected, transit time, and
-          some other factors. The algorithm presumes summer conditions.
+          I used rail and bus timetable data to compute public transport
+          itineraries to every Munro route on walkhighlands for a few sample
+          days. Itineraries are ranked based on how early you have to leave, how
+          well the return matches the hike duration, whether there are backup
+          options if you take longer than expected, transit time, and some other
+          factors. The algorithm presumes summer conditions.
         </p>
         <p className="text-sm text-gray-600 m-0 mb-3">
           Walkhighlands data on this site will be outdated, any errors
