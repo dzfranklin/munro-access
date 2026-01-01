@@ -95,8 +95,12 @@ export function ItineraryDisplay({ itinerary, type }: ItineraryDisplayProps) {
                 {" "}
                 {leg.from.name} → {leg.to.name}
               </span>
-              {leg.routeName && (
-                <span className="text-gray-500"> ({leg.routeName})</span>
+              {(leg.agencyName || leg.routeName) && (
+                <span className="text-gray-500">
+                  {" "}
+                  ({leg.agencyName && leg.agencyName + " "}
+                  {leg.routeName})
+                </span>
               )}
             </div>
           );
