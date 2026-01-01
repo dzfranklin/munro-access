@@ -39,14 +39,11 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
           </div>
 
           <div className="space-y-6">
-            {/* Start Location Preference */}
-            <div>
-              <h4 className="font-sans text-sm font-bold text-gray-800 mb-3">
-                Preferred Start Location
-              </h4>
+            {/* General preferences */}
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Default starting point
+                  Preferred Start Location
                 </label>
                 <select
                   value={preferences.preferredStartLocation || ""}
@@ -71,116 +68,143 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                     ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1.5">
-                  This will be the default tab when viewing routes. If not set,
-                  the site will remember your most recent selection.
+                  Default tab when viewing routes
                 </p>
               </div>
-            </div>
 
-            {/* Timing Preferences */}
-            <div>
-              <h4 className="font-sans text-sm font-bold text-gray-800 mb-3">
-                Timing
-              </h4>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1.5">
-                    Earliest Departure Time
-                  </label>
+              <div>
+                <label className="flex items-center text-sm text-gray-600">
                   <input
-                    type="time"
-                    value={`${String(Math.floor(preferences.earliestDeparture)).padStart(2, "0")}:${String(Math.round((preferences.earliestDeparture % 1) * 60)).padStart(2, "0")}`}
-                    onChange={(e) => {
-                      const [hours, minutes] = e.target.value
-                        .split(":")
-                        .map(Number);
-                      updatePreferences({
-                        earliestDeparture: hours + minutes / 60,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1.5">
-                    Sunset Time (summer)
-                  </label>
-                  <input
-                    type="time"
-                    value={`${String(Math.floor(preferences.sunset)).padStart(2, "0")}:${String(Math.round((preferences.sunset % 1) * 60)).padStart(2, "0")}`}
-                    onChange={(e) => {
-                      const [hours, minutes] = e.target.value
-                        .split(":")
-                        .map(Number);
-                      updatePreferences({
-                        sunset: hours + minutes / 60,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1.5">
-                    Buffer before return transport (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    step="5"
-                    min="15"
-                    max="240"
-                    value={Math.round(preferences.returnBuffer * 60)}
+                    type="checkbox"
+                    checked={preferences.allowCycling}
                     onChange={(e) =>
                       updatePreferences({
-                        returnBuffer: parseInt(e.target.value) / 60,
+                        allowCycling: e.target.checked,
                       })
                     }
-                    className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                    className="mr-2"
                   />
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Time needed after hike completion (using max walkhighlands
-                    time) before catching return transport
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1.5">
-                    Overnight trip penalty:{" "}
-                    {Math.round(preferences.overnightPenalty * 100)}%
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={preferences.overnightPenalty}
-                    onChange={(e) =>
-                      updatePreferences({
-                        overnightPenalty: parseFloat(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>No penalty (0%)</span>
-                    <span>Default (30%)</span>
-                    <span>Exclude (100%)</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Penalty applied to trips that span multiple days (e.g.,
-                    depart Friday, return Saturday). Set to 0% to rank overnight
-                    trips normally, or 100% to effectively exclude them.
-                  </p>
-                </div>
+                  Allow cycling
+                </label>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Include routes that involve cycling as part of the journey
+                </p>
               </div>
-            </div>
 
-            {/* Performance Preferences */}
-            <div>
-              <h4 className="font-sans text-sm font-bold text-gray-800 mb-3">
-                Performance
-              </h4>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Overnight trip penalty:{" "}
+                  {Math.round(preferences.overnightPenalty * 100)}%
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={preferences.overnightPenalty}
+                  onChange={(e) =>
+                    updatePreferences({
+                      overnightPenalty: parseFloat(e.target.value),
+                    })
+                  }
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>No penalty (0%)</span>
+                  <span>Default (30%)</span>
+                  <span>Exclude (100%)</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Penalty applied to trips spanning multiple days. Set to 100%
+                  to effectively exclude them.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Earliest Departure Time
+                </label>
+                <input
+                  type="time"
+                  value={`${String(Math.floor(preferences.earliestDeparture)).padStart(2, "0")}:${String(Math.round((preferences.earliestDeparture % 1) * 60)).padStart(2, "0")}`}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value
+                      .split(":")
+                      .map(Number);
+                    updatePreferences({
+                      earliestDeparture: hours + minutes / 60,
+                    });
+                  }}
+                  className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Preferred latest hike finish time
+                </label>
+                <input
+                  type="time"
+                  value={`${String(Math.floor(preferences.preferredLatestEnd)).padStart(2, "0")}:${String(Math.round((preferences.preferredLatestEnd % 1) * 60)).padStart(2, "0")}`}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value
+                      .split(":")
+                      .map(Number);
+                    updatePreferences({
+                      preferredLatestEnd: hours + minutes / 60,
+                    });
+                  }}
+                  className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Hikes finishing after this are penalized (not excluded)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Hard latest hike finish time
+                </label>
+                <input
+                  type="time"
+                  value={`${String(Math.floor(preferences.hardLatestEnd)).padStart(2, "0")}:${String(Math.round((preferences.hardLatestEnd % 1) * 60)).padStart(2, "0")}`}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value
+                      .split(":")
+                      .map(Number);
+                    updatePreferences({
+                      hardLatestEnd: hours + minutes / 60,
+                    });
+                  }}
+                  className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Hikes finishing after this are excluded entirely
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Buffer before return transport (minutes)
+                </label>
+                <input
+                  type="number"
+                  step="5"
+                  min="15"
+                  max="240"
+                  value={Math.round(preferences.returnBuffer * 60)}
+                  onChange={(e) =>
+                    updatePreferences({
+                      returnBuffer: parseInt(e.target.value) / 60,
+                    })
+                  }
+                  className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Time needed after hike completion before catching return
+                  transport
+                </p>
+              </div>
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
@@ -208,41 +232,44 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                   Relative to walkhighlands time estimates
                 </p>
               </div>
+            </div>
 
-              <div className="mt-5 pt-5 border-t border-gray-300">
-                <h5 className="font-sans text-sm font-bold text-gray-800 mb-2">
-                  Priorities
-                </h5>
-                <p className="text-xs text-gray-500 mb-3">
-                  How important are these factors? (0 = ignore, 1 = critical)
-                </p>
+            {/* Scoring */}
+            <div className="pt-5 border-t border-gray-300">
+              <h4 className="font-sans text-sm font-bold text-gray-800 mb-2">
+                Scoring
+              </h4>
+              <p className="text-xs text-gray-500 mb-3">
+                How important are these factors? (0 = ignore, 1 = critical)
+              </p>
 
-                <div className="space-y-3">
-                  {Object.entries(preferences.weights).map(([key, value]) => (
-                    <div key={key}>
-                      <label className="block text-sm text-gray-600 mb-1">
-                        {key.replace(/([A-Z])/g, " $1").trim()}:{" "}
-                        {value.toFixed(1)}
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={value}
-                        onChange={(e) =>
-                          updatePreferences({
-                            weights: {
-                              ...preferences.weights,
-                              [key]: parseFloat(e.target.value),
-                            },
-                          })
-                        }
-                        className="w-full"
-                      />
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-3">
+                {Object.entries(preferences.weights).map(([key, value]) => (
+                  <div key={key}>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      {(key[0].toUpperCase() + key.slice(1))
+                        .replace(/([A-Z])/g, " $1")
+                        .trim()}
+                      : {value.toFixed(1)}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={value}
+                      onChange={(e) =>
+                        updatePreferences({
+                          weights: {
+                            ...preferences.weights,
+                            [key]: parseFloat(e.target.value),
+                          },
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

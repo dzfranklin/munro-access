@@ -3,7 +3,12 @@ import { getTopTargetsPerStart } from "results/best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams } from "react-router";
-import { getSampleDates, startMap, munroMap, targetMap } from "results/parse.server";
+import {
+  getSampleDates,
+  startMap,
+  munroMap,
+  targetMap,
+} from "results/parse.server";
 import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
@@ -23,7 +28,10 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({}: Route.LoaderArgs) {
   // Get all targets (trailheads) for each starting location
-  const targetsByStart = getTopTargetsPerStart(Infinity, DEFAULT_RANKING_PREFERENCES);
+  const targetsByStart = getTopTargetsPerStart(
+    Infinity,
+    DEFAULT_RANKING_PREFERENCES
+  );
   const sampleDates = getSampleDates();
 
   // Convert Map to array with start names, sorted by standard order
@@ -34,7 +42,10 @@ export async function loader({}: Route.LoaderArgs) {
       targets,
     }))
     .sort((a, b) => {
-      return START_LOCATION_ORDER.indexOf(a.startName as any) - START_LOCATION_ORDER.indexOf(b.startName as any);
+      return (
+        START_LOCATION_ORDER.indexOf(a.startName as any) -
+        START_LOCATION_ORDER.indexOf(b.startName as any)
+      );
     });
 
   // Get all munros and targets for search
@@ -55,18 +66,19 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   // Read current state from URL
   const urlStart = searchParams.get("start");
   const urlPage = searchParams.get("page");
-  
+
   // Priority: URL > preferredStartLocation > lastViewedStartLocation > first tab
-  const selectedStart = urlStart || 
-                        preferences.preferredStartLocation || 
-                        preferences.lastViewedStartLocation || 
-                        targetsData[0]?.startId;
+  const selectedStart =
+    urlStart ||
+    preferences.preferredStartLocation ||
+    preferences.lastViewedStartLocation ||
+    targetsData[0]?.startId;
   const currentPage = urlPage ? parseInt(urlPage, 10) : 1;
 
   // Track when content is switching for fade effect
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const prevStartRef = React.useRef(selectedStart);
-  
+
   React.useEffect(() => {
     if (prevStartRef.current !== selectedStart) {
       setIsTransitioning(true);
@@ -81,7 +93,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   // When user clicks a tab, update lastViewed and URL, reset to page 1, but don't scroll
   const handleStartChange = (startId: string) => {
     updatePreferences({ lastViewedStartLocation: startId });
-    setSearchParams({ start: startId, page: "1" }, { preventScrollReset: true });
+    setSearchParams(
+      { start: startId, page: "1" },
+      { preventScrollReset: true }
+    );
   };
 
   // When user changes page, update URL and scroll to top
@@ -97,7 +112,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedTargets = selectedData?.targets.slice(startIndex, endIndex) || [];
+  const paginatedTargets =
+    selectedData?.targets.slice(startIndex, endIndex) || [];
 
   // Get all available start locations for preferences panel
   const startLocations = targetsData.map(({ startId, startName }) => ({
@@ -221,9 +237,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       )}
 
-      {/* Preferences */}
-      <PreferencesPanel startLocations={startLocations} />
-
       {/* How it works */}
       <div className="bg-gray-50 border border-gray-300 p-5 mb-8 leading-relaxed">
         <h2 className="text-lg font-bold text-gray-800 m-0 mb-3">
@@ -235,7 +248,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           sample days. Itineraries are ranked based on how early you have to
           leave, how well the return matches the hike duration, whether there
           are backup options if you take longer than expected, transit time, and
-          some other factors.
+          some other factors. The algorithm presumes summer conditions.
         </p>
         <p className="text-sm text-gray-600 m-0 mb-3">
           Walkhighlands data on this site will be outdated, any errors
@@ -257,6 +270,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           find options to look into further.
         </p>
       </div>
+
+      <PreferencesPanel startLocations={startLocations} />
 
       {/* Tabs */}
       {targetsData.length === 0 ? (
@@ -286,7 +301,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
           {/* Tab content */}
           {selectedData && (
-            <section 
+            <section
               className="transition-opacity duration-75"
               style={{ opacity: isTransitioning ? 0 : 1 }}
             >
@@ -337,7 +352,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                 {targetData.targetName}
                               </Link>
                             </div>
-                            {targetData.targetDescription !== targetData.targetName && (
+                            {targetData.targetDescription !==
+                              targetData.targetName && (
                               <div className="mt-1 text-xs text-gray-500">
                                 {targetData.targetDescription}
                               </div>
@@ -393,7 +409,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         <td className="py-4 px-2.5 align-top text-[13px]">
                           <div className="space-y-2.5">
                             {targetData.displayOptions?.map((option, i) => (
-                              <div key={i} className={i > 0 ? "pt-2.5 border-t border-gray-200" : ""}>
+                              <div
+                                key={i}
+                                className={
+                                  i > 0 ? "pt-2.5 border-t border-gray-200" : ""
+                                }
+                              >
                                 <ItinerarySummary
                                   outbound={option.outbound}
                                   return={option.return}
@@ -434,11 +455,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mb-8 text-sm">
                   <div className="text-gray-600">
-                    Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} routes
+                    Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of{" "}
+                    {totalItems} routes
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      onClick={() =>
+                        handlePageChange(Math.max(1, currentPage - 1))
+                      }
                       disabled={currentPage === 1}
                       className={`px-3 py-1.5 border border-gray-300 ${
                         currentPage === 1
@@ -452,7 +476,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       Page {currentPage} of {totalPages}
                     </div>
                     <button
-                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      onClick={() =>
+                        handlePageChange(Math.min(totalPages, currentPage + 1))
+                      }
                       disabled={currentPage === totalPages}
                       className={`px-3 py-1.5 border border-gray-300 ${
                         currentPage === totalPages

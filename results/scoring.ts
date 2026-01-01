@@ -19,8 +19,14 @@ const rankingPreferencesSchema = z.object({
   // Minimum buffer time after hike finishes before catching return (in hours)
   returnBuffer: z.number().min(0).max(6),
 
-  // Latest acceptable sunset time (hours, 24h format)
-  sunset: z.number().min(12).max(24),
+  // Preferred latest hike end time (hours, 24h format) - finishes after this are penalized
+  preferredLatestEnd: z.number().min(12).max(24),
+
+  // Hard cutoff for hike end time (hours, 24h format) - hikes finishing after this are rejected
+  hardLatestEnd: z.number().min(12).max(24),
+
+  // Allow cycling as part of journey
+  allowCycling: z.boolean(),
 
   // Preference weights (0-1, higher = more important)
   weights: z.object({
@@ -28,6 +34,7 @@ const rankingPreferencesSchema = z.object({
     hikeDuration: z.number().min(0).max(1),
     returnOptions: z.number().min(0).max(1),
     totalDuration: z.number().min(0).max(1),
+    finishTime: z.number().min(0).max(1),
   }),
 
   // Penalty for overnight trips (0 = no penalty, 1 = maximum penalty)
@@ -56,13 +63,16 @@ export const DEFAULT_RANKING_PREFERENCES: RankingPreferences = {
   earliestDeparture: 6, // 6am earliest
   walkingSpeed: 1.0, // Standard speed
   returnBuffer: 0.5, // 30 minutes
-  sunset: 21, // 9pm in summer
+  preferredLatestEnd: 18, // 6pm preferred
+  hardLatestEnd: 22, // 10pm hard cutoff
+  allowCycling: true,
   overnightPenalty: 0.3, // 30% penalty for overnight trips
   weights: {
     departureTime: 0.2,
     hikeDuration: 1.0, // Most important
     returnOptions: 0.8,
     totalDuration: 0.6,
+    finishTime: 0.5,
   },
 };
 
@@ -84,6 +94,7 @@ interface ItineraryScore {
     hikeDuration: number;
     returnOptions: number;
     totalDuration: number;
+    finishTime: number;
   };
   feasible: boolean;
   reason?: string;
@@ -104,6 +115,7 @@ export function scoreItineraryPair(
     hikeDuration: 0,
     returnOptions: 0,
     totalDuration: 0,
+    finishTime: 0,
   };
 
   const departureTime = parseTime(outbound.startTime);
@@ -141,14 +153,14 @@ export function scoreItineraryPair(
   const routeTimeMax = route.stats.timeHours.max / prefs.walkingSpeed;
   const hikeEndTime = arrivalTime + routeTimeMax;
 
-  // Check if hike would finish before sunset
-  if (hikeEndTime > prefs.sunset) {
+  // Hard cutoff - reject if hike would finish after hard latest end time
+  if (hikeEndTime > prefs.hardLatestEnd) {
     return {
       rawScore: 0,
       percentile: 0,
       components,
       feasible: false,
-      reason: `Hike would finish after sunset (estimated ${hikeEndTime.toFixed(1)}h)`,
+      reason: `Hike would finish too late (estimated ${hikeEndTime.toFixed(1)}h)`,
     };
   }
 
@@ -241,12 +253,23 @@ export function scoreItineraryPair(
   // Penalize trips over 14 hours
   components.totalDuration = Math.max(0, 1 - (totalHours - 10) / 10);
 
+  // 5. Finish time score (prefer finishing before preferred time)
+  // 1.0 if before preferred, linear decrease to 0.0 at hard cutoff
+  if (hikeEndTime <= prefs.preferredLatestEnd) {
+    components.finishTime = 1.0;
+  } else {
+    const hoursLate = hikeEndTime - prefs.preferredLatestEnd;
+    const maxLateHours = prefs.hardLatestEnd - prefs.preferredLatestEnd;
+    components.finishTime = Math.max(0, 1 - hoursLate / maxLateHours);
+  }
+
   // Calculate weighted total
   const total =
     components.departureTime * prefs.weights.departureTime +
     components.hikeDuration * prefs.weights.hikeDuration +
     components.returnOptions * prefs.weights.returnOptions +
-    components.totalDuration * prefs.weights.totalDuration;
+    components.totalDuration * prefs.weights.totalDuration +
+    components.finishTime * prefs.weights.finishTime;
 
   // Normalize by sum of weights
   const weightSum = Object.values(prefs.weights).reduce((a, b) => a + b, 0);
