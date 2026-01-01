@@ -1,6 +1,5 @@
-import { resultMap, targetMap, munroMap } from "./parse.server";
 import { selectBestItineraries, calculatePercentiles, DEFAULT_RANKING_PREFERENCES, type RankingPreferences } from "./scoring";
-import type { Itinerary, Route, Munro } from "./schema";
+import type { Itinerary, Route, Munro, Target, Result } from "./schema";
 
 export interface ItineraryOption {
   startId: string;
@@ -62,6 +61,9 @@ function selectDiverseOptions(
  */
 export function getBestItinerariesForTarget(
   targetId: string,
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  munroMap: Map<number, Munro>,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
   maxPerStartDay: number = 10,
   globalPercentiles?: Map<number, number>
@@ -114,7 +116,7 @@ export function getBestItinerariesForTarget(
   bestOptions.sort((a, b) => b.score - a.score);
 
   // Calculate percentiles if not provided, then apply them
-  const percentileMap = globalPercentiles ?? calculateGlobalPercentiles(prefs);
+  const percentileMap = globalPercentiles ?? calculateGlobalPercentiles(resultMap, targetMap, prefs);
   for (const option of bestOptions) {
     const percentile = percentileMap.get(option.score) ?? 0;
     option.score = percentile;
@@ -152,22 +154,42 @@ export function getBestItinerariesForTarget(
   };
 }
 
-/**
- * Calculate global percentiles for all itinerary scores
- * Call this once before generating all targets
- */
-export function calculateGlobalPercentiles(
-  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
-): Map<number, number> {
-  const allScores: number[] = [];
+// Cache structure for pre-computed target itineraries
+interface TargetItinerariesCache {
+  targetId: string;
+  options: Array<{
+    startId: string;
+    day: string;
+    outbound: Itinerary;
+    return: Itinerary;
+    rawScore: number;
+  }>;
+}
 
-  // Collect all scores from all targets
+/**
+ * Pre-compute all viable itinerary pairs for all targets
+ * This does the expensive work once and returns both the options and percentile map
+ */
+export function computeAllTargetItineraries(
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
+): {
+  targetCache: Map<string, TargetItinerariesCache>;
+  percentileMap: Map<number, number>;
+} {
+  const allScores: number[] = [];
+  const targetCache = new Map<string, TargetItinerariesCache>();
+
+  // Compute all viable pairs for all targets in one pass
   for (const [targetId, target] of targetMap.entries()) {
     const longestRoute = target.routes.reduce((longest, route) => {
       const longestMax = longest.stats.timeHours.max;
       const routeMax = route.stats.timeHours.max;
       return routeMax > longestMax ? route : longest;
     }, target.routes[0]);
+
+    const options: TargetItinerariesCache['options'] = [];
 
     for (const result of resultMap.values()) {
       if (result.target !== targetId) continue;
@@ -184,14 +206,39 @@ export function calculateGlobalPercentiles(
           Infinity
         );
 
-        for (const { score } of viable) {
+        for (const { outbound, return: returnItin, score } of viable) {
+          options.push({
+            startId: result.start,
+            day,
+            outbound,
+            return: returnItin,
+            rawScore: score.rawScore,
+          });
           allScores.push(score.rawScore);
         }
       }
     }
+
+    if (options.length > 0) {
+      targetCache.set(targetId, { targetId, options });
+    }
   }
 
-  return calculatePercentiles(allScores);
+  const percentileMap = calculatePercentiles(allScores);
+  return { targetCache, percentileMap };
+}
+
+/**
+ * Calculate global percentiles for all itinerary scores
+ * DEPRECATED: Use computeAllTargetItineraries instead for better performance
+ */
+export function calculateGlobalPercentiles(
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
+): Map<number, number> {
+  const { percentileMap } = computeAllTargetItineraries(resultMap, targetMap, prefs);
+  return percentileMap;
 }
 
 /**
@@ -199,19 +246,65 @@ export function calculateGlobalPercentiles(
  * Scores are normalized to global percentiles
  */
 export function getAllTargetsWithBestItineraries(
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  munroMap: Map<number, Munro>,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): TargetWithBestItineraries[] {
-  // First, calculate global percentiles
-  const globalPercentiles = calculateGlobalPercentiles(prefs);
-
+  // Compute all itineraries and percentiles in one pass
+  const { targetCache, percentileMap } = computeAllTargetItineraries(resultMap, targetMap, prefs);
+  
   const targetsWithItineraries: TargetWithBestItineraries[] = [];
 
-  // For each target (trailhead)
-  for (const [targetId] of targetMap.entries()) {
-    const targetData = getBestItinerariesForTarget(targetId, prefs, 10, globalPercentiles);
-    if (targetData && targetData.bestOptions.length > 0) {
-      targetsWithItineraries.push(targetData);
+  // For each target, build the result using cached data
+  for (const [targetId, cached] of targetCache.entries()) {
+    const target = targetMap.get(targetId);
+    if (!target) continue;
+
+    // Apply percentiles to cached scores
+    const bestOptions: ItineraryOption[] = cached.options.map(opt => ({
+      startId: opt.startId,
+      startName: opt.startId,
+      day: opt.day,
+      outbound: opt.outbound,
+      return: opt.return,
+      score: percentileMap.get(opt.rawScore) ?? 0,
+    }));
+
+    // Sort by percentile score
+    bestOptions.sort((a, b) => b.score - a.score);
+
+    // Limit options per start/day combination
+    const maxPerStartDay = 10;
+    const limitedOptions: ItineraryOption[] = [];
+    const countsByStartDay = new Map<string, number>();
+
+    for (const option of bestOptions) {
+      const key = `${option.startId}-${option.day}`;
+      const count = countsByStartDay.get(key) || 0;
+      if (count < maxPerStartDay) {
+        limitedOptions.push(option);
+        countsByStartDay.set(key, count + 1);
+      }
     }
+
+    // Resolve route details
+    const routes = target.routes.map(route => {
+      const munros = route.munros.map(rm => {
+        const munro = munroMap.get(rm.number);
+        if (!munro) throw new Error(`Munro ${rm.number} not found`);
+        return munro;
+      });
+      return { route, munros };
+    });
+
+    targetsWithItineraries.push({
+      targetId,
+      targetName: target.name,
+      targetDescription: target.description,
+      routes,
+      bestOptions: limitedOptions,
+    });
   }
 
   return targetsWithItineraries;
@@ -234,10 +327,13 @@ export interface TargetWithRoutes {
  * Get top N targets (trailheads) for each starting location
  */
 export function getTopTargetsPerStart(
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  munroMap: Map<number, Munro>,
   n: number = 10,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): Map<string, TargetWithRoutes[]> {
-  const allTargets = getAllTargetsWithBestItineraries(prefs);
+  const allTargets = getAllTargetsWithBestItineraries(resultMap, targetMap, munroMap, prefs);
   const targetsByStart = new Map<string, TargetWithRoutes[]>();
 
   // For each target, create filtered versions per start location
@@ -285,7 +381,11 @@ export function getTopTargetsPerStart(
 /**
  * Get stats about itinerary availability
  */
-export function getAvailabilityStats() {
+export function getAvailabilityStats(
+  resultMap: Map<string, Result>,
+  targetMap: Map<string, Target>,
+  munroMap: Map<number, Munro>
+) {
   let totalRoutes = 0;
   let totalTargets = 0;
   let targetsWithItineraries = 0;
@@ -296,7 +396,7 @@ export function getAvailabilityStats() {
     totalRoutes += target.routes.length;
   }
 
-  const allTargets = getAllTargetsWithBestItineraries();
+  const allTargets = getAllTargetsWithBestItineraries(resultMap, targetMap, munroMap);
   for (const target of allTargets) {
     if (target.bestOptions.length > 0) {
       targetsWithItineraries++;

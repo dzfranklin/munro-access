@@ -8,8 +8,8 @@ export function Footer({ samplePeriod }: FooterProps) {
   return (
     <footer className="mt-10 p-5 bg-gray-50 border border-gray-300 text-[13px] leading-relaxed">
       <p className="m-0 mb-6 text-gray-600">
-        <strong>Note:</strong> Always verify current timetables. These are based
-        on sample data for {samplePeriod}.
+        <strong>Note:</strong> Always verify current timetables. This site uses
+        sample itineraries from {samplePeriod}.
       </p>
 
       <h3 className="text-base font-bold text-gray-800 m-0 mb-3">Browse</h3>

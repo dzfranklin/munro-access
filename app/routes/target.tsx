@@ -1,4 +1,4 @@
-import { targetMap, startMap } from "results/parse.server";
+import { targetMap, startMap, munroMap, resultMap } from "results/parse.server";
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
@@ -31,9 +31,12 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
 
-  // Get best itineraries for this target
+  // Get best itineraries for this target with default preferences
   const bestItineraries = getBestItinerariesForTarget(
     params.id,
+    resultMap,
+    targetMap,
+    munroMap,
     DEFAULT_RANKING_PREFERENCES
   );
 
@@ -61,15 +64,40 @@ export async function loader({ params }: Route.LoaderArgs) {
       name: startMap.get(id)?.name || id,
     }));
 
-  return { target, bestItineraries, gmapsEmbedKey, starts };
+  return { target, bestItineraries, gmapsEmbedKey, starts, resultMap, targetMap, munroMap };
 }
 
 export default function Target({ loaderData }: Route.ComponentProps) {
-  const { target, bestItineraries, gmapsEmbedKey, starts } = loaderData;
+  const { target, bestItineraries: initialBestItineraries, gmapsEmbedKey, starts, resultMap, targetMap, munroMap } = loaderData;
   const { preferences } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
   const [timelineModalOpen, setTimelineModalOpen] = React.useState(false);
   const [timelineDay, setTimelineDay] = React.useState<string | null>(null);
+
+  // Recompute best itineraries when preferences change
+  const bestItineraries = React.useMemo(() => {
+    // Check if preferences differ from defaults
+    const prefsChanged = Object.keys(DEFAULT_RANKING_PREFERENCES).some(
+      (key) =>
+        preferences[key as keyof typeof DEFAULT_RANKING_PREFERENCES] !==
+        DEFAULT_RANKING_PREFERENCES[
+          key as keyof typeof DEFAULT_RANKING_PREFERENCES
+        ]
+    );
+
+    if (!prefsChanged) {
+      return initialBestItineraries;
+    }
+
+    // Re-compute with user preferences
+    return getBestItinerariesForTarget(
+      target.id,
+      resultMap,
+      targetMap,
+      munroMap,
+      preferences
+    );
+  }, [preferences, initialBestItineraries, target.id, resultMap, targetMap, munroMap]);
 
   // Read start from URL
   const urlStart = searchParams.get("start");

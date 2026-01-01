@@ -57,7 +57,7 @@ describe('best-itineraries', () => {
   });
 
   it('should return null if target not found', () => {
-    const result = getBestItinerariesForTarget('missing');
+    const result = getBestItinerariesForTarget('missing', resultMap, targetMap, munroMap);
     expect(result).toBeNull();
   });
 
@@ -78,7 +78,7 @@ describe('best-itineraries', () => {
 
     resultMap.set('s1:t1', result);
 
-    const best = getBestItinerariesForTarget('t1');
+    const best = getBestItinerariesForTarget('t1', resultMap, targetMap, munroMap);
     
     expect(best).not.toBeNull();
     expect(best?.targetId).toBe('t1');
@@ -104,7 +104,7 @@ describe('best-itineraries', () => {
     };
     resultMap.set('s1:t1', result);
 
-    const best = getBestItinerariesForTarget('t1');
+    const best = getBestItinerariesForTarget('t1', resultMap, targetMap, munroMap);
     
     // Since there is only one score, it should have percentile 0
     // Wait, calculatePercentiles: 1 item -> percentile 0. 

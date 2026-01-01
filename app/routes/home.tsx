@@ -8,6 +8,7 @@ import {
   startMap,
   munroMap,
   targetMap,
+  resultMap,
 } from "results/parse.server";
 import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
@@ -27,8 +28,11 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader({}: Route.LoaderArgs) {
-  // Get all targets (trailheads) for each starting location
+  // Get all targets (trailheads) for each starting location with default preferences
   const targetsByStart = getTopTargetsPerStart(
+    resultMap,
+    targetMap,
+    munroMap,
     Infinity,
     DEFAULT_RANKING_PREFERENCES
   );
@@ -52,16 +56,80 @@ export async function loader({}: Route.LoaderArgs) {
   const allMunros = Array.from(munroMap.values());
   const allTargets = Array.from(targetMap.values());
 
-  return { targetsData, sampleDates, allMunros, allTargets };
+  // Return maps for client-side re-computation
+  return {
+    targetsData,
+    sampleDates,
+    allMunros,
+    allTargets,
+    resultMap,
+    targetMap,
+    munroMap,
+    startMap,
+  };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { targetsData, sampleDates, allMunros, allTargets } = loaderData;
+  const {
+    targetsData: initialTargetsData,
+    sampleDates,
+    allMunros,
+    allTargets,
+    resultMap,
+    targetMap,
+    munroMap,
+    startMap,
+  } = loaderData;
   const { preferences, updatePreferences } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const itemsPerPage = 10;
+
+  // Recompute targets when preferences change
+  const targetsData = React.useMemo(() => {
+    // Check if preferences differ from defaults
+    const prefsChanged = Object.keys(DEFAULT_RANKING_PREFERENCES).some(
+      (key) =>
+        preferences[key as keyof typeof DEFAULT_RANKING_PREFERENCES] !==
+        DEFAULT_RANKING_PREFERENCES[
+          key as keyof typeof DEFAULT_RANKING_PREFERENCES
+        ]
+    );
+
+    if (!prefsChanged) {
+      return initialTargetsData;
+    }
+
+    // Re-compute with user preferences
+    const targetsByStart = getTopTargetsPerStart(
+      resultMap,
+      targetMap,
+      munroMap,
+      Infinity,
+      preferences
+    );
+
+    return Array.from(targetsByStart.entries())
+      .map(([startId, targets]) => ({
+        startId,
+        startName: startMap.get(startId)?.name || startId,
+        targets,
+      }))
+      .sort((a, b) => {
+        return (
+          START_LOCATION_ORDER.indexOf(a.startName as any) -
+          START_LOCATION_ORDER.indexOf(b.startName as any)
+        );
+      });
+  }, [
+    preferences,
+    initialTargetsData,
+    resultMap,
+    targetMap,
+    munroMap,
+    startMap,
+  ]);
 
   // Read current state from URL
   const urlStart = searchParams.get("start");
