@@ -1,4 +1,4 @@
-import type { MinimalItinerary } from "results/schema";
+import type { Itinerary } from "results/schema";
 
 // Text formatting
 
@@ -69,11 +69,11 @@ export function formatSamplePeriod(dates: string[]): string {
   return `${start.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} - ${end.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`;
 }
 
-export function isSameDay(itin1: MinimalItinerary, itin2: MinimalItinerary): boolean {
+export function isSameDay(itin1: Itinerary, itin2: Itinerary): boolean {
   return itin1.date === itin2.date;
 }
 
-export function isNextDay(outbound: MinimalItinerary, returnItin: MinimalItinerary): boolean {
+export function isNextDay(outbound: Itinerary, returnItin: Itinerary): boolean {
   const outboundDate = new Date(outbound.date);
   const returnDate = new Date(returnItin.date);
   const nextDay = new Date(outboundDate);
@@ -85,8 +85,8 @@ export function isNextDay(outbound: MinimalItinerary, returnItin: MinimalItinera
 }
 
 export function getDaysBetween(
-  outbound: MinimalItinerary,
-  returnItin: MinimalItinerary
+  outbound: Itinerary,
+  returnItin: Itinerary
 ): number {
   const diffMs = returnItin.dateMs - outbound.dateMs;
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
@@ -104,6 +104,6 @@ export function calculateDuration(
   return durationMs / (1000 * 60 * 60);
 }
 
-export function isOvernightJourney(itinerary: MinimalItinerary): boolean {
+export function isOvernightJourney(itinerary: Itinerary): boolean {
   return itinerary.isOvernight;
 }

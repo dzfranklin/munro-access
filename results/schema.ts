@@ -83,29 +83,20 @@ export const legSchema = z.object({
 });
 
 export const itinerarySchema = z.object({
-  date: z.iso.date(),
-  startTime: z.iso.time(),
-  endTime: z.iso.time(),
+  date: z.string(), // Format: "YYYY-MM-DD"
+  startTime: z.string(),
+  endTime: z.string(),
   modes: z.array(modeSchema),
   legs: z.array(legSchema),
 });
 
-// Minimal itinerary data needed for scoring (no leg details)
-export interface MinimalItinerary {
-  date: string;
-  startTime: string;
-  endTime: string;
-  modes: Mode[];
-  startTimeHours: number;
-  endTimeHours: number;
-  isOvernight: boolean;
-  dateMs: number;
-}
-
 // Enhanced runtime type with parsed numeric values
-// Extends MinimalItinerary and adds legs for full itinerary details
-export interface Itinerary extends MinimalItinerary, Omit<z.infer<typeof itinerarySchema>, keyof MinimalItinerary> {
-  // legs property comes from itinerarySchema
+export interface Itinerary extends z.infer<typeof itinerarySchema> {
+  // Numeric representations for fast computation
+  startTimeHours: number;  // e.g., 9.5 for "09:30:00"
+  endTimeHours: number;    // e.g., 11.75 for "11:45:00"
+  isOvernight: boolean;    // true if journey crosses midnight
+  dateMs: number;          // milliseconds since epoch for date comparison
 }
 
 export const dayItinerariesSchema = z.object({
@@ -124,10 +115,10 @@ export const resultSchema = z.object({
   }),
 });
 
-// Base Result type from schema (itineraries don't have enhanced fields yet)
+// Base schema type (before enhancement)
 export type ResultFromSchema = z.infer<typeof resultSchema>;
 
-// Enhanced Result type with precomputed itinerary fields
+// Enhanced Result type with enhanced itineraries
 export interface Result {
   start: string;
   target: string;

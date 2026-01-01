@@ -13,7 +13,7 @@ import {
   type Target,
 } from "./schema";
 import { slugify } from "../app/utils/format";
-import { computeAllTargetItineraries, toMinimalCache, toMinimalRoutes, toMinimalItinerary } from "./best-itineraries";
+import { computeAllTargetItineraries } from "./best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "./scoring";
 
 function parseTime(timeStr: string): number {
@@ -88,26 +88,26 @@ function parseResults(): Map<string, Result> {
     }
 
     // Enhance all itineraries with precomputed values
-    const resultFromSchema: ResultFromSchema = parsed.data;
+    const baseResult: ResultFromSchema = parsed.data;
     const result: Result = {
-      start: resultFromSchema.start,
-      target: resultFromSchema.target,
+      start: baseResult.start,
+      target: baseResult.target,
       itineraries: {
         WEDNESDAY: {
-          outbounds: resultFromSchema.itineraries.WEDNESDAY.outbounds.map(enhanceItinerary),
-          returns: resultFromSchema.itineraries.WEDNESDAY.returns.map(enhanceItinerary),
+          outbounds: baseResult.itineraries.WEDNESDAY.outbounds.map(enhanceItinerary),
+          returns: baseResult.itineraries.WEDNESDAY.returns.map(enhanceItinerary),
         },
         FRIDAY: {
-          outbounds: resultFromSchema.itineraries.FRIDAY.outbounds.map(enhanceItinerary),
-          returns: resultFromSchema.itineraries.FRIDAY.returns.map(enhanceItinerary),
+          outbounds: baseResult.itineraries.FRIDAY.outbounds.map(enhanceItinerary),
+          returns: baseResult.itineraries.FRIDAY.returns.map(enhanceItinerary),
         },
         SATURDAY: {
-          outbounds: resultFromSchema.itineraries.SATURDAY.outbounds.map(enhanceItinerary),
-          returns: resultFromSchema.itineraries.SATURDAY.returns.map(enhanceItinerary),
+          outbounds: baseResult.itineraries.SATURDAY.outbounds.map(enhanceItinerary),
+          returns: baseResult.itineraries.SATURDAY.returns.map(enhanceItinerary),
         },
         SUNDAY: {
-          outbounds: resultFromSchema.itineraries.SUNDAY.outbounds.map(enhanceItinerary),
-          returns: resultFromSchema.itineraries.SUNDAY.returns.map(enhanceItinerary),
+          outbounds: baseResult.itineraries.SUNDAY.outbounds.map(enhanceItinerary),
+          returns: baseResult.itineraries.SUNDAY.returns.map(enhanceItinerary),
         },
       },
     };
@@ -129,11 +129,6 @@ const {
 );
 
 export { targetCacheForDefaultPrefs, percentileMapForDefaultPrefs };
-
-// Export minimal versions for client-side use (much smaller serialization)
-export const minimalTargetCache = toMinimalCache(targetCacheForDefaultPrefs);
-export const minimalRoutes = toMinimalRoutes(targetMap);
-export { toMinimalItinerary };
 
 export function getSampleDates(): string[] {
   const dates = new Set<string>();

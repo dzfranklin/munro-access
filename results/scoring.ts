@@ -1,5 +1,4 @@
-import type { Itinerary, Route, MinimalItinerary } from "./schema";
-import type { MinimalRoute } from "./best-itineraries";
+import type { Itinerary, Route } from "./schema";
 import { z } from "zod";
 import {
   isSameDay,
@@ -103,9 +102,9 @@ interface ItineraryScore {
  * Returns score object if feasible, null if infeasible
  */
 export function scoreItineraryPair(
-  outbound: MinimalItinerary,
-  returnItin: MinimalItinerary | null,
-  route: Route | MinimalRoute,
+  outbound: Itinerary,
+  returnItin: Itinerary | null,
+  route: Route,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES
 ): ItineraryScore | null {
   const departureTime = outbound.startTimeHours;
@@ -262,20 +261,20 @@ export function scoreItineraryPair(
 /**
  * Find best itinerary pairs for a given day
  */
-export function selectBestItineraries<T extends MinimalItinerary>(
-  outbounds: T[],
-  returns: T[],
-  route: Route | MinimalRoute,
+export function selectBestItineraries(
+  outbounds: Itinerary[],
+  returns: Itinerary[],
+  route: Route,
   prefs: RankingPreferences = DEFAULT_RANKING_PREFERENCES,
   maxResults: number = 2
 ): Array<{
-  outbound: T;
-  return: T;
+  outbound: Itinerary;
+  return: Itinerary;
   score: ItineraryScore;
 }> {
   const scored: Array<{
-    outbound: T;
-    return: T;
+    outbound: Itinerary;
+    return: Itinerary;
     score: ItineraryScore;
   }> = [];
 

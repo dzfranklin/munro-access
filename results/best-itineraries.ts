@@ -1,19 +1,5 @@
 import { selectBestItineraries, calculatePercentiles, scoreItineraryPair, DEFAULT_RANKING_PREFERENCES, type RankingPreferences } from "./scoring";
-import type { Itinerary, Route, Munro, Target, Result, MinimalItinerary } from "./schema";
-
-// Helper to convert full Itinerary to MinimalItinerary
-export function toMinimalItinerary(itin: Itinerary): MinimalItinerary {
-  return {
-    date: itin.date,
-    startTime: itin.startTime,
-    endTime: itin.endTime,
-    modes: itin.modes,
-    startTimeHours: itin.startTimeHours,
-    endTimeHours: itin.endTimeHours,
-    isOvernight: itin.isOvernight,
-    dateMs: itin.dateMs,
-  };
-}
+import type { Itinerary, Route, Munro, Target, Result } from "./schema";
 
 export interface ItineraryOption {
   startId: string;
@@ -212,66 +198,6 @@ interface TargetItinerariesCache {
   }>;
 }
 
-// Minimal cache structure for client-side use (no leg details)
-export interface MinimalTargetItinerariesCache {
-  targetId: string;
-  options: Array<{
-    startId: string;
-    day: string;
-    outbound: MinimalItinerary;
-    return: MinimalItinerary;
-    rawScore: number;
-  }>;
-}
-
-// Minimal route data needed for scoring
-export interface MinimalRoute {
-  stats: {
-    timeHours: {
-      max: number;
-    };
-  };
-}
-
-// Convert full cache to minimal cache
-export function toMinimalCache(cache: Map<string, TargetItinerariesCache>): Map<string, MinimalTargetItinerariesCache> {
-  const minimalCache = new Map<string, MinimalTargetItinerariesCache>();
-  for (const [targetId, targetCache] of cache.entries()) {
-    minimalCache.set(targetId, {
-      targetId,
-      options: targetCache.options.map(opt => ({
-        startId: opt.startId,
-        day: opt.day,
-        outbound: toMinimalItinerary(opt.outbound),
-        return: toMinimalItinerary(opt.return),
-        rawScore: opt.rawScore,
-      })),
-    });
-  }
-  return minimalCache;
-}
-
-// Convert target map to minimal routes map
-export function toMinimalRoutes(targetMap: Map<string, Target>): Map<string, MinimalRoute> {
-  const minimalRoutes = new Map<string, MinimalRoute>();
-  for (const [targetId, target] of targetMap.entries()) {
-    const longestRoute = target.routes.reduce((longest, route) => {
-      const longestMax = longest.stats.timeHours.max;
-      const routeMax = route.stats.timeHours.max;
-      return routeMax > longestMax ? route : longest;
-    }, target.routes[0]);
-    
-    minimalRoutes.set(targetId, {
-      stats: {
-        timeHours: {
-          max: longestRoute.stats.timeHours.max,
-        },
-      },
-    });
-  }
-  return minimalRoutes;
-}
-
 /**
  * Pre-compute all viable itinerary pairs for all targets
  * This does the expensive work once and returns both the options and percentile map
@@ -332,38 +258,6 @@ export function computeAllTargetItineraries(
 
   const percentileMap = calculatePercentiles(allScores);
   return { targetCache, percentileMap };
-}
-
-/**
- * Recompute percentiles for pre-cached minimal itineraries with custom preferences
- * This allows client-side preference changes without re-fetching all data
- */
-export function recomputePercentilesFromMinimalCache(
-  minimalCache: Map<string, MinimalTargetItinerariesCache>,
-  minimalRoutes: Map<string, MinimalRoute>,
-  prefs: RankingPreferences
-): Map<number, number> {
-  const allScores: number[] = [];
-
-  // Rescore all cached itinerary pairs with new preferences
-  for (const [targetId, targetData] of minimalCache.entries()) {
-    const route = minimalRoutes.get(targetId);
-    if (!route) continue;
-
-    for (const option of targetData.options) {
-      const score = scoreItineraryPair(
-        option.outbound,
-        option.return,
-        route,
-        prefs
-      );
-      if (score) {
-        allScores.push(score.rawScore);
-      }
-    }
-  }
-
-  return calculatePercentiles(allScores);
 }
 
 /**
