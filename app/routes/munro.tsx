@@ -84,19 +84,20 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
         ) : (
           <div className="space-y-6">
             {targets.map((target) => (
-              <div
-                key={target.id}
-                className="border-b border-gray-200 pb-6"
-              >
-                <h3 className="font-serif text-lg font-bold text-theme-navy-900 mb-3">
+              <div key={target.id} className="border-b border-gray-200 pb-6">
+                <h3 className="font-serif text-lg font-bold text-theme-navy-900 mb-1">
                   <Link
                     to={`/target/${target.id}`}
                     className="text-theme-navy-700 underline"
                   >
-                    {target.description}
+                    {target.name}
                   </Link>
                 </h3>
-                <p className="text-sm text-gray-600 mb-3">{target.name}</p>
+                {target.description !== target.name && (
+                  <p className="text-sm text-gray-600 mb-3">
+                    {target.description}
+                  </p>
+                )}
 
                 <div className="pl-4">
                   <h4 className="text-sm font-bold text-gray-700 mb-2">
@@ -105,17 +106,22 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
                   <ul className="list-none m-0 p-0 space-y-2">
                     {target.routes.map((route) => (
                       <li key={route.page}>
-                        <a
-                          href={route.page}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-theme-navy-700 underline text-sm"
-                        >
+                        <div className="text-theme-navy-700 text-sm">
                           {route.name}
-                        </a>
+                        </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {route.stats.distanceKm}km • {route.stats.timeHours.min}-
-                          {route.stats.timeHours.max}h • {route.stats.ascentM}m ascent
+                          {route.stats.distanceKm}km •{" "}
+                          {route.stats.timeHours.min}-
+                          {route.stats.timeHours.max}h • {route.stats.ascentM}m
+                          ascent •{" "}
+                          <a
+                            href={route.page}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            walkhighlands
+                          </a>
                         </div>
                         {route.munros.length > 1 && (
                           <div className="text-xs text-gray-500 mt-1">
@@ -129,7 +135,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
                                       .toLowerCase()
                                       .replace(/\s+/g, "-")
                                       .replace(/[^a-z0-9-]/g, "")}`}
-                                    className="text-theme-green-600 underline"
+                                    className="text-theme-navy-700 underline"
                                   >
                                     {m.name}
                                   </Link>
@@ -147,7 +153,6 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
           </div>
         )}
       </section>
-
     </>
   );
 }

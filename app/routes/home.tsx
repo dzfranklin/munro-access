@@ -1,8 +1,12 @@
 import type { Route } from "./+types/home";
 import { getTopTargetsPerStart } from "results/best-itineraries";
-import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
+import {
+  DEFAULT_PREFERENCES,
+  userPreferencesSchema,
+  type UserPreferences,
+} from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, data } from "react-router";
 import {
   getSampleDates,
   startMap,
@@ -14,9 +18,9 @@ import {
 } from "results/parse.server";
 import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
-import { usePreferences } from "~/preferences-context";
 import { PreferencesPanel } from "~/components/PreferencesPanel";
 import { START_LOCATION_ORDER } from "~/utils/constants";
+import type { Itinerary } from "results/schema";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -29,25 +33,116 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({}: Route.LoaderArgs) {
-  // Get all targets (trailheads) for each starting location with default preferences
+function parsePreferencesFromCookie(
+  cookieHeader: string | null
+): UserPreferences {
+  if (!cookieHeader) {
+    return DEFAULT_PREFERENCES;
+  }
+
+  const cookies = Object.fromEntries(
+    cookieHeader.split(";").map((c) => {
+      const [key, ...v] = c.trim().split("=");
+      return [key, decodeURIComponent(v.join("="))];
+    })
+  );
+
+  const prefsCookie = cookies["munro-access-preferences"];
+  if (!prefsCookie) {
+    return DEFAULT_PREFERENCES;
+  }
+
+  try {
+    const parsed = JSON.parse(prefsCookie);
+    const validated = userPreferencesSchema.parse({
+      ...DEFAULT_PREFERENCES,
+      ...parsed,
+    });
+    return validated;
+  } catch (error) {
+    console.warn("Invalid preferences in cookie, using defaults:", error);
+    return DEFAULT_PREFERENCES;
+  }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const prefsJson = formData.get("preferences");
+
+  if (typeof prefsJson !== "string") {
+    return data({ error: "Invalid preferences" }, { status: 400 });
+  }
+
+  try {
+    const preferences = JSON.parse(prefsJson);
+    // Validate the preferences
+    userPreferencesSchema.parse(preferences);
+
+    // Set the cookie in the response
+    return data(
+      { success: true },
+      {
+        headers: {
+          "Set-Cookie": `munro-access-preferences=${encodeURIComponent(prefsJson)}; Path=/; Max-Age=${365 * 24 * 60 * 60}; SameSite=Lax`,
+        },
+      }
+    );
+  } catch (e) {
+    console.error("Failed to save preferences:", e);
+    return data({ error: "Invalid preferences data" }, { status: 400 });
+  }
+}
+
+// Minimal itinerary data for client (no legs, coordinates, or extra metadata)
+type MinimalItinerary = Pick<
+  Itinerary,
+  "date" | "startTime" | "endTime" | "modes"
+>;
+
+function stripItineraryData(itin: Itinerary): MinimalItinerary {
+  return {
+    date: itin.date,
+    startTime: itin.startTime,
+    endTime: itin.endTime,
+    modes: itin.modes,
+  };
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  // Parse preferences from cookie
+  const cookieHeader = request.headers.get("Cookie");
+  const preferences = parsePreferencesFromCookie(cookieHeader);
+
+  // Determine if we're using default preferences (for optimization)
+  const isDefaultPrefs =
+    JSON.stringify(preferences) === JSON.stringify(DEFAULT_PREFERENCES);
+
+  // Get all targets (trailheads) for each starting location with user preferences
   const targetsByStart = getTopTargetsPerStart(
     resultMap,
     targetMap,
     munroMap,
     Infinity,
-    DEFAULT_RANKING_PREFERENCES,
-    targetCacheForDefaultPrefs,
-    percentileMapForDefaultPrefs
+    preferences,
+    isDefaultPrefs ? targetCacheForDefaultPrefs : undefined,
+    isDefaultPrefs ? percentileMapForDefaultPrefs : undefined
   );
   const sampleDates = getSampleDates();
 
   // Convert Map to array with start names, sorted by standard order
+  // Strip down itinerary data to only what's needed for display
   const targetsData = Array.from(targetsByStart.entries())
     .map(([startId, targets]) => ({
       startId,
       startName: startMap.get(startId)?.name || startId,
-      targets,
+      targets: targets.map((target) => ({
+        ...target,
+        displayOptions: target.displayOptions?.map((opt) => ({
+          ...opt,
+          outbound: stripItineraryData(opt.outbound),
+          return: stripItineraryData(opt.return),
+        })),
+      })),
     }))
     .sort((a, b) => {
       return (
@@ -56,94 +151,58 @@ export async function loader({}: Route.LoaderArgs) {
       );
     });
 
-  // Get all munros and targets for search
-  const allMunros = Array.from(munroMap.values());
-  const allTargets = Array.from(targetMap.values());
+  // For search: send munros and routes (not targets/trailheads)
+  const allRoutes = Array.from(targetMap.values()).flatMap((target) =>
+    target.routes.map((route) => ({
+      name: route.name,
+      targetId: target.id,
+      munroNames: route.munros.map((m) => m.name).join(", "),
+    }))
+  );
 
-  // Return maps for client-side re-computation
+  const searchData = {
+    munros: Array.from(munroMap.values()).map((m) => ({
+      number: m.number,
+      name: m.name,
+      slug: m.slug,
+    })),
+    routes: allRoutes,
+  };
+
+  // Get start locations for preferences panel
+  const startLocations = targetsData.map(({ startId, startName }) => ({
+    id: startId,
+    name: startName,
+  }));
+
   return {
     targetsData,
     sampleDates,
-    allMunros,
-    allTargets,
-    resultMap,
-    targetMap,
-    munroMap,
-    startMap,
+    searchData,
+    startLocations,
+    preferences,
   };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const {
-    targetsData: initialTargetsData,
-    sampleDates,
-    allMunros,
-    allTargets,
-    resultMap,
-    targetMap,
-    munroMap,
-    startMap,
-  } = loaderData;
-  const { preferences, updatePreferences } = usePreferences();
+  const { targetsData, sampleDates, searchData, startLocations, preferences } =
+    loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const itemsPerPage = 10;
 
-  // Recompute targets when preferences change
-  const targetsData = React.useMemo(() => {
-    // Check if preferences differ from defaults
-    const prefsChanged = Object.keys(DEFAULT_RANKING_PREFERENCES).some(
-      (key) =>
-        preferences[key as keyof typeof DEFAULT_RANKING_PREFERENCES] !==
-        DEFAULT_RANKING_PREFERENCES[
-          key as keyof typeof DEFAULT_RANKING_PREFERENCES
-        ]
-    );
-
-    if (!prefsChanged) {
-      return initialTargetsData;
-    }
-
-    // Re-compute with user preferences
-    const targetsByStart = getTopTargetsPerStart(
-      resultMap,
-      targetMap,
-      munroMap,
-      Infinity,
-      preferences
-    );
-
-    return Array.from(targetsByStart.entries())
-      .map(([startId, targets]) => ({
-        startId,
-        startName: startMap.get(startId)?.name || startId,
-        targets,
-      }))
-      .sort((a, b) => {
-        return (
-          START_LOCATION_ORDER.indexOf(a.startName as any) -
-          START_LOCATION_ORDER.indexOf(b.startName as any)
-        );
-      });
-  }, [
-    preferences,
-    initialTargetsData,
-    resultMap,
-    targetMap,
-    munroMap,
-    startMap,
-  ]);
-
   // Read current state from URL
   const urlStart = searchParams.get("start");
   const urlPage = searchParams.get("page");
 
-  // Priority: URL > preferredStartLocation > lastViewedStartLocation > first tab
+  // Priority: URL > preferredStartLocation (from cookie) > first tab
   const selectedStart =
     urlStart ||
-    preferences.preferredStartLocation ||
-    preferences.lastViewedStartLocation ||
+    (preferences.preferredStartLocation &&
+    targetsData.find((d) => d.startId === preferences.preferredStartLocation)
+      ? preferences.preferredStartLocation
+      : null) ||
     targetsData[0]?.startId;
   const currentPage = urlPage ? parseInt(urlPage, 10) : 1;
 
@@ -162,9 +221,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     }
   }, [selectedStart]);
 
-  // When user clicks a tab, update lastViewed and URL, reset to page 1, but don't scroll
+  // When user clicks a tab, update URL and reset to page 1
   const handleStartChange = (startId: string) => {
-    updatePreferences({ lastViewedStartLocation: startId });
     setSearchParams(
       { start: startId, page: "1" },
       { preventScrollReset: true }
@@ -187,29 +245,23 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const paginatedTargets =
     selectedData?.targets.slice(startIndex, endIndex) || [];
 
-  // Get all available start locations for preferences panel
-  const startLocations = targetsData.map(({ startId, startName }) => ({
-    id: startId,
-    name: startName,
-  }));
-
-  // Filter munros and targets based on search query
+  // Filter munros and routes based on search query
   const filteredMunros = searchQuery
-    ? allMunros.filter((m) =>
+    ? searchData.munros.filter((m) =>
         m.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
-  const filteredTargets = searchQuery
-    ? allTargets.filter(
-        (t) =>
-          t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRoutes = searchQuery
+    ? searchData.routes.filter(
+        (r) =>
+          r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.munroNames.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
   const showSearchResults = searchQuery.length > 0;
   const hasSearchResults =
-    filteredMunros.length > 0 || filteredTargets.length > 0;
+    filteredMunros.length > 0 || filteredRoutes.length > 0;
 
   return (
     <>
@@ -271,31 +323,29 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   )}
                 </div>
               )}
-              {filteredTargets.length > 0 && (
+              {filteredRoutes.length > 0 && (
                 <div>
                   <h3 className="text-base font-bold text-gray-800 mb-2">
                     Routes
                   </h3>
                   <ul className="list-none m-0 p-0 space-y-1">
-                    {filteredTargets.slice(0, 10).map((target) => (
-                      <li key={target.id}>
+                    {filteredRoutes.slice(0, 10).map((route, idx) => (
+                      <li key={`${route.targetId}-${idx}`}>
                         <Link
-                          to={`/target/${target.id}?start=${selectedStart}`}
+                          to={`/target/${route.targetId}?start=${selectedStart}`}
                           className="text-theme-navy-700 underline text-sm"
                         >
-                          {target.description}
+                          {route.name}
                         </Link>
-                        {target.description !== target.name && (
-                          <span className="text-gray-500 text-xs ml-2">
-                            ({target.name})
-                          </span>
-                        )}
+                        <span className="text-gray-500 text-xs ml-1">
+                          ({route.munroNames})
+                        </span>
                       </li>
                     ))}
                   </ul>
-                  {filteredTargets.length > 10 && (
+                  {filteredRoutes.length > 10 && (
                     <p className="text-xs text-gray-500 mt-2">
-                      + {filteredTargets.length - 10} more
+                      + {filteredRoutes.length - 10} more
                     </p>
                   )}
                 </div>
@@ -343,7 +393,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </p>
       </div>
 
-      <PreferencesPanel startLocations={startLocations} />
+      <PreferencesPanel
+        startLocations={startLocations}
+        initialPreferences={preferences}
+      />
 
       {/* Tabs */}
       {targetsData.length === 0 ? (

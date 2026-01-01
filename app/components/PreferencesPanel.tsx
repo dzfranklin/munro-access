@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { usePreferences } from "~/preferences-context";
+import { useState, useEffect } from "react";
+import { Form, useNavigation, useActionData } from "react-router";
 import { START_LOCATION_ORDER } from "~/utils/constants";
+import { type UserPreferences } from "results/scoring";
 
 type StartLocation = {
   id: string;
@@ -9,11 +10,25 @@ type StartLocation = {
 
 type PreferencesPanelProps = {
   startLocations: StartLocation[];
+  initialPreferences: UserPreferences;
 };
 
-export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
-  const { preferences, updatePreferences, resetPreferences } = usePreferences();
+export function PreferencesPanel({
+  startLocations,
+  initialPreferences,
+}: PreferencesPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigation = useNavigation();
+  const actionData = useActionData();
+
+  const isSubmitting = navigation.state === "submitting";
+
+  // Close panel after successful submission
+  useEffect(() => {
+    if (actionData) {
+      setIsOpen(false);
+    }
+  }, [actionData]);
 
   return (
     <div className="mb-6">
@@ -26,13 +41,18 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
       </button>
 
       {isOpen && (
-        <div className="mt-4 p-5 bg-gray-50 border border-gray-300">
+        <Form
+          method="post"
+          className="mt-4 p-5 bg-gray-50 border border-gray-300"
+        >
           <div className="border-b-2 border-gray-300 pb-3 mb-5">
             <h3 className="font-serif text-lg font-bold text-theme-navy-900 inline">
               Your Preferences
             </h3>
             <button
-              onClick={resetPreferences}
+              type="submit"
+              name="action"
+              value="reset"
               className="text-sm text-theme-navy-700 underline hover:no-underline float-right"
             >
               Reset to defaults
@@ -47,15 +67,11 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                   Preferred Start Location
                 </label>
                 <select
-                  value={preferences.preferredStartLocation || ""}
-                  onChange={(e) =>
-                    updatePreferences({
-                      preferredStartLocation: e.target.value || null,
-                    })
-                  }
+                  name="preferredStartLocation"
+                  defaultValue={initialPreferences.preferredStartLocation || ""}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm bg-white"
                 >
-                  <option value="">Use most recently selected location</option>
+                  <option value="">No preference</option>
                   {[...startLocations]
                     .sort(
                       (a, b) =>
@@ -77,12 +93,8 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 <label className="flex items-center text-sm text-gray-600">
                   <input
                     type="checkbox"
-                    checked={preferences.allowCycling}
-                    onChange={(e) =>
-                      updatePreferences({
-                        allowCycling: e.target.checked,
-                      })
-                    }
+                    name="allowCycling"
+                    defaultChecked={initialPreferences.allowCycling}
                     className="mr-2"
                   />
                   Allow cycling
@@ -95,19 +107,15 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
                   Overnight trip penalty:{" "}
-                  {Math.round(preferences.overnightPenalty * 100)}%
+                  {Math.round(initialPreferences.overnightPenalty * 100)}%
                 </label>
                 <input
                   type="range"
+                  name="overnightPenalty"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={preferences.overnightPenalty}
-                  onChange={(e) =>
-                    updatePreferences({
-                      overnightPenalty: parseFloat(e.target.value),
-                    })
-                  }
+                  defaultValue={initialPreferences.overnightPenalty}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500">
@@ -127,15 +135,8 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 </label>
                 <input
                   type="time"
-                  value={`${String(Math.floor(preferences.earliestDeparture)).padStart(2, "0")}:${String(Math.round((preferences.earliestDeparture % 1) * 60)).padStart(2, "0")}`}
-                  onChange={(e) => {
-                    const [hours, minutes] = e.target.value
-                      .split(":")
-                      .map(Number);
-                    updatePreferences({
-                      earliestDeparture: hours + minutes / 60,
-                    });
-                  }}
+                  name="earliestDeparture"
+                  defaultValue={`${String(Math.floor(initialPreferences.earliestDeparture)).padStart(2, "0")}:${String(Math.round((initialPreferences.earliestDeparture % 1) * 60)).padStart(2, "0")}`}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
               </div>
@@ -146,15 +147,8 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 </label>
                 <input
                   type="time"
-                  value={`${String(Math.floor(preferences.preferredLatestEnd)).padStart(2, "0")}:${String(Math.round((preferences.preferredLatestEnd % 1) * 60)).padStart(2, "0")}`}
-                  onChange={(e) => {
-                    const [hours, minutes] = e.target.value
-                      .split(":")
-                      .map(Number);
-                    updatePreferences({
-                      preferredLatestEnd: hours + minutes / 60,
-                    });
-                  }}
+                  name="preferredLatestEnd"
+                  defaultValue={`${String(Math.floor(initialPreferences.preferredLatestEnd)).padStart(2, "0")}:${String(Math.round((initialPreferences.preferredLatestEnd % 1) * 60)).padStart(2, "0")}`}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1.5">
@@ -168,15 +162,8 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 </label>
                 <input
                   type="time"
-                  value={`${String(Math.floor(preferences.hardLatestEnd)).padStart(2, "0")}:${String(Math.round((preferences.hardLatestEnd % 1) * 60)).padStart(2, "0")}`}
-                  onChange={(e) => {
-                    const [hours, minutes] = e.target.value
-                      .split(":")
-                      .map(Number);
-                    updatePreferences({
-                      hardLatestEnd: hours + minutes / 60,
-                    });
-                  }}
+                  name="hardLatestEnd"
+                  defaultValue={`${String(Math.floor(initialPreferences.hardLatestEnd)).padStart(2, "0")}:${String(Math.round((initialPreferences.hardLatestEnd % 1) * 60)).padStart(2, "0")}`}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1.5">
@@ -190,15 +177,11 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 </label>
                 <input
                   type="number"
+                  name="returnBuffer"
                   step="5"
                   min="15"
                   max="240"
-                  value={Math.round(preferences.returnBuffer * 60)}
-                  onChange={(e) =>
-                    updatePreferences({
-                      returnBuffer: parseInt(e.target.value) / 60,
-                    })
-                  }
+                  defaultValue={Math.round(initialPreferences.returnBuffer * 60)}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1.5">
@@ -209,19 +192,15 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Walking Speed: {preferences.walkingSpeed.toFixed(1)}x
+                  Walking Speed: {initialPreferences.walkingSpeed.toFixed(1)}x
                 </label>
                 <input
                   type="range"
+                  name="walkingSpeed"
                   min="0.6"
                   max="1.4"
                   step="0.1"
-                  value={preferences.walkingSpeed}
-                  onChange={(e) =>
-                    updatePreferences({
-                      walkingSpeed: parseFloat(e.target.value),
-                    })
-                  }
+                  defaultValue={initialPreferences.walkingSpeed}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500">
@@ -245,7 +224,7 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
               </p>
 
               <div className="space-y-3">
-                {Object.entries(preferences.weights).map(([key, value]) => (
+                {Object.entries(initialPreferences.weights).map(([key, value]) => (
                   <div key={key}>
                     <label className="block text-sm text-gray-600 mb-1">
                       {(key[0].toUpperCase() + key.slice(1))
@@ -255,18 +234,11 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                     </label>
                     <input
                       type="range"
+                      name={`weight_${key}`}
                       min="0"
                       max="1"
                       step="0.1"
-                      value={value}
-                      onChange={(e) =>
-                        updatePreferences({
-                          weights: {
-                            ...preferences.weights,
-                            [key]: parseFloat(e.target.value),
-                          },
-                        })
-                      }
+                      defaultValue={value}
                       className="w-full"
                     />
                   </div>
@@ -275,13 +247,29 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
             </div>
           </div>
 
+          <div className="mt-5 pt-4 border-t border-gray-300">
+            <button
+              type="submit"
+              name="action"
+              value="update"
+              disabled={isSubmitting}
+              className={`px-4 py-2 text-sm font-bold ${
+                !isSubmitting
+                  ? "bg-theme-navy-700 text-white hover:bg-theme-navy-900"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              {isSubmitting ? "Applying..." : "Apply Changes"}
+            </button>
+          </div>
+
           <div className="mt-5 pt-5 border-t border-gray-300 bg-gray-100 -mx-5 -mb-5 px-5 py-4">
             <p className="text-sm text-gray-700 m-0">
               <strong>Note:</strong> These preferences are saved in your browser
               and affect how routes are ranked.
             </p>
           </div>
-        </div>
+        </Form>
       )}
     </div>
   );
