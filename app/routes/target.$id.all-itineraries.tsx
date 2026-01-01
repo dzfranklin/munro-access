@@ -3,10 +3,12 @@ import type { Route } from "./+types/target.$id.all-itineraries";
 import { data, Link, useSearchParams } from "react-router";
 import { AllItinerariesList } from "~/components/AllItinerariesList";
 import React from "react";
-import { usePreferences } from "~/preferences-context";
 import { START_LOCATION_ORDER } from "~/utils/constants";
 import { resultID } from "results/schema";
 import { formatDayLabel } from "~/utils/format";
+import {
+  parsePreferencesFromCookie,
+} from "~/utils/preferences.server";
 
 type StartInfo = {
   id: string;
@@ -25,11 +27,15 @@ export function meta({ loaderData }: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const target = targetMap.get(params.id);
   if (!target) {
     throw data(null, { status: 404 });
   }
+
+  // Parse preferences from cookie
+  const cookieHeader = request.headers.get("Cookie");
+  const preferences = parsePreferencesFromCookie(cookieHeader);
 
   // Get raw itineraries for each start location and day
   const rawItineraries: Record<
@@ -66,12 +72,11 @@ export async function loader({ params }: Route.LoaderArgs) {
       name: startMap.get(id)?.name || id,
     }));
 
-  return { target, starts, rawItineraries };
+  return { target, starts, rawItineraries, preferences };
 }
 
 export default function AllItineraries({ loaderData }: Route.ComponentProps) {
-  const { target, starts, rawItineraries } = loaderData;
-  const { preferences } = usePreferences();
+  const { target, starts, rawItineraries, preferences } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read start from URL

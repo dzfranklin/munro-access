@@ -1,10 +1,6 @@
 import type { Route } from "./+types/home";
 import { getTopTargetsPerStart } from "results/best-itineraries";
-import {
-  DEFAULT_PREFERENCES,
-  userPreferencesSchema,
-  type UserPreferences,
-} from "results/scoring";
+import { DEFAULT_PREFERENCES, userPreferencesSchema } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams, data } from "react-router";
 import {
@@ -21,6 +17,10 @@ import React from "react";
 import { PreferencesPanel } from "~/components/PreferencesPanel";
 import { START_LOCATION_ORDER } from "~/utils/constants";
 import type { Itinerary } from "results/schema";
+import {
+  parsePreferencesFromCookie,
+  createPreferencesCookie,
+} from "~/utils/preferences.server";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,38 +31,6 @@ export function meta({}: Route.MetaArgs) {
         "Discover munros you can reach by public transport from Edinburgh, Glasgow, and Stirling",
     },
   ];
-}
-
-function parsePreferencesFromCookie(
-  cookieHeader: string | null
-): UserPreferences {
-  if (!cookieHeader) {
-    return DEFAULT_PREFERENCES;
-  }
-
-  const cookies = Object.fromEntries(
-    cookieHeader.split(";").map((c) => {
-      const [key, ...v] = c.trim().split("=");
-      return [key, decodeURIComponent(v.join("="))];
-    })
-  );
-
-  const prefsCookie = cookies["munro-access-preferences"];
-  if (!prefsCookie) {
-    return DEFAULT_PREFERENCES;
-  }
-
-  try {
-    const parsed = JSON.parse(prefsCookie);
-    const validated = userPreferencesSchema.parse({
-      ...DEFAULT_PREFERENCES,
-      ...parsed,
-    });
-    return validated;
-  } catch (error) {
-    console.warn("Invalid preferences in cookie, using defaults:", error);
-    return DEFAULT_PREFERENCES;
-  }
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -83,7 +51,7 @@ export async function action({ request }: Route.ActionArgs) {
       { success: true },
       {
         headers: {
-          "Set-Cookie": `munro-access-preferences=${encodeURIComponent(prefsJson)}; Path=/; Max-Age=${365 * 24 * 60 * 60}; SameSite=Lax`,
+          "Set-Cookie": createPreferencesCookie(preferences),
         },
       }
     );
@@ -96,7 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
 // Minimal itinerary data for client (no legs, coordinates, or extra metadata)
 type MinimalItinerary = Pick<
   Itinerary,
-  "date" | "startTime" | "endTime" | "modes"
+  "date" | "startTime" | "endTime" | "modes" | "dateMs"
 >;
 
 function stripItineraryData(itin: Itinerary): MinimalItinerary {
@@ -105,6 +73,7 @@ function stripItineraryData(itin: Itinerary): MinimalItinerary {
     startTime: itin.startTime,
     endTime: itin.endTime,
     modes: itin.modes,
+    dateMs: itin.dateMs,
   };
 }
 

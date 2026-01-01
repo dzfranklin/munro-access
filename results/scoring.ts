@@ -12,6 +12,9 @@ const rankingPreferencesSchema = z.object({
   // Earliest acceptable departure time (in hours, 24h format)
   earliestDeparture: z.number().min(0).max(24),
 
+  // Latest preferred return arrival time (in hours, 24h format) - arrivals after this are penalized
+  preferredLatestArrival: z.number().min(12).max(24),
+
   // Walking speed multiplier (1.0 = standard WalkHighlands time)
   walkingSpeed: z.number().min(0.5).max(2.0),
 
@@ -30,6 +33,7 @@ const rankingPreferencesSchema = z.object({
   // Preference weights (0-1, higher = more important)
   weights: z.object({
     departureTime: z.number().min(0).max(1),
+    returnTime: z.number().min(0).max(1),
     hikeDuration: z.number().min(0).max(1),
     returnOptions: z.number().min(0).max(1),
     totalDuration: z.number().min(0).max(1),
@@ -60,6 +64,7 @@ export { userPreferencesSchema, rankingPreferencesSchema, uiPreferencesSchema };
 
 export const DEFAULT_RANKING_PREFERENCES: RankingPreferences = {
   earliestDeparture: 6, // 6am earliest
+  preferredLatestArrival: 22, // 10pm latest preferred for return arrival
   walkingSpeed: 1.0, // Standard speed
   returnBuffer: 0.5, // 30 minutes
   preferredLatestEnd: 18, // 6pm preferred
@@ -68,6 +73,7 @@ export const DEFAULT_RANKING_PREFERENCES: RankingPreferences = {
   overnightPenalty: 0.3, // 30% penalty for overnight trips
   weights: {
     departureTime: 0.2,
+    returnTime: 0.15,
     hikeDuration: 1.0, // Most important
     returnOptions: 0.8,
     totalDuration: 0.6,
@@ -90,6 +96,7 @@ interface ItineraryScore {
   percentile: number;
   components: {
     departureTime: number;
+    returnTime: number;
     hikeDuration: number;
     returnOptions: number;
     totalDuration: number;
@@ -181,6 +188,7 @@ export function scoreItineraryPair(
   // Now calculate scoring components (all 0-1, higher is better)
   const components = {
     departureTime: 0,
+    returnTime: 0,
     hikeDuration: 0,
     returnOptions: 0,
     totalDuration: 0,
@@ -201,18 +209,48 @@ export function scoreItineraryPair(
     );
   }
 
-  // 2. Hike duration score (prefer having plenty of time, 1.2x route time is ideal)
+  // 2. Return time score (penalize late arrivals home, prefer before latestArrival)
+  // Arrivals at/before latestArrival on same day = 1.0, after = linear decay to 0.5 at midnight
+  // Early morning arrivals (after midnight) get reduced score based on how late
+  const returnArrivalTimeOfDay = returnItin.endTimeHours;
+
+  // Check if return arrival is after midnight (early morning of next day)
+  if (returnItin.isOvernight || daysBetween > 0) {
+    // Arrival is after midnight - penalize based on how far past midnight
+    if (returnArrivalTimeOfDay < 6) {
+      // Arrivals between midnight and 6am get reduced score
+      // 00:00 = 0.5, gradually increases to 1.0 by 6am
+      components.returnTime = 0.5 + (0.5 * returnArrivalTimeOfDay) / 6;
+    } else {
+      // Shouldn't happen (daytime arrivals on next day would be very late)
+      components.returnTime = 1.0;
+    }
+  } else {
+    // Same-day arrival
+    if (returnArrivalTimeOfDay <= prefs.preferredLatestArrival) {
+      components.returnTime = 1.0;
+    } else {
+      const hoursLate = returnArrivalTimeOfDay - prefs.preferredLatestArrival;
+      const maxLateHours = 24 - prefs.preferredLatestArrival;
+      components.returnTime = Math.max(
+        0.5,
+        1.0 - (0.5 * hoursLate) / maxLateHours
+      );
+    }
+  }
+
+  // 3. Hike duration score (prefer having plenty of time, 1.2x route time is ideal)
   const availableHikeTime =
     returnDepartureTime - prefs.returnBuffer - arrivalTime;
   const idealHikeTime = (route.stats.timeHours.max * 1.2) / prefs.walkingSpeed;
   const timeRatio = availableHikeTime / idealHikeTime;
   components.hikeDuration = timeRatio >= 1 ? 1.0 : Math.max(0, timeRatio);
 
-  // 3. Return options score (calculated separately - this is for a single pair)
+  // 4. Return options score (calculated separately - this is for a single pair)
   // Will be set to 1.0 if multiple viable returns exist, 0.5 if only one
   components.returnOptions = 0.5;
 
-  // 4. Total duration score (prefer shorter total journey)
+  // 5. Total duration score (prefer shorter total journey)
   const totalHours = calculateDuration(
     outbound.date,
     outbound.startTime,
@@ -223,7 +261,7 @@ export function scoreItineraryPair(
   // Penalize trips over 14 hours
   components.totalDuration = Math.max(0, 1 - (totalHours - 10) / 10);
 
-  // 5. Finish time score (prefer finishing before preferred time)
+  // 6. Finish time score (prefer finishing before preferred time)
   // 1.0 if before preferred, linear decrease to 0.0 at hard cutoff
   if (hikeEndTime <= prefs.preferredLatestEnd) {
     components.finishTime = 1.0;
@@ -236,6 +274,7 @@ export function scoreItineraryPair(
   // Calculate weighted total
   const total =
     components.departureTime * prefs.weights.departureTime +
+    components.returnTime * prefs.weights.returnTime +
     components.hikeDuration * prefs.weights.hikeDuration +
     components.returnOptions * prefs.weights.returnOptions +
     components.totalDuration * prefs.weights.totalDuration +

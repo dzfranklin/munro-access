@@ -9,13 +9,13 @@ import {
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
 import { getBestItinerariesForTarget } from "results/best-itineraries";
-import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
+import { DEFAULT_PREFERENCES } from "results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
 import { TimelineModal } from "~/components/TimelineModal";
 import React from "react";
-import { usePreferences } from "~/preferences-context";
 import { START_LOCATION_ORDER } from "~/utils/constants";
 import { formatDayLabel } from "~/utils/format";
+import { parsePreferencesFromCookie } from "~/utils/preferences.server";
 
 type StartInfo = {
   id: string;
@@ -32,22 +32,30 @@ export function meta({ loaderData }: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const target = targetMap.get(params.id);
   if (!target) {
     throw data(null, { status: 404 });
   }
 
-  // Get best itineraries for this target with default preferences
+  // Parse preferences from cookie
+  const cookieHeader = request.headers.get("Cookie");
+  const preferences = parsePreferencesFromCookie(cookieHeader);
+
+  // Determine if we're using default preferences (for optimization)
+  const isDefaultPrefs =
+    JSON.stringify(preferences) === JSON.stringify(DEFAULT_PREFERENCES);
+
+  // Get best itineraries for this target with user preferences
   const bestItineraries = getBestItinerariesForTarget(
     params.id,
     resultMap,
     targetMap,
     munroMap,
-    DEFAULT_RANKING_PREFERENCES,
+    preferences,
     10,
-    percentileMapForDefaultPrefs,
-    targetCacheForDefaultPrefs
+    isDefaultPrefs ? percentileMapForDefaultPrefs : undefined,
+    isDefaultPrefs ? targetCacheForDefaultPrefs : undefined
   );
 
   const gmapsEmbedKey = process.env.GOOGLE_MAPS_EMBED_KEY;
@@ -74,22 +82,25 @@ export async function loader({ params }: Route.LoaderArgs) {
       name: startMap.get(id)?.name || id,
     }));
 
+  // Get start locations for preferences panel
+  const startLocations = starts.map(({ id, name }) => ({
+    id,
+    name,
+  }));
+
   return {
     target,
     bestItineraries,
     gmapsEmbedKey,
     starts,
+    preferences,
+    startLocations,
   };
 }
 
 export default function Target({ loaderData }: Route.ComponentProps) {
-  const {
-    target,
-    bestItineraries,
-    gmapsEmbedKey,
-    starts,
-  } = loaderData;
-  const { preferences } = usePreferences();
+  const { target, bestItineraries, gmapsEmbedKey, starts, preferences } =
+    loaderData;
   const [searchParams, setSearchParams] = useSearchParams();
   const [timelineModalOpen, setTimelineModalOpen] = React.useState(false);
   const [timelineDay, setTimelineDay] = React.useState<string | null>(null);

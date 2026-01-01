@@ -10,9 +10,15 @@ import {
 } from "~/utils/format";
 import { formatModes } from "~/utils/transport";
 
+// Minimal itinerary fields needed for summary display
+type ItinerarySummaryData = Pick<
+  Itinerary,
+  "date" | "startTime" | "endTime" | "modes" | "dateMs"
+>;
+
 interface ItinerarySummaryProps {
-  outbound: Itinerary;
-  return: Itinerary;
+  outbound: ItinerarySummaryData;
+  return: ItinerarySummaryData;
   day: string;
   score?: number;
 }

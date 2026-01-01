@@ -30,6 +30,61 @@ export function PreferencesPanel({
     }
   }, [actionData]);
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const action = formData.get("action");
+
+    if (action === "reset") {
+      // Let form submit normally for reset
+      return;
+    }
+
+    // Prevent default and build preferences JSON
+    e.preventDefault();
+
+    // Parse time inputs (HH:MM format) to decimal hours
+    const parseTime = (timeStr: string | null): number => {
+      if (!timeStr) return 0;
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      return hours + minutes / 60;
+    };
+
+    const preferences = {
+      preferredStartLocation: formData.get("preferredStartLocation") || null,
+      lastViewedStartLocation: initialPreferences.lastViewedStartLocation,
+      earliestDeparture: parseTime(formData.get("earliestDeparture") as string),
+      latestArrival: parseTime(formData.get("latestArrival") as string),
+      walkingSpeed: parseFloat(formData.get("walkingSpeed") as string),
+      returnBuffer: parseFloat(formData.get("returnBuffer") as string) / 60, // Convert minutes to hours
+      preferredLatestEnd: parseTime(formData.get("preferredLatestEnd") as string),
+      hardLatestEnd: parseTime(formData.get("hardLatestEnd") as string),
+      allowCycling: formData.get("allowCycling") === "on",
+      overnightPenalty: parseFloat(formData.get("overnightPenalty") as string),
+      weights: {
+        departureTime: parseFloat(formData.get("weight_departureTime") as string),
+        returnTime: parseFloat(formData.get("weight_returnTime") as string),
+        hikeDuration: parseFloat(formData.get("weight_hikeDuration") as string),
+        returnOptions: parseFloat(formData.get("weight_returnOptions") as string),
+        totalDuration: parseFloat(formData.get("weight_totalDuration") as string),
+        finishTime: parseFloat(formData.get("weight_finishTime") as string),
+      },
+    };
+
+    // Create new FormData with JSON
+    const submitData = new FormData();
+    submitData.append("action", "update");
+    submitData.append("preferences", JSON.stringify(preferences));
+
+    // Submit using fetch
+    fetch(form.action || window.location.pathname, {
+      method: "POST",
+      body: submitData,
+    }).then(() => {
+      window.location.reload();
+    });
+  };
+
   return (
     <div className="mb-6">
       <button
@@ -44,6 +99,7 @@ export function PreferencesPanel({
         <Form
           method="post"
           className="mt-4 p-5 bg-gray-50 border border-gray-300"
+          onSubmit={handleSubmit}
         >
           <div className="border-b-2 border-gray-300 pb-3 mb-5">
             <h3 className="font-serif text-lg font-bold text-theme-navy-900 inline">
@@ -131,7 +187,7 @@ export function PreferencesPanel({
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Earliest Departure Time
+                  Earliest Departure Time (hard cutoff)
                 </label>
                 <input
                   type="time"
@@ -139,6 +195,24 @@ export function PreferencesPanel({
                   defaultValue={`${String(Math.floor(initialPreferences.earliestDeparture)).padStart(2, "0")}:${String(Math.round((initialPreferences.earliestDeparture % 1) * 60)).padStart(2, "0")}`}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Itineraries departing before this time are excluded entirely
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1.5">
+                  Latest preferred return arrival time
+                </label>
+                <input
+                  type="time"
+                  name="preferredLatestArrival"
+                  defaultValue={`${String(Math.floor(initialPreferences.preferredLatestArrival)).padStart(2, "0")}:${String(Math.round((initialPreferences.preferredLatestArrival % 1) * 60)).padStart(2, "0")}`}
+                  className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Arrivals home after this time are penalized (not excluded)
+                </p>
               </div>
 
               <div>
@@ -158,7 +232,7 @@ export function PreferencesPanel({
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Hard latest hike finish time
+                  Latest hike finish time (hard cutoff)
                 </label>
                 <input
                   type="time"
@@ -181,7 +255,9 @@ export function PreferencesPanel({
                   step="5"
                   min="15"
                   max="240"
-                  defaultValue={Math.round(initialPreferences.returnBuffer * 60)}
+                  defaultValue={Math.round(
+                    initialPreferences.returnBuffer * 60
+                  )}
                   className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1.5">
@@ -224,25 +300,27 @@ export function PreferencesPanel({
               </p>
 
               <div className="space-y-3">
-                {Object.entries(initialPreferences.weights).map(([key, value]) => (
-                  <div key={key}>
-                    <label className="block text-sm text-gray-600 mb-1">
-                      {(key[0].toUpperCase() + key.slice(1))
-                        .replace(/([A-Z])/g, " $1")
-                        .trim()}
-                      : {value.toFixed(1)}
-                    </label>
-                    <input
-                      type="range"
-                      name={`weight_${key}`}
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      defaultValue={value}
-                      className="w-full"
-                    />
-                  </div>
-                ))}
+                {Object.entries(initialPreferences.weights).map(
+                  ([key, value]) => (
+                    <div key={key}>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        {(key[0].toUpperCase() + key.slice(1))
+                          .replace(/([A-Z])/g, " $1")
+                          .trim()}
+                        : {value.toFixed(1)}
+                      </label>
+                      <input
+                        type="range"
+                        name={`weight_${key}`}
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        defaultValue={value}
+                        className="w-full"
+                      />
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>

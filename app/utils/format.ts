@@ -69,11 +69,17 @@ export function formatSamplePeriod(dates: string[]): string {
   return `${start.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} - ${end.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`;
 }
 
-export function isSameDay(itin1: Itinerary, itin2: Itinerary): boolean {
+export function isSameDay(
+  itin1: Pick<Itinerary, "date">,
+  itin2: Pick<Itinerary, "date">
+): boolean {
   return itin1.date === itin2.date;
 }
 
-export function isNextDay(outbound: Itinerary, returnItin: Itinerary): boolean {
+export function isNextDay(
+  outbound: Pick<Itinerary, "date">,
+  returnItin: Pick<Itinerary, "date">
+): boolean {
   const outboundDate = new Date(outbound.date);
   const returnDate = new Date(returnItin.date);
   const nextDay = new Date(outboundDate);
@@ -85,8 +91,8 @@ export function isNextDay(outbound: Itinerary, returnItin: Itinerary): boolean {
 }
 
 export function getDaysBetween(
-  outbound: Itinerary,
-  returnItin: Itinerary
+  outbound: Pick<Itinerary, "dateMs">,
+  returnItin: Pick<Itinerary, "dateMs">
 ): number {
   const diffMs = returnItin.dateMs - outbound.dateMs;
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
