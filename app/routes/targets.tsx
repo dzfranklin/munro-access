@@ -1,7 +1,7 @@
 import type { Route } from "./+types/targets";
 import { targetMap as parsedTargets } from "results/parse.server";
 import { Link } from "react-router";
-import { pluralize } from "~/text-utils";
+import { pluralize } from "~/utils/format";
 
 export function meta({}: Route.MetaArgs) {
   return [

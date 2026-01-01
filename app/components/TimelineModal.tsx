@@ -1,7 +1,8 @@
 import React from "react";
 import type { Itinerary, Route, Munro } from "results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
-import { formatDuration, parseTime } from "~/time-utils";
+import { formatDuration, parseTime, isSameDay, formatTime } from "~/utils/format";
+import { formatMode } from "~/utils/transport";
 import { getViableReturns } from "results/itinerary-utils";
 
 interface ItineraryOption {
@@ -38,13 +39,6 @@ export function TimelineModal({
     null
   );
 
-  const dayLabel = day.charAt(0) + day.slice(1).toLowerCase();
-
-  // Format time for display
-  function formatTime(timeStr: string): string {
-    return timeStr.slice(0, 5);
-  }
-
   // Get unique outbound itineraries
   const outbounds = Array.from(
     new Map(
@@ -70,10 +64,8 @@ export function TimelineModal({
   // Filter to same-day returns only for timeline view
   const compatibleReturns = selectedOutbound && longestRoute
     ? getViableReturns(selectedOutbound, allReturns, longestRoute.route).filter(ret => {
-        const returnStart = parseTime(ret.startTime);
-        const outboundEnd = parseTime(selectedOutbound.endTime);
-        // Only show returns that start after outbound ends (same day)
-        return returnStart >= outboundEnd;
+        // Only show same-day returns in timeline view
+        return isSameDay(selectedOutbound, ret);
       })
     : [];
 
@@ -148,19 +140,12 @@ export function TimelineModal({
     };
   }
 
-  // Get mode abbreviations
+  // Helper function to format mode labels for display in timeline
   function getModeLabel(modes: string[]): string {
     const uniqueModes = new Set(modes);
     uniqueModes.delete("WALK");
-    const abbrevs: Record<string, string> = {
-      RAIL: "Train",
-      BUS: "Bus",
-      COACH: "Coach",
-      FERRY: "Ferry",
-      BICYCLE: "Cycle",
-    };
     return Array.from(uniqueModes)
-      .map((m) => abbrevs[m] || m)
+      .map((m) => formatMode(m))
       .join(" + ");
   }
 

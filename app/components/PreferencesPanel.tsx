@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { usePreferences } from "~/preferences-context";
-import { START_LOCATION_ORDER } from "~/constants";
+import { START_LOCATION_ORDER } from "~/utils/constants";
 
 type StartLocation = {
   id: string;
@@ -139,6 +139,33 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                   <p className="text-xs text-gray-500 mt-1.5">
                     Time needed after hike completion (using max Walkhighlands
                     time) before catching return transport
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1.5">
+                    Overnight trip penalty: {Math.round(preferences.overnightPenalty * 100)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={preferences.overnightPenalty}
+                    onChange={(e) =>
+                      updatePreferences({
+                        overnightPenalty: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>No penalty (0%)</span>
+                    <span>Default (30%)</span>
+                    <span>Exclude (100%)</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Penalty applied to trips that span multiple days (e.g., depart Friday, return Saturday). Set to 0% to rank overnight trips normally, or 100% to effectively exclude them.
                   </p>
                 </div>
               </div>

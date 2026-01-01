@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import type { Route } from "./+types/_layout";
 import { getSampleDates } from "results/parse.server";
-import { formatSamplePeriod } from "results/format-dates";
+import { formatSamplePeriod } from "~/utils/format";
 import { Footer } from "~/components/Footer";
 
 export async function loader({}: Route.LoaderArgs) {

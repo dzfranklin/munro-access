@@ -1,52 +1,19 @@
 # Claude Context
 
-This document contains important context and guidelines for working on the Munro
-Access project.
+Guidelines for working on the Munro Access project.
 
 ## Project Overview
 
-**Munro Access** helps users find munros accessible by public transport from
-Edinburgh, Glasgow, and Stirling.
+**Munro Access** finds munros accessible by public transport from Edinburgh, Glasgow, and Stirling, ranked by intelligent scoring.
 
 ### Key Features
 
-1. **Intelligent Itinerary Scoring** - Each route is scored based on departure
-   time, hike duration, return options, connection time, total duration, and
-   sunset constraints
-2. **Top Route Rankings** - Home page shows best routes ranked by score across
-   all starting locations
-3. **Detailed Target Pages** - Individual trailhead pages show all available
-   routes first, then public transport options to reach that trailhead
-4. **Detailed Itineraries** - Full journey breakdowns with times, transport
-   modes, and connections
+- **Smart Scoring** - Ranks routes by departure time, hike duration, return options, and total journey time
+- **Top Rankings** - Home page shows best routes across all starting locations  
+- **Target Pages** - Show hiking routes first, then transport options to reach trailheads
+- **Detailed Itineraries** - Full journey breakdowns with times and connections
 
-### How Scoring Works
-
-Each outbound + return journey pair is evaluated:
-
-1. **Feasibility Checks** (must pass):
-   - Departure not too early
-   - Hike finishes before sunset
-   - Adequate buffer time before return
-
-2. **Scoring Components** (0-1 scale, weighted):
-   - Departure time (prefers ~9am)
-   - Hike duration (prefers 1.5x route time available)
-   - Return options (boosted if multiple returns exist)
-   - Connection time (penalizes < 10min connections)
-   - Total duration (prefers shorter journeys)
-
-3. **Final Score**: Weighted average, normalized to 0-100%
-
-### Data Sources
-
-- **Route Information**: walkhighlands (all lower case unless at start of
-  sentence, in which ase Walkhighlands)
-- **Public Transport**: OpenTripPlanner with GTFS data
-- **Sample Week**: February 2026 (weekday and weekend patterns)
-
-⚠️ **Important**: Sample data only - users must verify current timetables before
-traveling
+⚠️ **Sample data** from February 2026 - users must verify current timetables
 
 ### Code Structure
 
@@ -54,50 +21,46 @@ traveling
 results/
   scoring.ts            - Scoring algorithm and preferences
   best-itineraries.ts   - Logic to find top options
-  itinerary-utils.ts    - Shared utilities for filtering returns
+  itinerary-utils.ts    - Utilities for filtering returns
   schema.ts             - Data types
-  parse.ts              - Load data from JSON files
+  parse.server.ts       - Load data from JSON files
 
 app/
-  time-utils.ts         - Time utilities: formatDuration(), parseTime()
+  utils/format.ts       - Time/date utilities
+  text-utils.ts         - Text formatting (deprecated - use utils/format.ts)
   routes/
-    home.tsx            - Landing page with top routes
-    target.tsx          - Trailhead pages: routes first, then transport options
+    home.tsx            - Landing page with rankings
+    target.tsx          - Trailhead detail pages
     munro.tsx           - Individual munro pages
   components/
-    ItineraryDisplay.tsx - Shows journey details
-    TimelineModal.tsx    - Interactive timeline view
+    ItineraryDisplay.tsx - Journey details
+    TimelineModal.tsx    - Interactive timeline
 ```
 
-### Utility Functions
+### Key Utilities
 
-**Time utilities** (`app/time-utils.ts`):
-- `formatDuration(minutes: number): string` - Formats minutes as "Xh Ym" (e.g.,
-  "2h 43m")
-- `parseTime(timeStr: string): number` - Parses "HH:MM" to decimal hours (e.g.,
-  "09:30" → 9.5)
+**Time/Date** (`app/utils/format.ts`):
+- `formatDuration(minutes: number)` - "2h 43m" format
+- `parseTime(timeStr: string)` - "09:30" → 9.5
+- `calculateDuration(startDate, startTime, endDate, endTime)` - Duration in hours
+- `isSameDay(itin1, itin2)` - Check if same date
+- `isNextDay(outbound, return)` - Check if return is next day
 
-**Itinerary utilities** (`results/itinerary-utils.ts`):
-- `getViableReturns(outbound, allReturns, route)` - Filters returns allowing
-  ≥50% of min route time
-
-⚠️ **Always use existing utilities** - Don't reimplement parseTime or
-formatDuration!
+**Itinerary** (`results/itinerary-utils.ts`):
+- `getViableReturns(outbound, allReturns, route)` - Returns allowing ≥50% min route time
 
 ## Style Guide
 
 ### Design Philosophy
 
-This site uses a **traditional,  aesthetic** inspired by classic
-hiking and outdoor resource websites. The goal is to look
-clean and trustworthy, avoiding modern trendy design patterns.
+Traditional, information-dense aesthetic inspired by classic outdoor websites.
 
-**Key principles:**
-- Clean and information-dense
-- Traditional without being cluttered
-- Would look appropriate (and better than average) if designed 10+ years ago
-- Modern web development practices under the hood
-- No emojis anywhere in the UI
+**Principles:**
+- Clean layout, no clutter
+- No emojis anywhere
+- System fonts only (Georgia serif for headings, Verdana for body)
+- Simple borders, no shadows or rounded corners
+- Muted professional colors
 
 ### Typography
 

@@ -7,7 +7,8 @@ import { DayItineraryCard } from "~/components/DayItineraryCard";
 import { TimelineModal } from "~/components/TimelineModal";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
-import { START_LOCATION_ORDER } from "~/constants";
+import { START_LOCATION_ORDER } from "~/utils/constants";
+import { formatDayLabel } from "~/utils/format";
 
 type StartInfo = {
   id: string;
@@ -16,7 +17,7 @@ type StartInfo = {
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [
-    { title: `${loaderData.target.description} - Munro Access` },
+    { title: `${loaderData.target.name} - Munro Access` },
     {
       name: "description",
       content: `Public transport routes to ${loaderData.target.description}`,
@@ -31,7 +32,10 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
 
   // Get best itineraries for this target
-  const bestItineraries = getBestItinerariesForTarget(params.id, DEFAULT_RANKING_PREFERENCES);
+  const bestItineraries = getBestItinerariesForTarget(
+    params.id,
+    DEFAULT_RANKING_PREFERENCES
+  );
 
   const gmapsEmbedKey = process.env.GOOGLE_MAPS_EMBED_KEY;
 
@@ -47,7 +51,10 @@ export async function loader({ params }: Route.LoaderArgs) {
     .sort((a, b) => {
       const aName = startMap.get(a)?.name || a;
       const bName = startMap.get(b)?.name || b;
-      return START_LOCATION_ORDER.indexOf(aName as any) - START_LOCATION_ORDER.indexOf(bName as any);
+      return (
+        START_LOCATION_ORDER.indexOf(aName as any) -
+        START_LOCATION_ORDER.indexOf(bName as any)
+      );
     })
     .map((id) => ({
       id,
@@ -66,7 +73,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
   // Read start from URL
   const urlStart = searchParams.get("start");
-  
+
   // Priority: URL > preferredStartLocation > first available start
   const selectedStart = (() => {
     if (urlStart && starts.some((s) => s.id === urlStart)) {
@@ -84,7 +91,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
   // Track when content is switching for fade effect
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const prevStartRef = React.useRef(selectedStart);
-  
+
   React.useEffect(() => {
     if (prevStartRef.current !== selectedStart) {
       setIsTransitioning(true);
@@ -103,10 +110,10 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
   // Open timeline modal for a specific day
   const openTimeline = (day: string) => {
-    console.log('openTimeline called with day:', day);
+    console.log("openTimeline called with day:", day);
     setTimelineDay(day);
     setTimelineModalOpen(true);
-    console.log('State set - modalOpen should be true');
+    console.log("State set - modalOpen should be true");
   };
 
   // Get options for selected start and timeline day
@@ -134,9 +141,11 @@ export default function Target({ loaderData }: Route.ComponentProps) {
         <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
           {target.name}
         </h1>
-        <p className="font-sans text-base text-gray-600 m-0">
-          {target.description}
-        </p>
+        {target.description !== target.name && (
+          <p className="font-sans text-base text-gray-600 m-0">
+            {target.description}
+          </p>
+        )}
       </header>
 
       {/* Map */}
@@ -144,7 +153,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
         <div className="mb-8">
           <iframe
             width="100%"
-            height="400"
+            height="250"
             className="border border-gray-300"
             style={{ border: 0 }}
             loading="lazy"
@@ -289,7 +298,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                   <div key={day}>
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="font-sans text-base font-bold text-theme-navy-900">
-                        {day.charAt(0) + day.slice(1).toLowerCase()}
+                        {formatDayLabel(day)}
                       </h3>
                       <button
                         onClick={() => openTimeline(day)}

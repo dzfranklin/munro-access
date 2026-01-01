@@ -10,7 +10,7 @@ import {
   type Start,
   type Target,
 } from "./schema";
-import { slugify } from "./slugify";
+import { slugify } from "../app/utils/format";
 
 function parseStarts(): Map<string, Start> {
   const contents = fs.readFileSync("starts.json", "utf-8");

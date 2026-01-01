@@ -4,11 +4,11 @@ import { DEFAULT_RANKING_PREFERENCES } from "results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams } from "react-router";
 import { getSampleDates, startMap, munroMap, targetMap } from "results/parse.server";
-import { formatSamplePeriod } from "results/format-dates";
+import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
 import { PreferencesPanel } from "~/components/PreferencesPanel";
-import { START_LOCATION_ORDER } from "~/constants";
+import { START_LOCATION_ORDER } from "~/utils/constants";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -197,9 +197,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         >
                           {target.description}
                         </Link>
-                        <span className="text-gray-500 text-xs ml-2">
-                          ({target.name})
-                        </span>
+                        {target.description !== target.name && (
+                          <span className="text-gray-500 text-xs ml-2">
+                            ({target.name})
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -335,9 +337,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                 {targetData.targetName}
                               </Link>
                             </div>
-                            <div className="mt-1 text-xs text-gray-500">
-                              {targetData.targetDescription}
-                            </div>
+                            {targetData.targetDescription !== targetData.targetName && (
+                              <div className="mt-1 text-xs text-gray-500">
+                                {targetData.targetDescription}
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className="py-4 px-2.5 align-top">

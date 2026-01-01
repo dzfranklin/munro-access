@@ -1,4 +1,4 @@
-function getModeAbbrev(mode: string): string {
+export function formatMode(mode: string): string {
   const abbrevs: Record<string, string> = {
     RAIL: "Train",
     BUS: "Bus",
@@ -11,12 +11,12 @@ function getModeAbbrev(mode: string): string {
   return abbrevs[mode] || mode;
 }
 
-export function getUniqueModes(modes: string[]): string[] {
+function getUniqueModesFormatted(modes: string[]): string[] {
   const modeSet = new Set(modes);
   modeSet.delete("WALK");
-  return Array.from(modeSet).map(getModeAbbrev);
+  return Array.from(modeSet).map(formatMode);
 }
 
 export function formatModes(modes: string[]): string {
-  return getUniqueModes(modes).join(" + ");
+  return getUniqueModesFormatted(modes).join(", ");
 }

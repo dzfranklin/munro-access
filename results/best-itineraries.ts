@@ -138,12 +138,11 @@ export function getBestItinerariesForTarget(
   // Sort by score (best first)
   bestOptions.sort((a, b) => b.score - a.score);
 
-  // Apply percentiles if provided
-  if (globalPercentiles) {
-    for (const option of bestOptions) {
-      const percentile = globalPercentiles.get(option.score) ?? 0;
-      option.score = percentile;
-    }
+  // Calculate percentiles if not provided, then apply them
+  const percentileMap = globalPercentiles ?? calculateGlobalPercentiles(prefs);
+  for (const option of bestOptions) {
+    const percentile = percentileMap.get(option.score) ?? 0;
+    option.score = percentile;
   }
 
   // Limit options per start/day combination to keep UI manageable

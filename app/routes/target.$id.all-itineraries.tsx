@@ -4,8 +4,9 @@ import { data, Link, useSearchParams } from "react-router";
 import { AllItinerariesList } from "~/components/AllItinerariesList";
 import React from "react";
 import { usePreferences } from "~/preferences-context";
-import { START_LOCATION_ORDER } from "~/constants";
+import { START_LOCATION_ORDER } from "~/utils/constants";
 import { resultID } from "results/schema";
+import { formatDayLabel } from "~/utils/format";
 
 type StartInfo = {
   id: string;
@@ -193,7 +194,7 @@ export default function AllItineraries({ loaderData }: Route.ComponentProps) {
                       return (
                         <div key={day}>
                           <h2 className="font-sans text-base font-normal text-gray-700 mb-3">
-                            {day.charAt(0) + day.slice(1).toLowerCase()}
+                            {formatDayLabel(day)}
                           </h2>
                           <AllItinerariesList
                             outbounds={itins.outbounds}

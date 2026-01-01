@@ -1,7 +1,7 @@
 import type { Itinerary } from "results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
-import { formatDuration } from "~/time-utils";
-import { formatModes } from "~/mode-utils";
+import { formatDuration } from "~/utils/format";
+import { formatModes } from "~/utils/transport";
 import React from "react";
 
 interface AllItinerariesListProps {
@@ -38,16 +38,24 @@ function ItineraryRow({ itinerary, type }: { itinerary: Itinerary; type: "outbou
         <div className="flex items-start justify-between text-xs gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-bold text-theme-navy-900 whitespace-nowrap">{startTime} → {endTime}</span>
-              <span className="text-gray-500 whitespace-nowrap">({formatDuration(duration)})</span>
+              <span className="font-bold text-theme-navy-900 whitespace-nowrap">
+                {startTime} → {endTime}
+              </span>
+              <span className="text-gray-500 whitespace-nowrap">
+                ({formatDuration(duration)})
+              </span>
             </div>
             <div className="text-gray-600">
-              {modes && <span>{modes}</span>}
-              {modes && <span className="mx-1.5">·</span>}
-              <span>{transfers} {transfers === 1 ? "transfer" : "transfers"}</span>
+              <span>{modes}</span>
+              <span className="mx-1.5">·</span>
+              <span>
+                {transfers} {transfers === 1 ? "transfer" : "transfers"}
+              </span>
             </div>
           </div>
-          <span className="text-gray-500 flex-shrink-0 pt-0.5">{isExpanded ? "−" : "+"}</span>
+          <span className="text-gray-500 flex-shrink-0 pt-0.5">
+            {isExpanded ? "−" : "+"}
+          </span>
         </div>
       </button>
       {isExpanded && (
