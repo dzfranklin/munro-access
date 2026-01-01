@@ -4,16 +4,20 @@ Guidelines for working on the Munro Access project.
 
 ## Project Overview
 
-**Munro Access** finds munros accessible by public transport from Edinburgh, Glasgow, and Stirling, ranked by intelligent scoring.
+**Munro Access** finds munros accessible by public transport from Edinburgh,
+Glasgow, and Stirling, ranked by intelligent scoring.
 
 ### Key Features
 
-- **Smart Scoring** - Ranks routes by departure time, hike duration, return options, and total journey time
+- **Smart Scoring** - Ranks routes by departure time, hike duration, return
+  options, and total journey time
 - **Top Rankings** - Home page shows best routes across all starting locations  
-- **Target Pages** - Show hiking routes first, then transport options to reach trailheads
+- **Target Pages** - Show hiking routes first, then transport options to reach
+  trailheads
 - **Detailed Itineraries** - Full journey breakdowns with times and connections
+- **Sample data** from February 2026 - users must verify current timetables
+- Statically generated site using react-router v7 to prerender
 
-⚠️ **Sample data** from February 2026 - users must verify current timetables
 
 ### Code Structure
 
@@ -41,12 +45,14 @@ app/
 **Time/Date** (`app/utils/format.ts`):
 - `formatDuration(minutes: number)` - "2h 43m" format
 - `parseTime(timeStr: string)` - "09:30" → 9.5
-- `calculateDuration(startDate, startTime, endDate, endTime)` - Duration in hours
+- `calculateDuration(startDate, startTime, endDate, endTime)` - Duration in
+  hours
 - `isSameDay(itin1, itin2)` - Check if same date
 - `isNextDay(outbound, return)` - Check if return is next day
 
 **Itinerary** (`results/itinerary-utils.ts`):
-- `getViableReturns(outbound, allReturns, route)` - Returns allowing ≥50% min route time
+- `getViableReturns(outbound, allReturns, route)` - Returns allowing ≥50% min
+  route time
 
 ## Style Guide
 

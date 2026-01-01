@@ -137,6 +137,22 @@ export function scoreItineraryPair(
     };
   }
 
+  // Check cycling preference
+  if (!prefs.allowCycling) {
+    const usesBike =
+      outbound.modes.includes("BICYCLE") ||
+      (returnItin?.modes.includes("BICYCLE") ?? false);
+    if (usesBike) {
+      return {
+        rawScore: 0,
+        percentile: 0,
+        components,
+        feasible: false,
+        reason: "Cycling not allowed by preferences",
+      };
+    }
+  }
+
   // Reject overnight arrivals (arrivals between midnight and earliest acceptable departure)
   const arrivalTimeOfDay = arrivalTime % 24;
   if (arrivalTimeOfDay < prefs.earliestDeparture) {
@@ -321,19 +337,28 @@ export function selectBestItineraries(
 
         // Count how many return options exist within 2 hours of this one
         const returnTime = parseTime(returnItin.startTime);
-        const alternativeReturns = returns.filter(r => {
+        const alternativeReturns = returns.filter((r) => {
           const rt = parseTime(r.startTime);
-          return rt > hikeEndTime + prefs.returnBuffer &&
-                 Math.abs(rt - returnTime) <= 2;
+          return (
+            rt > hikeEndTime + prefs.returnBuffer &&
+            Math.abs(rt - returnTime) <= 2
+          );
         });
 
         // Boost score if multiple return options
         if (alternativeReturns.length > 1) {
           score.components.returnOptions = 1.0;
           // Recalculate total
-          const weightSum = Object.values(prefs.weights).reduce((a, b) => a + b, 0);
-          score.rawScore = Object.entries(score.components)
-            .reduce((sum, [key, val]) => sum + val * prefs.weights[key as keyof typeof prefs.weights], 0) / weightSum;
+          const weightSum = Object.values(prefs.weights).reduce(
+            (a, b) => a + b,
+            0
+          );
+          score.rawScore =
+            Object.entries(score.components).reduce(
+              (sum, [key, val]) =>
+                sum + val * prefs.weights[key as keyof typeof prefs.weights],
+              0
+            ) / weightSum;
         }
 
         scored.push({ outbound, return: returnItin, score });
@@ -353,15 +378,15 @@ export function selectBestItineraries(
 export function calculatePercentiles(scores: number[]): Map<number, number> {
   const sortedScores = [...scores].sort((a, b) => a - b);
   const percentileMap = new Map<number, number>();
-  
+
   for (let i = 0; i < sortedScores.length; i++) {
     const score = sortedScores[i];
     // Don't overwrite if we've already seen this score (use first occurrence for duplicate scores)
     if (!percentileMap.has(score)) {
-      const percentile = (i / Math.max(1, sortedScores.length - 1));
+      const percentile = i / Math.max(1, sortedScores.length - 1);
       percentileMap.set(score, percentile);
     }
   }
-  
+
   return percentileMap;
 }

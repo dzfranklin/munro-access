@@ -8,3 +8,5 @@ node_modules
 # React Router
 /.react-router/
 /build/
+
+test-results/
