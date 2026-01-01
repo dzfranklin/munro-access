@@ -164,11 +164,11 @@ export function TimelineModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white border-2 border-theme-navy-700 max-w-[1200px] w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white border border-theme-navy-700 max-w-300 w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
