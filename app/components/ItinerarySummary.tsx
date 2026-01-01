@@ -1,6 +1,13 @@
 import type { Itinerary } from "results/schema";
 import { getPercentileClasses } from "~/utils/itinerary";
-import { formatDuration, isSameDay, getDaysBetween, calculateDuration, formatDayLabel } from "~/utils/format";
+import {
+  formatDuration,
+  isSameDay,
+  getDaysBetween,
+  calculateDuration,
+  formatDayLabel,
+  formatTime,
+} from "~/utils/format";
 import { formatModes } from "~/utils/transport";
 
 interface ItinerarySummaryProps {
@@ -17,11 +24,25 @@ export function ItinerarySummary({
   score,
 }: ItinerarySummaryProps) {
   // Calculate durations using date-based calculations
+  // If endTime < startTime, the journey crosses midnight to the next day
+  const getEndDate = (
+    startDate: string,
+    startTime: string,
+    endTime: string
+  ) => {
+    if (endTime < startTime) {
+      const nextDay = new Date(startDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      return nextDay.toISOString().slice(0, 10);
+    }
+    return startDate;
+  };
+
   const outboundDuration = Math.round(
     calculateDuration(
       outbound.date,
       outbound.startTime,
-      outbound.date,
+      getEndDate(outbound.date, outbound.startTime, outbound.endTime),
       outbound.endTime
     ) * 60
   );
@@ -30,15 +51,22 @@ export function ItinerarySummary({
     calculateDuration(
       returnItin.date,
       returnItin.startTime,
-      returnItin.date,
+      getEndDate(returnItin.date, returnItin.startTime, returnItin.endTime),
       returnItin.endTime
     ) * 60
   );
 
   // Calculate time at target (arrival to return departure)
+  // Outbound might end on the next day if it crossed midnight
+  const outboundEndDate = getEndDate(
+    outbound.date,
+    outbound.startTime,
+    outbound.endTime
+  );
+
   const timeAtTarget = Math.round(
     calculateDuration(
-      outbound.date,
+      outboundEndDate,
       outbound.endTime,
       returnItin.date,
       returnItin.startTime
@@ -59,39 +87,30 @@ export function ItinerarySummary({
   }
 
   return (
-    <div className="text-[13px] leading-relaxed">
-      <div className="text-gray-700">
-        <span className="font-medium">{formatDayLabel(day)}:</span>{" "}
-        {outbound.startTime.slice(0, 5)}–{outbound.endTime.slice(0, 5)} (
-        {formatDuration(outboundDuration)})
-        {outboundModes.length > 0 && (
-          <span className="text-gray-500"> via {outboundModes}</span>
-        )}
+    <div className="text-[13px] leading-snug">
+      <div className="font-bold text-gray-700">
+        {formatDayLabel(day)}
+        <span className="text-xs text-gray-500 font-normal ml-1.5">
+          {formatDuration(timeAtTarget)} hike window
+        </span>
       </div>
       <div className="text-gray-700">
-        <span className="font-medium">Return:</span>{" "}
-        {returnItin.startTime.slice(0, 5)}–{returnItin.endTime.slice(0, 5)} (
-        {formatDuration(returnDuration)})
+        Out: {formatTime(outbound.startTime)} - {formatTime(outbound.endTime)}{" "}
+        <span className="text-gray-500">
+          ({formatDuration(outboundDuration)}) {outboundModes}
+        </span>
+      </div>
+      <div className="text-gray-700">
+        Return: {formatTime(returnItin.startTime)} -{" "}
+        {formatTime(returnItin.endTime)}{" "}
+        <span className="text-gray-500">
+          ({formatDuration(returnDuration)}) {returnModes}
+        </span>
         {!isSameDay(outbound, returnItin) && (
           <span className="text-xs text-gray-500 ml-1">
-            +{getDaysBetween(outbound, returnItin)} day
-            {getDaysBetween(outbound, returnItin) > 1 ? "s" : ""}
+            +{getDaysBetween(outbound, returnItin)}d
           </span>
         )}
-        {returnModes.length > 0 && (
-          <span className="text-gray-500"> via {returnModes}</span>
-        )}
-      </div>
-      <div className="text-xs text-gray-600">
-        {percentileLabel && (
-          <>
-            <span className={`font-medium ${percentileClass}`}>
-              {percentileLabel}
-            </span>
-            <span className="text-gray-600"> · </span>
-          </>
-        )}
-        <span>{formatDuration(timeAtTarget)} until departure</span>
       </div>
     </div>
   );

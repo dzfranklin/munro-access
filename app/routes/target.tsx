@@ -165,7 +165,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       )}
 
       {/* Routes */}
-      <section className="mb-12">
+      <section className="mb-8">
         <h2 className="font-serif text-2xl font-normal text-theme-navy-900 border-b-2 border-gray-300 pb-2 mb-6">
           Routes from {target.name}
         </h2>
@@ -175,20 +175,23 @@ export default function Target({ loaderData }: Route.ComponentProps) {
             No routes available.
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 font-serif text-gray-700">
             {target.routes.map((route) => (
               <div key={route.page}>
-                <div className="font-serif text-sm text-gray-700">
-                  {route.name}
-                  <span className="text-gray-500"> • </span>
-                  <a
-                    href={route.page}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-theme-navy-700 underline text-[13px] font-sans"
-                  >
-                    walkhighlands
-                  </a>
+                <div className="text-sm font-medium">{route.name}</div>
+                <div className="text-[13px]">
+                  <span className="text-gray-600">
+                    {route.stats.distanceKm}km • {route.stats.timeHours.min}-
+                    {route.stats.timeHours.max}h • {route.stats.ascentM}m •{" "}
+                    <a
+                      href={route.page}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-theme-navy-700 underline"
+                    >
+                      walkhighlands
+                    </a>
+                  </span>
                 </div>
                 <div className="text-[13px]">
                   {route.munros.map((munro, idx) => (
@@ -205,11 +208,6 @@ export default function Target({ loaderData }: Route.ComponentProps) {
                       </Link>
                     </span>
                   ))}
-                  <span className="text-gray-600">
-                    {" "}
-                    • {route.stats.distanceKm}km • {route.stats.timeHours.min}-
-                    {route.stats.timeHours.max}h • {route.stats.ascentM}m
-                  </span>
                 </div>
               </div>
             ))}

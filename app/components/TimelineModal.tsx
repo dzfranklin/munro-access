@@ -1,7 +1,13 @@
 import React from "react";
 import type { Itinerary, Route, Munro } from "results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
-import { formatDuration, parseTime, isSameDay, formatTime } from "~/utils/format";
+import {
+  formatDuration,
+  parseTime,
+  isSameDay,
+  formatTime,
+  formatDayLabel,
+} from "~/utils/format";
 import { formatMode } from "~/utils/transport";
 import { getViableReturns } from "results/itinerary-utils";
 
@@ -48,9 +54,7 @@ export function TimelineModal({
 
   // Get all unique returns from options
   const allReturns = Array.from(
-    new Map(
-      options.map((opt) => [opt.return.startTime, opt.return])
-    ).values()
+    new Map(options.map((opt) => [opt.return.startTime, opt.return])).values()
   );
 
   // Use the shortest route time (most conservative for showing returns)
@@ -62,28 +66,36 @@ export function TimelineModal({
 
   // Get returns viable for selected outbound (50% of shorter route time)
   // Filter to same-day returns only for timeline view
-  const compatibleReturns = selectedOutbound && longestRoute
-    ? getViableReturns(selectedOutbound, allReturns, longestRoute.route).filter(ret => {
-        // Only show same-day returns in timeline view
-        return isSameDay(selectedOutbound, ret);
-      })
-    : [];
+  const compatibleReturns =
+    selectedOutbound && longestRoute
+      ? getViableReturns(
+          selectedOutbound,
+          allReturns,
+          longestRoute.route
+        ).filter((ret) => {
+          // Only show same-day returns in timeline view
+          return isSameDay(selectedOutbound, ret);
+        })
+      : [];
 
   // Find the best-scored return from the compatible options
-  const getBestReturn = (outbound: Itinerary, viable: Itinerary[]): Itinerary | null => {
+  const getBestReturn = (
+    outbound: Itinerary,
+    viable: Itinerary[]
+  ): Itinerary | null => {
     if (viable.length === 0) return null;
-    
+
     // Find returns from original scored options that match this outbound
     const scoredReturnsForOutbound = options
-      .filter(opt => opt.outbound.startTime === outbound.startTime)
+      .filter((opt) => opt.outbound.startTime === outbound.startTime)
       .sort((a, b) => b.score - a.score); // Sort by score descending
-    
+
     // Return the highest-scored viable return, or first viable if none scored
     for (const scored of scoredReturnsForOutbound) {
-      const match = viable.find(v => v.startTime === scored.return.startTime);
+      const match = viable.find((v) => v.startTime === scored.return.startTime);
       if (match) return match;
     }
-    
+
     return viable[0]; // Fallback to earliest viable return
   };
 
@@ -91,9 +103,10 @@ export function TimelineModal({
   React.useEffect(() => {
     if (isOpen && outbounds.length > 0 && !selectedOutbound) {
       // Find the best-scored outbound from options
-      const bestOption = options.reduce((best, opt) => 
-        opt.score > best.score ? opt : best
-      , options[0]);
+      const bestOption = options.reduce(
+        (best, opt) => (opt.score > best.score ? opt : best),
+        options[0]
+      );
       setSelectedOutbound(bestOption.outbound);
     }
   }, [isOpen, outbounds.length]);
@@ -120,23 +133,23 @@ export function TimelineModal({
   function getTimelineStyle(startTime: string, endTime: string) {
     const start = parseTime(startTime);
     let end = parseTime(endTime);
-    
+
     // Handle overnight journeys (end time after midnight)
     if (end < start) {
       end += 24;
     }
-    
+
     // Clip at midnight
     const clippedEnd = Math.min(end, END_HOUR);
     const isClipped = end > END_HOUR;
-    
+
     const left = ((start - START_HOUR) / TOTAL_HOURS) * 100;
     const width = ((clippedEnd - start) / TOTAL_HOURS) * 100;
-    
-    return { 
-      left: `${Math.max(0, left)}%`, 
+
+    return {
+      left: `${Math.max(0, left)}%`,
       width: `${Math.max(0, width)}%`,
-      isClipped 
+      isClipped,
     };
   }
 
@@ -166,7 +179,7 @@ export function TimelineModal({
                 Timeline View
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {startName} to {targetName} • {dayLabel}
+                {startName} to {targetName} • {formatDayLabel(day)}
               </p>
             </div>
             <button
@@ -185,7 +198,7 @@ export function TimelineModal({
             {/* Timeline axis */}
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-shrink-0 w-28"></div>
-              <div className="relative flex-1 h-8 border-b-2 border-gray-400">
+              <div className="relative flex-1 h-8">
                 {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => {
                   const hour = START_HOUR + i;
                   const position = (i / TOTAL_HOURS) * 100;
@@ -212,14 +225,15 @@ export function TimelineModal({
             </div>
 
             {/* Hike window */}
-            {selectedOutbound && selectedReturn &&
+            {selectedOutbound &&
+              selectedReturn &&
               (() => {
                 const outboundEnd = parseTime(selectedOutbound.endTime);
                 const returnStart = parseTime(selectedReturn.startTime);
-                
+
                 // Don't show if return starts before outbound ends
                 if (returnStart < outboundEnd) return null;
-                
+
                 const hikeStart = outboundEnd;
                 const hikeEnd = returnStart;
                 const style = getTimelineStyle(
@@ -231,18 +245,30 @@ export function TimelineModal({
                     .padStart(2, "0")}`
                 );
                 const hikeMinutes = Math.round((hikeEnd - hikeStart) * 60);
-                const startTimeStr = formatTime(`${Math.floor(hikeStart)}:${Math.round((hikeStart % 1) * 60).toString().padStart(2, "0")}`);
-                const endTimeStr = formatTime(`${Math.floor(hikeEnd)}:${Math.round((hikeEnd % 1) * 60).toString().padStart(2, "0")}`);
+                const startTimeStr = formatTime(
+                  `${Math.floor(hikeStart)}:${Math.round((hikeStart % 1) * 60)
+                    .toString()
+                    .padStart(2, "0")}`
+                );
+                const endTimeStr = formatTime(
+                  `${Math.floor(hikeEnd)}:${Math.round((hikeEnd % 1) * 60)
+                    .toString()
+                    .padStart(2, "0")}`
+                );
 
                 return (
                   <div className="flex items-center gap-2 mt-2">
                     <div className="flex-shrink-0 w-28 text-right">
-                      <div className="text-xs font-bold text-gray-700">Hike Window</div>
-                      <div className="text-xs text-gray-600">{formatDuration(hikeMinutes)}</div>
+                      <div className="text-xs font-bold text-gray-700">
+                        Hike Window
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {formatDuration(hikeMinutes)}
+                      </div>
                     </div>
                     <div className="relative flex-1 h-7 bg-gray-50 border border-gray-300 flex items-center">
                       {/* Start time - left of bar */}
-                      <div 
+                      <div
                         className="absolute text-xs text-gray-700 pr-1 text-right"
                         style={{ right: `${100 - parseFloat(style.left)}%` }}
                       >
@@ -254,7 +280,7 @@ export function TimelineModal({
                         style={{ left: style.left, width: style.width }}
                       />
                       {/* End time - right of bar */}
-                      <div 
+                      <div
                         className="absolute text-xs text-gray-700 pl-1 text-left"
                         style={{ left: `calc(${style.left} + ${style.width})` }}
                       >
@@ -266,7 +292,6 @@ export function TimelineModal({
                 );
               })()}
           </div>
-
           {/* Outbound Section */}
           <section className="mb-8">
             <h3 className="font-sans text-base font-bold text-theme-navy-900 mb-4">
@@ -300,7 +325,9 @@ export function TimelineModal({
                     }`}
                   >
                     <div className="flex-shrink-0 w-28 text-right text-[13px]">
-                      <div className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}>
+                      <div
+                        className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}
+                      >
                         {formatTime(outbound.startTime)}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -316,7 +343,9 @@ export function TimelineModal({
                       />
                     </div>
                     <div className="flex-shrink-0 w-20 text-left text-[13px]">
-                      <div className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}>
+                      <div
+                        className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}
+                      >
                         {formatTime(outbound.endTime)}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -328,7 +357,6 @@ export function TimelineModal({
               })}
             </div>
           </section>
-
           {/* Return Section */}
           {selectedOutbound && (
             <section className="mb-6">
@@ -363,7 +391,9 @@ export function TimelineModal({
                       }`}
                     >
                       <div className="flex-shrink-0 w-28 text-right text-[13px]">
-                        <div className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}>
+                        <div
+                          className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}
+                        >
                           {formatTime(returnItinerary.startTime)}
                         </div>
                         <div className="text-xs text-gray-600">
@@ -373,20 +403,22 @@ export function TimelineModal({
                       <div className="relative flex-1 h-10 bg-gray-50 flex items-center">
                         <div
                           className={`absolute inset-y-2 transition-all ${
-                            isSelected
-                              ? "bg-gray-500 shadow-md"
-                              : "bg-gray-400"
+                            isSelected ? "bg-gray-500 shadow-md" : "bg-gray-400"
                           }`}
                           style={{ left: style.left, width: style.width }}
                         />
                         {style.isClipped && (
                           <div className="absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center bg-gradient-to-r from-transparent to-white pointer-events-none">
-                            <span className="text-gray-600 font-bold text-lg">→</span>
+                            <span className="text-gray-600 font-bold text-lg">
+                              →
+                            </span>
                           </div>
                         )}
                       </div>
                       <div className="flex-shrink-0 w-20 text-left text-[13px]">
-                        <div className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}>
+                        <div
+                          className={`font-bold ${isSelected ? "text-gray-800" : "text-gray-800"}`}
+                        >
                           {formatTime(returnItinerary.endTime)}
                         </div>
                         <div className="text-xs text-gray-600">
@@ -425,7 +457,6 @@ export function TimelineModal({
               )}
             </section>
           )}
-
           {!selectedOutbound && (
             <div className="text-center py-10 text-gray-500">
               Select an outbound journey to see return options

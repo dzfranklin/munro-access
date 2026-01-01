@@ -59,8 +59,10 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                 >
                   <option value="">Use most recently selected location</option>
                   {[...startLocations]
-                    .sort((a, b) => 
-                      START_LOCATION_ORDER.indexOf(a.name as any) - START_LOCATION_ORDER.indexOf(b.name as any)
+                    .sort(
+                      (a, b) =>
+                        START_LOCATION_ORDER.indexOf(a.name as any) -
+                        START_LOCATION_ORDER.indexOf(b.name as any)
                     )
                     .map((start) => (
                       <option key={start.id} value={start.id}>
@@ -137,14 +139,15 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                     className="w-full px-3 py-2 border-2 border-gray-300 text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Time needed after hike completion (using max Walkhighlands
+                    Time needed after hike completion (using max walkhighlands
                     time) before catching return transport
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm text-gray-600 mb-1.5">
-                    Overnight trip penalty: {Math.round(preferences.overnightPenalty * 100)}%
+                    Overnight trip penalty:{" "}
+                    {Math.round(preferences.overnightPenalty * 100)}%
                   </label>
                   <input
                     type="range"
@@ -165,7 +168,9 @@ export function PreferencesPanel({ startLocations }: PreferencesPanelProps) {
                     <span>Exclude (100%)</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Penalty applied to trips that span multiple days (e.g., depart Friday, return Saturday). Set to 0% to rank overnight trips normally, or 100% to effectively exclude them.
+                    Penalty applied to trips that span multiple days (e.g.,
+                    depart Friday, return Saturday). Set to 0% to rank overnight
+                    trips normally, or 100% to effectively exclude them.
                   </p>
                 </div>
               </div>

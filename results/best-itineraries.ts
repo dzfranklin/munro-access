@@ -24,57 +24,32 @@ export interface TargetWithBestItineraries {
 }
 
 /**
- * Select diverse itinerary options for display
- * Prioritizes: best score, different days, non-bike alternatives
+ * Select the single best itinerary option for each unique day
+ * Prioritizes weekends (Saturday, Sunday) over weekdays
  */
 function selectDiverseOptions(
   allOptions: ItineraryOption[],
   maxOptions: number = 3
 ): ItineraryOption[] {
-  const displayOptions: ItineraryOption[] = [];
-  const dayOrder = ["WEDNESDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+  const dayPriority = ["SATURDAY", "SUNDAY", "WEDNESDAY", "FRIDAY"];
+  const bestByDay = new Map<string, ItineraryOption>();
 
-  // First, add the best option
-  if (allOptions.length > 0) {
-    displayOptions.push(allOptions[0]);
-  }
-
-  // Try to find options for different days
-  const seenDays = new Set([allOptions[0]?.day]);
-  for (const option of allOptions.slice(1)) {
-    if (!seenDays.has(option.day)) {
-      displayOptions.push(option);
-      seenDays.add(option.day);
-      if (displayOptions.length >= maxOptions) break;
-    }
-  }
-
-  // If best option uses bike, try to find one without
-  if (displayOptions.length < maxOptions && allOptions[0]?.outbound.modes.includes("BICYCLE")) {
-    const noBikeOption = allOptions.find(
-      opt => !opt.outbound.modes.includes("BICYCLE") && !opt.return.modes.includes("BICYCLE")
-    );
-    if (noBikeOption && !displayOptions.includes(noBikeOption)) {
-      displayOptions.push(noBikeOption);
-    }
-  }
-
-  // Fill remaining slots with next best options
+  // For each option, keep only the best scoring one per day
   for (const option of allOptions) {
-    if (!displayOptions.includes(option)) {
-      displayOptions.push(option);
-      if (displayOptions.length >= maxOptions) break;
+    const existing = bestByDay.get(option.day);
+    if (!existing || option.score > existing.score) {
+      bestByDay.set(option.day, option);
     }
   }
 
-  // Sort by day order
-  displayOptions.sort((a, b) => {
-    const indexA = dayOrder.indexOf(a.day);
-    const indexB = dayOrder.indexOf(b.day);
+  // Convert to array and sort by priority (weekends first)
+  const displayOptions = Array.from(bestByDay.values()).sort((a, b) => {
+    const indexA = dayPriority.indexOf(a.day);
+    const indexB = dayPriority.indexOf(b.day);
     return indexA - indexB;
   });
 
-  return displayOptions;
+  return displayOptions.slice(0, maxOptions);
 }
 
 /**

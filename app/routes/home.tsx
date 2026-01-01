@@ -391,24 +391,25 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                           ))}
                         </td>
                         <td className="py-4 px-2.5 align-top text-[13px]">
-                          <div className="space-y-2">
+                          <div className="space-y-2.5">
                             {targetData.displayOptions?.map((option, i) => (
-                              <ItinerarySummary
-                                key={i}
-                                outbound={option.outbound}
-                                return={option.return}
-                                day={option.day}
-                                score={option.score}
-                              />
+                              <div key={i} className={i > 0 ? "pt-2.5 border-t border-gray-200" : ""}>
+                                <ItinerarySummary
+                                  outbound={option.outbound}
+                                  return={option.return}
+                                  day={option.day}
+                                  score={option.score}
+                                />
+                              </div>
                             ))}
                           </div>
                           {targetData.displayOptions &&
                             targetData.bestOptions.length >
                               targetData.displayOptions.length && (
-                              <div className="mt-2 text-xs">
+                              <div className="mt-2.5 text-xs">
                                 <Link
                                   to={`/target/${targetData.targetId}?start=${selectedStart}`}
-                                  className="text-gray-500 underline"
+                                  className="text-theme-navy-700 underline"
                                 >
                                   +{" "}
                                   {targetData.bestOptions.length -

@@ -1,7 +1,12 @@
 import type { Itinerary } from "results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
 import { getPercentileClasses } from "~/utils/itinerary";
-import { formatDuration, parseTime, pluralize, formatDayLabel } from "~/utils/format";
+import {
+  formatDuration,
+  parseTime,
+  pluralize,
+  formatDayLabel,
+} from "~/utils/format";
 import React from "react";
 import { formatModes } from "~/utils/transport";
 
@@ -136,7 +141,7 @@ export function DayItineraryCard({ day, options }: DayItineraryCardProps) {
                     {percentileLabel}
                   </span>
                   <span className="text-gray-600"> · </span>
-                  <span>{formatDuration(timeAtTarget)} until departure</span>
+                  <span>{formatDuration(timeAtTarget)} hike window</span>
                 </td>
                 <td className="py-3 align-top">
                   <button
