@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Form, useNavigation, useActionData } from "react-router";
+import { Form, useNavigation, useActionData, useSubmit } from "react-router";
 import { START_LOCATION_ORDER } from "~/utils/constants";
-import { type UserPreferences } from "results/scoring";
+import { type UserPreferences, DEFAULT_PREFERENCES } from "results/scoring";
 
 type StartLocation = {
   id: string;
@@ -20,6 +20,7 @@ export function PreferencesPanel({
   const [isOpen, setIsOpen] = useState(false);
   const navigation = useNavigation();
   const actionData = useActionData();
+  const submit = useSubmit();
 
   const isSubmitting = navigation.state === "submitting";
 
@@ -31,58 +32,74 @@ export function PreferencesPanel({
   }, [actionData]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
     const form = e.currentTarget;
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
+    const action = submitter?.value || "update";
     const formData = new FormData(form);
-    const action = formData.get("action");
+
+    let preferences: UserPreferences;
 
     if (action === "reset") {
-      // Let form submit normally for reset
-      return;
+      // Use defaults
+      preferences = {
+        ...DEFAULT_PREFERENCES,
+        lastViewedStartLocation: initialPreferences.lastViewedStartLocation,
+      };
+    } else {
+      // Parse time inputs (HH:MM format) to decimal hours
+      const parseTime = (timeStr: string | null): number => {
+        if (!timeStr) return 0;
+        const [hours, minutes] = timeStr.split(":").map(Number);
+        return hours + minutes / 60;
+      };
+
+      preferences = {
+        preferredStartLocation:
+          (formData.get("preferredStartLocation") as string) || null,
+        lastViewedStartLocation: initialPreferences.lastViewedStartLocation,
+        earliestDeparture: parseTime(
+          formData.get("earliestDeparture") as string
+        ),
+        preferredLatestArrival: parseTime(
+          formData.get("preferredLatestArrival") as string
+        ),
+        walkingSpeed: parseFloat(formData.get("walkingSpeed") as string),
+        returnBuffer: parseFloat(formData.get("returnBuffer") as string) / 60, // Convert minutes to hours
+        preferredLatestEnd: parseTime(
+          formData.get("preferredLatestEnd") as string
+        ),
+        hardLatestEnd: parseTime(formData.get("hardLatestEnd") as string),
+        allowCycling: formData.get("allowCycling") === "on",
+        overnightPenalty: parseFloat(
+          formData.get("overnightPenalty") as string
+        ),
+        weights: {
+          departureTime: parseFloat(
+            formData.get("weight_departureTime") as string
+          ),
+          returnTime: parseFloat(formData.get("weight_returnTime") as string),
+          hikeDuration: parseFloat(
+            formData.get("weight_hikeDuration") as string
+          ),
+          returnOptions: parseFloat(
+            formData.get("weight_returnOptions") as string
+          ),
+          totalDuration: parseFloat(
+            formData.get("weight_totalDuration") as string
+          ),
+          finishTime: parseFloat(formData.get("weight_finishTime") as string),
+        },
+      };
     }
-
-    // Prevent default and build preferences JSON
-    e.preventDefault();
-
-    // Parse time inputs (HH:MM format) to decimal hours
-    const parseTime = (timeStr: string | null): number => {
-      if (!timeStr) return 0;
-      const [hours, minutes] = timeStr.split(":").map(Number);
-      return hours + minutes / 60;
-    };
-
-    const preferences = {
-      preferredStartLocation: formData.get("preferredStartLocation") || null,
-      lastViewedStartLocation: initialPreferences.lastViewedStartLocation,
-      earliestDeparture: parseTime(formData.get("earliestDeparture") as string),
-      latestArrival: parseTime(formData.get("latestArrival") as string),
-      walkingSpeed: parseFloat(formData.get("walkingSpeed") as string),
-      returnBuffer: parseFloat(formData.get("returnBuffer") as string) / 60, // Convert minutes to hours
-      preferredLatestEnd: parseTime(formData.get("preferredLatestEnd") as string),
-      hardLatestEnd: parseTime(formData.get("hardLatestEnd") as string),
-      allowCycling: formData.get("allowCycling") === "on",
-      overnightPenalty: parseFloat(formData.get("overnightPenalty") as string),
-      weights: {
-        departureTime: parseFloat(formData.get("weight_departureTime") as string),
-        returnTime: parseFloat(formData.get("weight_returnTime") as string),
-        hikeDuration: parseFloat(formData.get("weight_hikeDuration") as string),
-        returnOptions: parseFloat(formData.get("weight_returnOptions") as string),
-        totalDuration: parseFloat(formData.get("weight_totalDuration") as string),
-        finishTime: parseFloat(formData.get("weight_finishTime") as string),
-      },
-    };
 
     // Create new FormData with JSON
     const submitData = new FormData();
     submitData.append("action", "update");
     submitData.append("preferences", JSON.stringify(preferences));
 
-    // Submit using fetch
-    fetch(form.action || window.location.pathname, {
-      method: "POST",
-      body: submitData,
-    }).then(() => {
-      window.location.reload();
-    });
+    submit(submitData, { method: "post" });
   };
 
   return (
@@ -162,8 +179,7 @@ export function PreferencesPanel({
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Overnight trip penalty:{" "}
-                  {Math.round(initialPreferences.overnightPenalty * 100)}%
+                  Overnight trip penalty
                 </label>
                 <input
                   type="range"
@@ -172,12 +188,18 @@ export function PreferencesPanel({
                   max="1"
                   step="0.1"
                   defaultValue={initialPreferences.overnightPenalty}
+                  list="overnight-penalty-ticks"
                   className="w-full"
                 />
+                <datalist id="overnight-penalty-ticks">
+                  <option value="0" label="0%"></option>
+                  <option value="0.3" label="30%"></option>
+                  <option value="1" label="100%"></option>
+                </datalist>
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>No penalty (0%)</span>
-                  <span>Default (30%)</span>
-                  <span>Exclude (100%)</span>
+                  <span>No penalty</span>
+                  <span>Default</span>
+                  <span>Exclude</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1.5">
                   Penalty applied to trips spanning multiple days. Set to 100%
@@ -268,7 +290,7 @@ export function PreferencesPanel({
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1.5">
-                  Walking Speed: {initialPreferences.walkingSpeed.toFixed(1)}x
+                  Walking Speed
                 </label>
                 <input
                   type="range"
@@ -277,12 +299,18 @@ export function PreferencesPanel({
                   max="1.4"
                   step="0.1"
                   defaultValue={initialPreferences.walkingSpeed}
+                  list="walking-speed-ticks"
                   className="w-full"
                 />
+                <datalist id="walking-speed-ticks">
+                  <option value="0.6" label="0.6x"></option>
+                  <option value="1.0" label="1.0x"></option>
+                  <option value="1.4" label="1.4x"></option>
+                </datalist>
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>Slower (0.6x)</span>
-                  <span>Standard (1.0x)</span>
-                  <span>Faster (1.4x)</span>
+                  <span>Slower</span>
+                  <span>Standard</span>
+                  <span>Faster</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1.5">
                   Relative to walkhighlands time estimates
@@ -307,7 +335,6 @@ export function PreferencesPanel({
                         {(key[0].toUpperCase() + key.slice(1))
                           .replace(/([A-Z])/g, " $1")
                           .trim()}
-                        : {value.toFixed(1)}
                       </label>
                       <input
                         type="range"
@@ -316,8 +343,14 @@ export function PreferencesPanel({
                         max="1"
                         step="0.1"
                         defaultValue={value}
+                        list={`weight-${key}-ticks`}
                         className="w-full"
                       />
+                      <datalist id={`weight-${key}-ticks`}>
+                        <option value="0" label="0"></option>
+                        <option value="0.5" label="0.5"></option>
+                        <option value="1" label="1"></option>
+                      </datalist>
                     </div>
                   )
                 )}
