@@ -46,9 +46,9 @@ test.describe("All Itineraries Page", () => {
     // Click to expand
     await expandButton.click();
 
-    // Should show detailed leg information
+    // Should show detailed leg information (legs with mode: format)
     await expect(
-      page.locator("text=/Depart|Arrive|Walk|Bus|Rail/i").first()
+      page.locator("text=/Bus:|Train:|Walk:/i").first()
     ).toBeVisible();
 
     // Should have collapse button (− symbol)
@@ -132,9 +132,9 @@ test.describe("All Itineraries Page", () => {
     // Click to expand
     await expandButton.click();
 
-    // Should show detailed leg information
+    // Should show detailed leg information (legs with mode: format)
     await expect(
-      page.locator("text=/Depart|Arrive|Walk|Bus|Rail/i").first()
+      page.locator("text=/Bus:|Train:|Walk:/i").first()
     ).toBeVisible();
 
     // Should have collapse button (− symbol)

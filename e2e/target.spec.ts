@@ -35,9 +35,9 @@ test.describe("Target Page", () => {
     // Click to expand
     await showDetailsButton.click();
 
-    // Should show expanded itinerary details (legs)
+    // Should show expanded itinerary details (legs with mode: format)
     await expect(
-      page.locator("text=/Depart|Arrive|Walk|Bus|Rail/i").first()
+      page.locator("text=/Bus:|Train:|Walk:/i").first()
     ).toBeVisible();
 
     // Should have "hide" button
@@ -122,9 +122,9 @@ test.describe("Target Page", () => {
     const collapseButton = page.getByRole("button", { name: "hide" }).first();
     await expect(collapseButton).toBeVisible();
 
-    // Verify expanded content is visible (any of the common leg text)
+    // Verify expanded content is visible (legs with mode: format)
     await expect(
-      page.locator("text=/Depart|Arrive|Walk|Bus|Rail|Train/i").first()
+      page.locator("text=/Bus:|Train:|Walk:/i").first()
     ).toBeVisible();
   });
 });
