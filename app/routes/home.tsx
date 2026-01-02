@@ -465,8 +465,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                               }
                             >
                               <div className="font-serif text-sm text-gray-700">
-                                {routeData.route.name}
-                                <span className="text-gray-500"> • </span>
+                                {routeData.route.name} •&nbsp;
                                 <a
                                   href={routeData.route.page}
                                   target="_blank"
@@ -476,22 +475,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                                   walkhighlands
                                 </a>
                               </div>
-                              <div className="mt-1.5">
-                                {routeData.munros.map((munro, j) => (
-                                  <span key={munro.number}>
-                                    <Link
-                                      to={`/munro/${munro.slug}`}
-                                      className="text-theme-navy-700 underline text-[13px]"
-                                    >
-                                      {munro.name}
-                                    </Link>
-                                    {j < routeData.munros.length - 1 && (
-                                      <span className="text-gray-400"> • </span>
-                                    )}
-                                  </span>
-                                ))}
-                              </div>
-                              <div className="mt-1.5 text-gray-600 text-[13px]">
+                              <div className="mt-1 text-gray-600 text-xs">
                                 {routeData.route.stats.distanceKm}km •{" "}
                                 {routeData.route.stats.timeHours.min}-
                                 {routeData.route.stats.timeHours.max}h •{" "}
