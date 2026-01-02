@@ -335,9 +335,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </h2>
         <p className="text-sm text-gray-600 m-0 mb-3">
           I used rail and bus timetable data to compute public transport
-          itineraries to every Munro route on walkhighlands for a few sample
-          days. Itineraries are ranked based on various subjective factors you
-          customize. The algorithm presumes summer conditions.
+          itineraries to the starting point every Munro route on walkhighlands
+          for a few sample days. Itineraries are ranked based on various
+          subjective factors you can customize. The algorithm presumes summer
+          conditions.
         </p>
         <p className="text-[13px] text-gray-600 m-0 mb-3">
           Walkhighlands data on this site will be outdated, any errors
