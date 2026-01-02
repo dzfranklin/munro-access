@@ -240,7 +240,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           Munro Access
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
-          Public transport connections to munros from Glasgow, Edinburgh, and
+          Public transport connections to Munros from Glasgow, Edinburgh, and
           Stirling
         </p>
       </header>
