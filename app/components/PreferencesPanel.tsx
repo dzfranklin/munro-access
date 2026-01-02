@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigation, useActionData, useSubmit } from "react-router";
 import { START_LOCATION_ORDER } from "~/utils/constants";
-import { type UserPreferences, type RankingPreferences, DEFAULT_PREFERENCES } from "~/results/scoring";
+import {
+  type UserPreferences,
+  type RankingPreferences,
+  DEFAULT_PREFERENCES,
+} from "~/results/scoring";
 import { PreferencesControls } from "./PreferencesControls";
 
 type StartLocation = {
@@ -19,7 +23,8 @@ export function PreferencesPanel({
   initialPreferences,
 }: PreferencesPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [preferences, setPreferences] = useState<UserPreferences>(initialPreferences);
+  const [preferences, setPreferences] =
+    useState<UserPreferences>(initialPreferences);
 
   const navigation = useNavigation();
   const actionData = useActionData();
@@ -37,22 +42,13 @@ export function PreferencesPanel({
     setPreferences({ ...preferences, ranking: newPrefs });
   };
 
-  const handleApply = () => {
+  const submitPreferences = (prefs: UserPreferences) => {
+    setPreferences(prefs);
+
     const formData = new FormData();
     formData.append("action", "update");
-    formData.append("preferences", JSON.stringify(preferences));
-
+    formData.append("preferences", JSON.stringify(prefs));
     submit(formData, { method: "post" });
-  };
-
-  const handleReset = () => {
-    setPreferences({
-      ...DEFAULT_PREFERENCES,
-      ui: {
-        ...DEFAULT_PREFERENCES.ui,
-        lastViewedStartLocation: initialPreferences.ui.lastViewedStartLocation,
-      },
-    });
   };
 
   return (
@@ -72,7 +68,7 @@ export function PreferencesPanel({
               Your Preferences
             </h3>
             <button
-              onClick={handleReset}
+              onClick={() => submitPreferences(DEFAULT_PREFERENCES)}
               className="text-sm text-theme-navy-700 underline hover:no-underline float-right"
             >
               Reset to defaults
@@ -123,7 +119,7 @@ export function PreferencesPanel({
 
           <div className="mt-5 pt-4 border-t border-gray-300">
             <button
-              onClick={handleApply}
+              onClick={() => submitPreferences(preferences)}
               disabled={isSubmitting}
               className={`px-4 py-2 text-sm font-bold ${
                 !isSubmitting
