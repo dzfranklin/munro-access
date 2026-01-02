@@ -251,14 +251,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           htmlFor="search"
           className="block text-sm font-bold text-gray-700 mb-2"
         >
-          Search for a munro or route
+          Search for a Munro or route
         </label>
         <input
           id="search"
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Enter munro or route name..."
+          placeholder="Enter Munro or route name..."
           className="w-full px-3 py-2 border-2 border-gray-300 text-sm focus:outline-none focus:border-theme-navy-700"
         />
       </div>
@@ -341,9 +341,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           conditions.
         </p>
         <p className="text-[13px] text-gray-600 m-0 mb-3">
-          Walkhighlands data on this site will be outdated, any errors
-          introduced are mine. My goal is to help you find interesting routes to
-          look into further on{" "}
+          Route information from walkhighlands on this site will be outdated,
+          any errors introduced are mine. My goal is to help you find
+          interesting routes to look into further on{" "}
           <a
             href="http://walkhighlands.co.uk/"
             target="_blank"

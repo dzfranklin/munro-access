@@ -56,7 +56,7 @@ export function Footer({ samplePeriod }: FooterProps) {
       </h3>
       <ul className="m-0 pl-0 list-none text-gray-600 space-y-2">
         <li>
-          Route data from{" "}
+          Route information from{" "}
           <a
             href="http://walkhighlands.co.uk/"
             target="_blank"
