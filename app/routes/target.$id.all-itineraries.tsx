@@ -88,10 +88,10 @@ export default function AllItineraries({ loaderData }: Route.ComponentProps) {
       return urlStart;
     }
     if (
-      preferences.preferredStartLocation &&
-      starts.some((s) => s.id === preferences.preferredStartLocation)
+      preferences.ui.preferredStartLocation &&
+      starts.some((s) => s.id === preferences.ui.preferredStartLocation)
     ) {
-      return preferences.preferredStartLocation;
+      return preferences.ui.preferredStartLocation;
     }
     return starts.length > 0 ? starts[0].id : null;
   })();

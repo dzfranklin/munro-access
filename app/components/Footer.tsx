@@ -65,8 +65,9 @@ export function Footer({ samplePeriod }: FooterProps) {
           >
             walkhighlands
           </a>
-          . Data will be outdated, any errors introduced are mine. My goal is to
-          help you find interesting routes to look into further on{" "}
+          . Data will be outdated, any errors introduced are mine, walkhighlands
+          has no affiliation with this project. My goal is to help you find
+          interesting routes to look into further on{" "}
           <a
             href="http://walkhighlands.co.uk/"
             target="_blank"

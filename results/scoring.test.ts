@@ -85,7 +85,6 @@ describe("scoreItineraryPair", () => {
     const result = scoreItineraryPair(outbound, returnItin, route);
 
     expect(result).toBeNull();
-    
   });
 
   it("should reject if arrival is too early (overnight arrival)", () => {
@@ -103,7 +102,6 @@ describe("scoreItineraryPair", () => {
     const result = scoreItineraryPair(outbound, returnItin, route);
 
     expect(result).toBeNull();
-    
   });
 
   it("should reject if hike finishes too late", () => {
@@ -121,25 +119,28 @@ describe("scoreItineraryPair", () => {
     const result = scoreItineraryPair(outbound, returnItin, route);
 
     expect(result).toBeNull();
-    
   });
 
-  it("should reject if return buffer is insufficient", () => {
-    // Arrive 10:00. Route 6h. Finish 16:00. Return 16:15. Buffer is 15min. Required 30min (0.5h).
+  it("should reject if return is less than min", () => {
     const outbound = createItinerary({
       startTime: "08:00:00",
       endTime: "10:00:00",
     });
     const returnItin = createItinerary({
-      startTime: "16:15:00",
-      endTime: "18:15:00",
+      startTime: "11:00:00",
+      endTime: "12:00:00",
     });
-    const route = createRoute();
+    const route = createRoute({
+      stats: {
+        distanceKm: 10,
+        timeHours: { min: 4, max: 6 },
+        ascentM: 500,
+      },
+    });
 
     const result = scoreItineraryPair(outbound, returnItin, route);
 
     expect(result).toBeNull();
-    
   });
 
   it("should reject if returning by bike without outbound bike", () => {
@@ -150,7 +151,6 @@ describe("scoreItineraryPair", () => {
     const result = scoreItineraryPair(outbound, returnItin, route);
 
     expect(result).toBeNull();
-    
   });
 
   it("should allow returning by bike if outbound has bike", () => {

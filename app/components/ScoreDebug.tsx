@@ -1,37 +1,29 @@
-import type { RankingPreferences } from "results/scoring";
+import type { RankingPreferences, ItineraryScore } from "results/scoring";
 
 interface ScoreDebugProps {
-  score: {
-    rawScore: number;
-    percentile: number;
-    components: {
-      departureTime: number;
-      returnTime: number;
-      hikeDuration: number;
-      returnOptions: number;
-      totalDuration: number;
-      finishTime: number;
-    };
-  };
+  score: ItineraryScore;
   preferences: RankingPreferences;
   visible?: boolean;
 }
 
-export function ScoreDebug({ score, preferences, visible = false }: ScoreDebugProps) {
+export function ScoreDebug({
+  score,
+  preferences,
+  visible = false,
+}: ScoreDebugProps) {
   if (!visible) return null;
 
   const { components } = score;
   const weights = preferences.weights;
 
   // Calculate weighted values for each component
-  const weighted = {
-    departureTime: components.departureTime * weights.departureTime,
-    returnTime: components.returnTime * weights.returnTime,
-    hikeDuration: components.hikeDuration * weights.hikeDuration,
-    returnOptions: components.returnOptions * weights.returnOptions,
-    totalDuration: components.totalDuration * weights.totalDuration,
-    finishTime: components.finishTime * weights.finishTime,
-  };
+  const weighted = Object.entries(components).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: value * weights[key as keyof typeof weights],
+    }),
+    {} as Record<string, number>
+  );
 
   const weightSum = Object.values(weights).reduce((a, b) => a + b, 0);
 
@@ -41,9 +33,10 @@ export function ScoreDebug({ score, preferences, visible = false }: ScoreDebugPr
   return (
     <div className="border border-gray-300 bg-gray-50 p-3 text-xs font-mono">
       <div className="font-bold mb-2">Score Breakdown (Debug)</div>
-      
+
       <div className="mb-2">
-        <strong>Final Score:</strong> {fmt(score.rawScore)} (percentile: {fmt(score.percentile * 100)}%)
+        <strong>Final Score:</strong> {fmt(score.rawScore)} (percentile:{" "}
+        {fmt(score.percentile * 100)}%)
       </div>
 
       <table className="w-full border-collapse">
@@ -61,7 +54,7 @@ export function ScoreDebug({ score, preferences, visible = false }: ScoreDebugPr
             const weight = weights[key as keyof typeof weights];
             const weightedValue = weighted[key as keyof typeof weighted];
             const percentOfTotal = (weightedValue / score.rawScore) * 100;
-            
+
             return (
               <tr key={key} className="border-b border-gray-200">
                 <td className="py-1">{key}</td>
@@ -76,20 +69,21 @@ export function ScoreDebug({ score, preferences, visible = false }: ScoreDebugPr
             <td className="py-1">TOTAL</td>
             <td className="text-right">-</td>
             <td className="text-right">{fmt(weightSum)}</td>
-            <td className="text-right">{fmt(Object.values(weighted).reduce((a, b) => a + b, 0))}</td>
+            <td className="text-right">
+              {fmt(Object.values(weighted).reduce((a, b) => a + b, 0))}
+            </td>
             <td className="text-right">100%</td>
           </tr>
         </tbody>
       </table>
 
       <div className="mt-2 text-gray-600">
-        Components with highest impact: {
-          Object.entries(weighted)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 3)
-            .map(([key]) => key)
-            .join(", ")
-        }
+        Components with highest impact:{" "}
+        {Object.entries(weighted)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3)
+          .map(([key]) => key)
+          .join(", ")}
       </div>
     </div>
   );

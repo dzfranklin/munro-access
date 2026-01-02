@@ -5,7 +5,7 @@ import { pluralize } from "~/utils/format";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "All Route Locations - Munro Access" },
+    { title: "All Route Starting Locations - Munro Access" },
     {
       name: "description",
       content: "Complete list of route starting locations for Munros",
@@ -31,27 +31,19 @@ export default function Targets({ loaderData }: Route.ComponentProps) {
           to="/"
           className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
-          Back to all routes
+          Back to best options
         </Link>
       </nav>
 
       {/* Header */}
       <header className="border-b-[3px] border-theme-navy-700 pb-4 mb-6">
         <h1 className="font-serif text-[2rem] font-normal text-theme-navy-900 m-0 mb-2.5">
-          All Route Locations
+          All Route Starting Locations
         </h1>
         <p className="font-sans text-base text-gray-600 m-0">
           {targets.length} starting locations for Munro routes
         </p>
       </header>
-
-      {/* Info box */}
-      <div className="bg-gray-50 border border-gray-300 p-5 mb-8 leading-relaxed">
-        <p className="text-sm text-gray-600 m-0">
-          These are the trailhead locations where routes begin. Click on a
-          location to see all available routes and public transport options.
-        </p>
-      </div>
 
       {/* Targets table */}
       <section>
@@ -80,14 +72,13 @@ export default function Targets({ loaderData }: Route.ComponentProps) {
                   </Link>
                 </td>
                 <td className="py-3 px-2.5 align-top text-gray-600">
-                  {pluralize(target.routes.length, 'route')}
+                  {pluralize(target.routes.length, "route")}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-
     </>
   );
 }

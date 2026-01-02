@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { setPreferences } from "./helpers";
 
 test.describe("All Itineraries Page", () => {
   test("displays outbound and return itineraries", async ({ page }) => {
@@ -65,20 +66,8 @@ test.describe("All Itineraries Page", () => {
   });
 
   test("filters itineraries with cycling disabled", async ({ page }) => {
+    await setPreferences(page, { ranking: { allowCycling: false } });
     await page.goto("/");
-
-    // Set preferences on homepage
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await prefsToggle.click();
-
-    const cyclingCheckbox = page
-      .locator("label")
-      .filter({ hasText: /Allow cycling/i })
-      .locator("input[type='checkbox']");
-    await cyclingCheckbox.uncheck();
-
-    // Close preferences
-    await prefsToggle.click();
 
     // Navigate to target and then all itineraries page
     const firstTarget = page.locator("a[href*='/target/']").first();
@@ -103,18 +92,8 @@ test.describe("All Itineraries Page", () => {
   });
 
   test("respects time preferences", async ({ page }) => {
+    await setPreferences(page, { ranking: { earliestDeparture: 9 } });
     await page.goto("/");
-
-    // Set preferences on homepage
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await prefsToggle.click();
-
-    // Change earliest departure time to 9am
-    const earliestDepartureInput = page.locator("input[type='time']").first();
-    await earliestDepartureInput.fill("09:00");
-
-    // Close preferences
-    await prefsToggle.click();
 
     // Navigate to target and then all itineraries page
     const firstTarget = page.locator("a[href*='/target/']").first();
@@ -133,18 +112,8 @@ test.describe("All Itineraries Page", () => {
   });
 
   test("expands itinerary details with preferences set", async ({ page }) => {
+    await setPreferences(page, { ranking: { earliestDeparture: 8 } });
     await page.goto("/");
-
-    // Set preferences on homepage
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await prefsToggle.click();
-
-    // Change earliest departure time to 8am
-    const earliestDepartureInput = page.locator("input[type='time']").first();
-    await earliestDepartureInput.fill("08:00");
-
-    // Close preferences
-    await prefsToggle.click();
 
     // Navigate to target and then all itineraries page
     const firstTarget = page.locator("a[href*='/target/']").first();

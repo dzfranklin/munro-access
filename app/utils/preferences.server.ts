@@ -26,8 +26,8 @@ export function parsePreferencesFromCookie(
   try {
     const parsed = JSON.parse(prefsCookie);
     const validated = userPreferencesSchema.parse({
-      ...DEFAULT_PREFERENCES,
-      ...parsed,
+      ranking: { ...DEFAULT_PREFERENCES.ranking, ...parsed.ranking },
+      ui: { ...DEFAULT_PREFERENCES.ui, ...parsed.ui },
     });
     return validated;
   } catch (error) {

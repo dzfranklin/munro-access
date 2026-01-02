@@ -101,13 +101,6 @@ export function getBestItinerariesForTarget(
     // Slow path: compute from scratch (for custom preferences)
     bestOptions = [];
 
-    // Use the longest route for scoring (most conservative estimate)
-    const longestRoute = target.routes.reduce((longest, route) => {
-      const longestMax = longest.stats.timeHours.max;
-      const routeMax = route.stats.timeHours.max;
-      return routeMax > longestMax ? route : longest;
-    }, target.routes[0]);
-
     // Check itineraries from all start cities
     for (const result of resultMap.values()) {
       if (result.target !== targetId) continue;
@@ -118,23 +111,52 @@ export function getBestItinerariesForTarget(
 
         if (outbounds.length === 0 || returns.length === 0) continue;
 
-        // Get all viable itinerary pairs for this day
-        const viable = selectBestItineraries(
-          outbounds,
-          returns,
-          longestRoute,
-          prefs,
-          Infinity // No limit - return all viable pairs
-        );
+        // Try each route and find best scores for each itinerary pair
+        const pairScores = new Map<string, { outbound: Itinerary; return: Itinerary; bestScore: number; viableRouteCount: number }>();
 
-        for (const { outbound, return: returnItin, score } of viable) {
+        for (const route of target.routes) {
+          const viable = selectBestItineraries(
+            outbounds,
+            returns,
+            route,
+            prefs,
+            Infinity
+          );
+
+          for (const { outbound, return: returnItin, score } of viable) {
+            const pairKey = `${outbound.startTime}-${returnItin.startTime}`;
+            const existing = pairScores.get(pairKey);
+
+            if (!existing) {
+              pairScores.set(pairKey, {
+                outbound,
+                return: returnItin,
+                bestScore: score.rawScore,
+                viableRouteCount: 1,
+              });
+            } else {
+              // Keep best score, but count all viable routes
+              if (score.rawScore > existing.bestScore) {
+                existing.bestScore = score.rawScore;
+              }
+              existing.viableRouteCount++;
+            }
+          }
+        }
+
+        // Add pairs with route flexibility boost
+        for (const pair of pairScores.values()) {
+          // Apply boost: 2% per additional viable route beyond the first
+          const routeBoost = 1 + (pair.viableRouteCount - 1) * 0.02;
+          const boostedScore = pair.bestScore * routeBoost;
+
           bestOptions.push({
             startId: result.start,
             startName: result.start,
             day,
-            outbound,
-            return: returnItin,
-            score: score.rawScore,
+            outbound: pair.outbound,
+            return: pair.return,
+            score: boostedScore,
           });
         }
       }
@@ -215,12 +237,6 @@ export function computeAllTargetItineraries(
 
   // Compute all viable pairs for all targets in one pass
   for (const [targetId, target] of targetMap.entries()) {
-    const longestRoute = target.routes.reduce((longest, route) => {
-      const longestMax = longest.stats.timeHours.max;
-      const routeMax = route.stats.timeHours.max;
-      return routeMax > longestMax ? route : longest;
-    }, target.routes[0]);
-
     const options: TargetItinerariesCache['options'] = [];
 
     for (const result of resultMap.values()) {
@@ -230,23 +246,53 @@ export function computeAllTargetItineraries(
         const { outbounds, returns } = dayItineraries;
         if (outbounds.length === 0 || returns.length === 0) continue;
 
-        const viable = selectBestItineraries(
-          outbounds,
-          returns,
-          longestRoute,
-          prefs,
-          Infinity
-        );
+        // Try each route and find best scores for each itinerary pair
+        const pairScores = new Map<string, { outbound: Itinerary; return: Itinerary; bestScore: number; viableRouteCount: number }>();
 
-        for (const { outbound, return: returnItin, score } of viable) {
+        for (const route of target.routes) {
+          const viable = selectBestItineraries(
+            outbounds,
+            returns,
+            route,
+            prefs,
+            Infinity
+          );
+
+          for (const { outbound, return: returnItin, score } of viable) {
+            const pairKey = `${outbound.startTime}-${returnItin.startTime}`;
+            const existing = pairScores.get(pairKey);
+
+            if (!existing) {
+              pairScores.set(pairKey, {
+                outbound,
+                return: returnItin,
+                bestScore: score.rawScore,
+                viableRouteCount: 1,
+              });
+            } else {
+              // Keep best score, but count all viable routes
+              if (score.rawScore > existing.bestScore) {
+                existing.bestScore = score.rawScore;
+              }
+              existing.viableRouteCount++;
+            }
+          }
+        }
+
+        // Add pairs with route flexibility boost
+        for (const pair of pairScores.values()) {
+          // Apply boost: 2% per additional viable route beyond the first
+          const routeBoost = 1 + (pair.viableRouteCount - 1) * 0.02;
+          const boostedScore = pair.bestScore * routeBoost;
+
           options.push({
             startId: result.start,
             day,
-            outbound,
-            return: returnItin,
-            rawScore: score.rawScore,
+            outbound: pair.outbound,
+            return: pair.return,
+            rawScore: boostedScore,
           });
-          allScores.push(score.rawScore);
+          allScores.push(boostedScore);
         }
       }
     }

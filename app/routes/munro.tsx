@@ -48,7 +48,7 @@ export default function Munro({ loaderData }: Route.ComponentProps) {
           to="/"
           className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
-          Back to all routes
+          Back to best options
         </Link>
       </nav>
 

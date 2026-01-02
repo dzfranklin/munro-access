@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { setPreferences } from "./helpers";
 
 test.describe("Target Page", () => {
   test("displays target details and routes", async ({ page }) => {
@@ -62,21 +63,20 @@ test.describe("Target Page", () => {
   });
 
   test("respects cycling preference", async ({ page }) => {
-    await page.goto("/");
-
     // First, find a target with cycling routes BEFORE disabling cycling
+    await page.goto("/");
     const targetLinks = page.locator("a[href*='/target/']");
     const targetCount = await targetLinks.count();
-    
+
     let targetWithCycling = null;
     let targetHref = null;
     for (let i = 0; i < Math.min(targetCount, 20); i++) {
       const target = targetLinks.nth(i);
-      
+
       // Check the parent row for bike/cycling indicators
       const row = target.locator("xpath=ancestor::tr[1]");
       const rowText = await row.textContent();
-      
+
       if (rowText && rowText.includes("Bike")) {
         targetWithCycling = target;
         targetHref = await target.getAttribute("href");
@@ -89,19 +89,8 @@ test.describe("Target Page", () => {
       throw new Error("No target with cycling routes found on the home page");
     }
 
-    // Now disable cycling preference
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await prefsToggle.click();
-
-    const cyclingCheckbox = page
-      .locator("label")
-      .filter({ hasText: /Allow cycling/i })
-      .locator("input[type='checkbox']");
-
-    await cyclingCheckbox.uncheck();
-
-    // Close preferences
-    await prefsToggle.click();
+    // Disable cycling preference
+    await setPreferences(page, { ranking: { allowCycling: false } });
 
     // Navigate to the target we found earlier (using the href directly)
     await page.goto(targetHref);
@@ -109,30 +98,15 @@ test.describe("Target Page", () => {
     await expect(
       page.locator("h2").filter({ hasText: /Transport to/i })
     ).toBeVisible();
-    
+
     // Assert no cycling routes shown - check the entire page content
     const pageText = await page.textContent("body");
     expect(pageText).not.toContain("Bike");
   });
 
   test("expands itinerary with preferences set", async ({ page }) => {
+    await setPreferences(page, { ranking: { earliestDeparture: 8 } });
     await page.goto("/");
-
-    // Set preferences on homepage - set time preference instead of cycling
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await expect(prefsToggle).toBeVisible();
-    await prefsToggle.click();
-
-    // Wait for preferences panel to open
-    await page.waitForTimeout(200);
-
-    // Change earliest departure time to 8am
-    const earliestDepartureInput = page.locator("input[type='time']").first();
-    await expect(earliestDepartureInput).toBeVisible();
-    await earliestDepartureInput.fill("08:00");
-
-    // Close preferences
-    await prefsToggle.click();
 
     // Navigate to target page
     const firstTarget = page.locator("a[href*='/target/']").first();

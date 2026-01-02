@@ -92,7 +92,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     targetMap,
     munroMap,
     Infinity,
-    preferences,
+    preferences.ranking,
     isDefaultPrefs ? targetCacheForDefaultPrefs : undefined,
     isDefaultPrefs ? percentileMapForDefaultPrefs : undefined
   );
@@ -168,9 +168,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   // Priority: URL > preferredStartLocation (from cookie) > first tab
   const selectedStart =
     urlStart ||
-    (preferences.preferredStartLocation &&
-    targetsData.find((d) => d.startId === preferences.preferredStartLocation)
-      ? preferences.preferredStartLocation
+    (preferences.ui.preferredStartLocation &&
+    targetsData.find((d) => d.startId === preferences.ui.preferredStartLocation)
+      ? preferences.ui.preferredStartLocation
       : null) ||
     targetsData[0]?.startId;
   const currentPage = urlPage ? parseInt(urlPage, 10) : 1;
@@ -336,12 +336,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <p className="text-sm text-gray-600 m-0 mb-3">
           I used rail and bus timetable data to compute public transport
           itineraries to every Munro route on walkhighlands for a few sample
-          days. Itineraries are ranked based on how early you have to leave, how
-          well the return matches the hike duration, whether there are backup
-          options if you take longer than expected, transit time, and some other
-          factors. The algorithm presumes summer conditions.
+          days. Itineraries are ranked based on various subjective factors you
+          customize. The algorithm presumes summer conditions.
         </p>
-        <p className="text-sm text-gray-600 m-0 mb-3">
+        <p className="text-[13px] text-gray-600 m-0 mb-3">
           Walkhighlands data on this site will be outdated, any errors
           introduced are mine. My goal is to help you find interesting routes to
           look into further on{" "}
@@ -356,9 +354,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           .
         </p>
         <p className="text-[13px] text-gray-600 m-0">
-          <strong>Note:</strong> These results are based on sample schedules
-          from {formatSamplePeriod(sampleDates)}. They are intended to help you
-          find options to look into further.
+          These results are based on sample schedules from{" "}
+          {formatSamplePeriod(sampleDates)}. My hope is that transit schedules
+          won't change too much too quickly, but you should definitely verify
+          itineraries yourself.
         </p>
       </div>
 

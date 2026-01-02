@@ -4,7 +4,9 @@ test.describe("Targets List", () => {
   test("displays list of all targets", async ({ page }) => {
     await page.goto("/targets");
 
-    await expect(page.locator("h1")).toContainText("Route Locations");
+    await expect(page.locator("h1")).toContainText(
+      "All Route Starting Locations"
+    );
 
     // Should have target links
     const targetLinks = page.locator("a[href*='/target/']");

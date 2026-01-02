@@ -52,7 +52,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     resultMap,
     targetMap,
     munroMap,
-    preferences,
+    preferences.ranking,
     10,
     isDefaultPrefs ? percentileMapForDefaultPrefs : undefined,
     isDefaultPrefs ? targetCacheForDefaultPrefs : undefined
@@ -114,10 +114,10 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       return urlStart;
     }
     if (
-      preferences.preferredStartLocation &&
-      starts.some((s) => s.id === preferences.preferredStartLocation)
+      preferences.ui.preferredStartLocation &&
+      starts.some((s) => s.id === preferences.ui.preferredStartLocation)
     ) {
-      return preferences.preferredStartLocation;
+      return preferences.ui.preferredStartLocation;
     }
     return starts.length > 0 ? starts[0].id : null;
   })();
@@ -144,10 +144,8 @@ export default function Target({ loaderData }: Route.ComponentProps) {
 
   // Open timeline modal for a specific day
   const openTimeline = (day: string) => {
-    console.log("openTimeline called with day:", day);
     setTimelineDay(day);
     setTimelineModalOpen(true);
-    console.log("State set - modalOpen should be true");
   };
 
   // Get options for selected start and timeline day
@@ -166,7 +164,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
           to={urlStart ? `/?start=${urlStart}` : "/"}
           className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
-          Back to all routes
+          Back to best options
         </Link>
       </nav>
 
@@ -355,6 +353,7 @@ export default function Target({ loaderData }: Route.ComponentProps) {
       <TimelineModal
         isOpen={timelineModalOpen}
         onClose={() => setTimelineModalOpen(false)}
+        key={`${selectedStart}-${timelineDay}`} // Reset state when start/day changes
         options={timelineOptions}
         day={timelineDay || ""}
         startName={

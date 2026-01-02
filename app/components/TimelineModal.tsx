@@ -101,6 +101,7 @@ export function TimelineModal({
 
   // Auto-select best outbound when modal opens
   React.useEffect(() => {
+    console.log("Timeline modal", { isOpen, outbounds, selectedOutbound });
     if (isOpen && outbounds.length > 0 && !selectedOutbound) {
       // Find the best-scored outbound from options
       const bestOption = options.reduce(

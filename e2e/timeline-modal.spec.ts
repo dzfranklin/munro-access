@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { setPreferences } from "./helpers";
 
 test.describe("Timeline Modal", () => {
   test("opens and displays journey details", async ({ page }) => {
@@ -45,26 +46,13 @@ test.describe("Timeline Modal", () => {
   });
 
   test("opens with preferences set", async ({ page }) => {
+    await setPreferences(page, { ranking: { allowCycling: false } });
     await page.goto("/");
-
-    // Set preferences on homepage
-    const prefsToggle = page.getByTestId("preferences-toggle");
-    await prefsToggle.click();
-
-    const cyclingCheckbox = page
-      .locator("label")
-      .filter({ hasText: /Allow cycling/i })
-      .locator("input[type='checkbox']");
-    await cyclingCheckbox.uncheck();
-
-    // Close preferences
-    await prefsToggle.click();
 
     // Navigate to target page
     const firstTarget = page.locator("a[href*='/target/']").first();
     await firstTarget.click();
 
-    // Find and click a view/details button
     page
       .locator("button")
       .filter({ hasText: /timeline/i })

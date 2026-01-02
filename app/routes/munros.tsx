@@ -30,7 +30,7 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
           to="/"
           className="text-theme-navy-700 underline text-sm hover:no-underline"
         >
-          Back to all routes
+          Back to best options
         </Link>
       </nav>
 
@@ -58,7 +58,7 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-300">
               <th className="py-2.5 px-2.5 text-left font-bold">Name</th>
-              <th className="py-2.5 px-2.5 text-left font-bold">Links</th>
+              <th className="py-2.5 px-2.5 text-left font-bold"></th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +77,7 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
                     href={munro.page}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-theme-green-600 underline text-[13px]"
+                    className="text-theme-navy-700 underline text-[13px]"
                   >
                     walkhighlands
                   </a>
@@ -87,7 +87,6 @@ export default function Munros({ loaderData }: Route.ComponentProps) {
           </tbody>
         </table>
       </section>
-
     </>
   );
 }

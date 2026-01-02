@@ -1,16 +1,14 @@
 import type { Itinerary, Route } from "./schema";
 import { z } from "zod";
-import {
-  isSameDay,
-  getDaysBetween,
-  calculateDuration,
-  isOvernightJourney,
-} from "../app/utils/format";
+import { isSameDay, getDaysBetween } from "../app/utils/format";
 
 // Preferences that affect itinerary scoring/ranking
 const rankingPreferencesSchema = z.object({
   // Earliest acceptable departure time (in hours, 24h format)
   earliestDeparture: z.number().min(0).max(24),
+
+  // Preferred earliest departure time (in hours, 24h format) - departures before this are penalized
+  preferredEarliestDeparture: z.number().min(0).max(24),
 
   // Latest preferred return arrival time (in hours, 24h format) - arrivals after this are penalized
   preferredLatestArrival: z.number().min(12).max(24),
@@ -34,9 +32,8 @@ const rankingPreferencesSchema = z.object({
   weights: z.object({
     departureTime: z.number().min(0).max(1),
     returnTime: z.number().min(0).max(1),
-    hikeDuration: z.number().min(0).max(1),
+    hikeDurationFit: z.number().min(0).max(1),
     returnOptions: z.number().min(0).max(1),
-    totalDuration: z.number().min(0).max(1),
     finishTime: z.number().min(0).max(1),
   }),
 
@@ -53,8 +50,10 @@ const uiPreferencesSchema = z.object({
   lastViewedStartLocation: z.string().nullable(),
 });
 
-const userPreferencesSchema =
-  rankingPreferencesSchema.merge(uiPreferencesSchema);
+const userPreferencesSchema = z.object({
+  ranking: rankingPreferencesSchema,
+  ui: uiPreferencesSchema,
+});
 
 export type RankingPreferences = z.infer<typeof rankingPreferencesSchema>;
 export type UIPreferences = z.infer<typeof uiPreferencesSchema>;
@@ -63,21 +62,21 @@ export type UserPreferences = z.infer<typeof userPreferencesSchema>;
 export { userPreferencesSchema, rankingPreferencesSchema, uiPreferencesSchema };
 
 export const DEFAULT_RANKING_PREFERENCES: RankingPreferences = {
-  earliestDeparture: 6, // 6am earliest
-  preferredLatestArrival: 22, // 10pm latest preferred for return arrival
-  walkingSpeed: 1.0, // Standard speed
-  returnBuffer: 0.5, // 30 minutes
-  preferredLatestEnd: 18, // 6pm preferred
-  hardLatestEnd: 22, // 10pm hard cutoff
+  earliestDeparture: 6,
+  preferredEarliestDeparture: 7.5,
+  preferredLatestArrival: 22,
+  walkingSpeed: 1,
+  returnBuffer: 0.5,
+  preferredLatestEnd: 18,
+  hardLatestEnd: 22,
   allowCycling: true,
-  overnightPenalty: 0.3, // 30% penalty for overnight trips
+  overnightPenalty: 0.3,
   weights: {
-    departureTime: 0.2,
-    returnTime: 0.15,
-    hikeDuration: 1.0, // Most important
-    returnOptions: 0.8,
-    totalDuration: 0.6,
-    finishTime: 0.5,
+    departureTime: 0.7,
+    returnTime: 0.7,
+    hikeDurationFit: 0.6,
+    returnOptions: 0.4,
+    finishTime: 0.7,
   },
 };
 
@@ -87,19 +86,18 @@ export const DEFAULT_UI_PREFERENCES: UIPreferences = {
 };
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
-  ...DEFAULT_RANKING_PREFERENCES,
-  ...DEFAULT_UI_PREFERENCES,
+  ranking: DEFAULT_RANKING_PREFERENCES,
+  ui: DEFAULT_UI_PREFERENCES,
 };
 
-interface ItineraryScore {
+export interface ItineraryScore {
   rawScore: number;
   percentile: number;
   components: {
     departureTime: number;
     returnTime: number;
-    hikeDuration: number;
+    hikeDurationFit: number;
     returnOptions: number;
-    totalDuration: number;
     finishTime: number;
   };
 }
@@ -143,15 +141,6 @@ export function scoreItineraryPair(
     return null;
   }
 
-  // Calculate adjusted hike duration based on walking speed
-  const routeTimeMax = route.stats.timeHours.max / prefs.walkingSpeed;
-  const hikeEndTime = arrivalTime + routeTimeMax;
-
-  // Hard cutoff - reject if hike would finish after hard latest end time
-  if (hikeEndTime > prefs.hardLatestEnd) {
-    return null;
-  }
-
   // If no return specified, can't evaluate return timing
   if (!returnItin) {
     return null;
@@ -179,9 +168,13 @@ export function scoreItineraryPair(
   // Also add the days between if not an overnight journey
   returnArrivalTime += daysBetween * 24;
 
-  // Check if there's enough buffer time before return
-  const bufferTime = returnDepartureTime - hikeEndTime;
-  if (bufferTime < prefs.returnBuffer) {
+  // Calculate expected hike end time (max time + buffer) for finish time scoring
+  const expectedHikeTime =
+    route.stats.timeHours.max / prefs.walkingSpeed + prefs.returnBuffer;
+  const hikeEndTime = arrivalTime + expectedHikeTime;
+
+  // Hard cutoff - reject if hike would finish after hard latest end time
+  if (hikeEndTime > prefs.hardLatestEnd) {
     return null;
   }
 
@@ -189,24 +182,22 @@ export function scoreItineraryPair(
   const components = {
     departureTime: 0,
     returnTime: 0,
-    hikeDuration: 0,
+    hikeDurationFit: 0,
     returnOptions: 0,
-    totalDuration: 0,
     finishTime: 0,
   };
 
-  // 1. Departure time score (penalize very early starts, slight preference for 8am+)
-  // 8am+ = 1.0, 7am = 0.9, earlier = linear penalty down to earliestDeparture
-  if (departureTime >= 8) {
+  // 1. Departure time score (penalize departures before preferred time)
+  // Score based on distance before preferredEarliestDeparture
+  // At or after preferredEarliestDeparture = 1.0
+  // Linear penalty down to 0.0 at earliestDeparture
+  if (departureTime >= prefs.preferredEarliestDeparture) {
     components.departureTime = 1.0;
-  } else if (departureTime >= 7) {
-    components.departureTime = 0.9 + 0.1 * (departureTime - 7);
   } else {
-    components.departureTime = Math.max(
-      0,
-      (0.9 * (departureTime - prefs.earliestDeparture)) /
-        (7 - prefs.earliestDeparture)
-    );
+    const hoursBefore = prefs.preferredEarliestDeparture - departureTime;
+    const maxHoursBefore =
+      prefs.preferredEarliestDeparture - prefs.earliestDeparture;
+    components.departureTime = Math.max(0, 1.0 - hoursBefore / maxHoursBefore);
   }
 
   // 2. Return time score (penalize late arrivals home, prefer before latestArrival)
@@ -239,29 +230,32 @@ export function scoreItineraryPair(
     }
   }
 
-  // 3. Hike duration score (prefer having plenty of time, 1.2x route time is ideal)
-  const availableHikeTime =
-    returnDepartureTime - prefs.returnBuffer - arrivalTime;
-  const idealHikeTime = (route.stats.timeHours.max * 1.2) / prefs.walkingSpeed;
-  const timeRatio = availableHikeTime / idealHikeTime;
-  components.hikeDuration = timeRatio >= 1 ? 1.0 : Math.max(0, timeRatio);
+  // 3. Hike duration fit score (penalize durations shorter than max, too long is worse)
+  const availableHikeTime = returnDepartureTime - arrivalTime;
+  const minHikeTime = route.stats.timeHours.min / prefs.walkingSpeed;
+  const maxHikeTime =
+    route.stats.timeHours.max / prefs.walkingSpeed + prefs.returnBuffer;
+
+  if (availableHikeTime < minHikeTime) {
+    return null;
+  } else if (availableHikeTime < maxHikeTime) {
+    // Between min and max - penalize at double rate
+    const shortfall = maxHikeTime - availableHikeTime;
+    components.hikeDurationFit = Math.max(0.0, 1.0 - (shortfall * 2) / 4);
+  } else if (availableHikeTime <= maxHikeTime + 4) {
+    // At or above max - linear penalty up to max+4 hours
+    const extraTime = availableHikeTime - maxHikeTime;
+    components.hikeDurationFit = Math.max(0.0, 1.0 - extraTime / 4);
+  } else {
+    // Way too long (>4 hours over max)
+    components.hikeDurationFit = 0.0;
+  }
 
   // 4. Return options score (calculated separately - this is for a single pair)
   // Will be set to 1.0 if multiple viable returns exist, 0.5 if only one
   components.returnOptions = 0.5;
 
-  // 5. Total duration score (prefer shorter total journey)
-  const totalHours = calculateDuration(
-    outbound.date,
-    outbound.startTime,
-    returnItin.date,
-    returnItin.endTime
-  );
-
-  // Penalize trips over 14 hours
-  components.totalDuration = Math.max(0, 1 - (totalHours - 10) / 10);
-
-  // 6. Finish time score (prefer finishing before preferred time)
+  // 5. Finish time score (prefer finishing before preferred time)
   // 1.0 if before preferred, linear decrease to 0.0 at hard cutoff
   if (hikeEndTime <= prefs.preferredLatestEnd) {
     components.finishTime = 1.0;
@@ -275,9 +269,8 @@ export function scoreItineraryPair(
   const total =
     components.departureTime * prefs.weights.departureTime +
     components.returnTime * prefs.weights.returnTime +
-    components.hikeDuration * prefs.weights.hikeDuration +
+    components.hikeDurationFit * prefs.weights.hikeDurationFit +
     components.returnOptions * prefs.weights.returnOptions +
-    components.totalDuration * prefs.weights.totalDuration +
     components.finishTime * prefs.weights.finishTime;
 
   // Normalize by sum of weights
@@ -327,17 +320,15 @@ export function selectBestItineraries(
         if (outbound.isOvernight) {
           arrivalTime += 24;
         }
-        const routeTimeMax = route.stats.timeHours.max / prefs.walkingSpeed;
-        const hikeEndTime = arrivalTime + routeTimeMax;
+        const expectedHikeTime =
+          route.stats.timeHours.max / prefs.walkingSpeed + prefs.returnBuffer;
+        const hikeEndTime = arrivalTime + expectedHikeTime;
 
         // Count how many return options exist within 2 hours of this one
         const returnTime = returnItin.startTimeHours;
         const alternativeReturns = returns.filter((r) => {
           const rt = r.startTimeHours;
-          return (
-            rt > hikeEndTime + prefs.returnBuffer &&
-            Math.abs(rt - returnTime) <= 2
-          );
+          return rt >= hikeEndTime && Math.abs(rt - returnTime) <= 2;
         });
 
         // Boost score if multiple return options

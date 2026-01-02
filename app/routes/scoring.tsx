@@ -1,22 +1,18 @@
 import type { Route } from "./+types/scoring";
 import { data, useLoaderData } from "react-router";
 import { useState, useMemo } from "react";
+import { type Result, type Itinerary, resultID } from "results/schema";
 import {
-  resultMap,
-  targetMap,
-  munroMap,
-  startMap,
-} from "results/parse.server";
-import {
-  scoreItineraryPair,
+  selectBestItineraries,
+  calculatePercentiles,
   DEFAULT_RANKING_PREFERENCES,
   type RankingPreferences,
 } from "results/scoring";
 import { formatTime, formatDuration, parseTime } from "~/utils/format";
 import { formatModes } from "~/utils/transport";
-import { getViableReturns } from "results/itinerary-utils";
 import { ScoreDebug } from "~/components/ScoreDebug";
 import { PreferencesControls } from "~/components/PreferencesControls";
+import { resultMap, targetMap, startMap } from "results/parse.server";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,16 +27,12 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   // Pick a sample target with good data
   const url = new URL(request.url);
-  const targetId = url.searchParams.get("target") || "ben-lomond-ptarmigan";
+  const targetId =
+    url.searchParams.get("target") || "inveruglas-visitor-centre";
 
   const target = targetMap.get(targetId);
   if (!target) {
-    throw data(null, { status: 404 });
-  }
-
-  const result = resultMap.get(targetId);
-  if (!result) {
-    throw data(null, { status: 404 });
+    throw data({ error: "Target not found" }, { status: 404 });
   }
 
   // Get all targets for selector
@@ -51,25 +43,44 @@ export async function loader({ request }: Route.LoaderArgs) {
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Get sample data from one route
-  const firstRoute = result.routes[0];
+  // Get sample route from target
+  const firstRoute = target.routes[0];
   if (!firstRoute) {
-    throw data({ error: "No routes found" }, { status: 404 });
+    throw data({ error: "No routes found for this target" }, { status: 404 });
   }
 
-  // Get sample start location
-  const firstStart = Object.keys(firstRoute.byStart)[0];
-  if (!firstStart) {
-    throw data({ error: "No start locations found" }, { status: 404 });
+  let sampleStart = "edinburgh";
+  let sampleResult = resultMap.get(resultID(sampleStart, targetId));
+  if (!sampleResult) {
+    throw data({ error: "Missing result" }, { status: 404 });
   }
 
-  const startInfo = startMap.get(firstStart);
-  const itineraries = firstRoute.byStart[firstStart];
+  const startInfo = startMap.get(sampleStart);
 
-  // Sample one day
-  const sampleDate = Object.keys(itineraries.outbound)[0];
-  const outbounds = itineraries.outbound[sampleDate] || [];
-  const allReturns = itineraries.return[sampleDate] || [];
+  // Get sample day itineraries
+  const days: Array<keyof typeof sampleResult.itineraries> = [
+    "SATURDAY",
+    "SUNDAY",
+    "FRIDAY",
+    "WEDNESDAY",
+  ];
+  let sampleDay = "SATURDAY";
+  let outbounds: Itinerary[] = [];
+  let allReturns: Itinerary[] = [];
+
+  for (const day of days) {
+    const dayData = sampleResult.itineraries[day];
+    if (dayData && dayData.outbounds.length > 0 && dayData.returns.length > 0) {
+      sampleDay = day;
+      outbounds = dayData.outbounds;
+      allReturns = dayData.returns;
+      break;
+    }
+  }
+
+  if (outbounds.length === 0) {
+    throw data({ error: "No itineraries found" }, { status: 404 });
+  }
 
   return {
     target: {
@@ -79,18 +90,18 @@ export async function loader({ request }: Route.LoaderArgs) {
     allTargets,
     route: firstRoute,
     start: {
-      id: firstStart,
-      name: startInfo?.name || firstStart,
+      id: sampleStart,
+      name: startInfo?.name || sampleStart,
     },
-    date: sampleDate,
+    date: sampleDay,
     outbounds,
     allReturns,
   };
 }
 
-export default function ScoringDebugPage() {
+export default function ScoringDebugPage({ loaderData }: Route.ComponentProps) {
   const { target, allTargets, route, start, date, outbounds, allReturns } =
-    useLoaderData<typeof loader>();
+    loaderData;
 
   const [preferences, setPreferences] = useState<RankingPreferences>(
     DEFAULT_RANKING_PREFERENCES
@@ -99,49 +110,18 @@ export default function ScoringDebugPage() {
 
   // Calculate scored pairs client-side
   const scoredPairs = useMemo(() => {
-    const pairs: Array<{
-      outbound: any;
-      return: any;
-      score: any;
-    }> = [];
-
-    for (const outbound of outbounds) {
-      const viableReturns = getViableReturns(
-        outbound,
-        allReturns,
-        route,
-        preferences.walkingSpeed,
-        preferences.returnBuffer
-      );
-
-      for (const returnItin of viableReturns) {
-        const score = scoreItineraryPair(
-          outbound,
-          returnItin,
-          route,
-          preferences
-        );
-        if (score) {
-          pairs.push({ outbound, return: returnItin, score });
-        }
-      }
-    }
-
-    // Sort by score descending
-    pairs.sort((a, b) => b.score.rawScore - a.score.rawScore);
+    // Use selectBestItineraries with a high maxResults to get all pairs with scoring
+    const pairs = selectBestItineraries(
+      outbounds,
+      allReturns,
+      route,
+      preferences,
+      10000 // High number to get all results
+    );
 
     // Calculate percentiles
     const scores = pairs.map((p) => p.score.rawScore);
-    const sortedScores = [...scores].sort((a, b) => a - b);
-    const percentileMap = new Map<number, number>();
-    
-    for (let i = 0; i < sortedScores.length; i++) {
-      const score = sortedScores[i];
-      if (!percentileMap.has(score)) {
-        const percentile = i / Math.max(1, sortedScores.length - 1);
-        percentileMap.set(score, percentile);
-      }
-    }
+    const percentileMap = calculatePercentiles(scores);
 
     // Update percentiles in scores
     pairs.forEach((pair) => {
@@ -200,6 +180,27 @@ export default function ScoringDebugPage() {
         preferences={preferences}
         onChange={setPreferences}
       />
+
+      <pre className="max-h-30 mt-6 p-4 bg-gray-100 border border-gray-300 overflow-x-auto text-sm select-all">
+        <code>{JSON.stringify(preferences, null, 2)}</code>
+      </pre>
+
+      <div className="mt-6">
+        <h2 className="font-serif text-xl font-bold text-theme-navy-900 mb-3">
+          Route: {route.name}{" "}
+          <a href={route.page} className="underline text-sm" target="_blank">
+            (walkhighlands)
+          </a>
+        </h2>
+        <div className="text-sm text-gray-700">
+          {Object.entries(route.stats).map(([key, value]) => (
+            <div key={key} className="flex">
+              <div className="font-medium text-gray-600 w-32">{key}</div>
+              <div className="text-gray-700">{JSON.stringify(value)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className="mt-6">
         <h2 className="font-serif text-xl font-bold text-theme-navy-900 mb-3">
@@ -285,9 +286,7 @@ export default function ScoringDebugPage() {
                   </td>
                   <td className="py-3 align-top">
                     <button
-                      onClick={() =>
-                        setExpandedIndex(isExpanded ? null : idx)
-                      }
+                      onClick={() => setExpandedIndex(isExpanded ? null : idx)}
                       className="text-gray-400 hover:text-theme-navy-700 text-xs"
                     >
                       {isExpanded ? "−" : "+"}
