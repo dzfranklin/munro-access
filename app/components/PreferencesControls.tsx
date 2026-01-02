@@ -1,4 +1,4 @@
-import { type RankingPreferences } from "results/scoring";
+import { type RankingPreferences } from "~/results/scoring";
 
 type PreferencesControlsProps = {
   preferences: RankingPreferences;

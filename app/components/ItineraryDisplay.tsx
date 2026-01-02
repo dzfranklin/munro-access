@@ -1,4 +1,4 @@
-import type { Itinerary } from "results/schema";
+import type { Itinerary } from "~/results/schema";
 import {
   formatDuration,
   parseTime,

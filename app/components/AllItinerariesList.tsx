@@ -1,4 +1,4 @@
-import type { Itinerary } from "results/schema";
+import type { Itinerary } from "~/results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
 import { formatDuration, formatTime } from "~/utils/format";
 import { formatModes } from "~/utils/transport";

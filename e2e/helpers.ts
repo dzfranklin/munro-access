@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { DEFAULT_PREFERENCES, type UserPreferences, type RankingPreferences, type UIPreferences } from "results/scoring";
+import { DEFAULT_PREFERENCES, type UserPreferences, type RankingPreferences, type UIPreferences } from "../app/results/scoring";
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];

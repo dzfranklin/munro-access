@@ -1,5 +1,5 @@
 import type { Route } from "./+types/targets";
-import { targetMap as parsedTargets } from "results/parse.server";
+import { targetMap as parsedTargets } from "~/results/parse.server";
 import { Link } from "react-router";
 import { pluralize } from "~/utils/format";
 

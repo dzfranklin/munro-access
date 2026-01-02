@@ -1,10 +1,10 @@
-import { targetMap, startMap, resultMap } from "results/parse.server";
+import { targetMap, startMap, resultMap } from "~/results/parse.server";
 import type { Route } from "./+types/target.$id.all-itineraries";
 import { data, Link, useSearchParams } from "react-router";
 import { AllItinerariesList } from "~/components/AllItinerariesList";
 import React from "react";
 import { START_LOCATION_ORDER } from "~/utils/constants";
-import { resultID } from "results/schema";
+import { resultID } from "~/results/schema";
 import { formatDayLabel } from "~/utils/format";
 import {
   parsePreferencesFromCookie,

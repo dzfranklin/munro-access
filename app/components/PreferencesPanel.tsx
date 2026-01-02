@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigation, useActionData, useSubmit } from "react-router";
 import { START_LOCATION_ORDER } from "~/utils/constants";
-import { type UserPreferences, type RankingPreferences, DEFAULT_PREFERENCES } from "results/scoring";
+import { type UserPreferences, type RankingPreferences, DEFAULT_PREFERENCES } from "~/results/scoring";
 import { PreferencesControls } from "./PreferencesControls";
 
 type StartLocation = {

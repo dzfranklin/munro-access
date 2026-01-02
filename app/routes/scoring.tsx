@@ -1,18 +1,18 @@
 import type { Route } from "./+types/scoring";
 import { data, useLoaderData } from "react-router";
 import { useState, useMemo } from "react";
-import { type Result, type Itinerary, resultID } from "results/schema";
+import { type Result, type Itinerary, resultID } from "~/results/schema";
 import {
   selectBestItineraries,
   calculatePercentiles,
   DEFAULT_RANKING_PREFERENCES,
   type RankingPreferences,
-} from "results/scoring";
+} from "~/results/scoring";
 import { formatTime, formatDuration, parseTime } from "~/utils/format";
 import { formatModes } from "~/utils/transport";
 import { ScoreDebug } from "~/components/ScoreDebug";
 import { PreferencesControls } from "~/components/PreferencesControls";
-import { resultMap, targetMap, startMap } from "results/parse.server";
+import { resultMap, targetMap, startMap } from "~/results/parse.server";
 
 export function meta({}: Route.MetaArgs) {
   return [

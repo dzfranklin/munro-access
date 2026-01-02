@@ -1,4 +1,4 @@
-import type { Route } from "results/schema";
+import type { Route } from "~/results/schema";
 
 export default function RouteNameComponent({ route }: { route: Route }) {
   return (

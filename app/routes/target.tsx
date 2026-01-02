@@ -5,11 +5,11 @@ import {
   resultMap,
   targetCacheForDefaultPrefs,
   percentileMapForDefaultPrefs,
-} from "results/parse.server";
+} from "~/results/parse.server";
 import type { Route } from "./+types/target";
 import { data, Link, useSearchParams } from "react-router";
-import { getBestItinerariesForTarget } from "results/best-itineraries";
-import { DEFAULT_PREFERENCES } from "results/scoring";
+import { getBestItinerariesForTarget } from "~/results/best-itineraries";
+import { DEFAULT_PREFERENCES } from "~/results/scoring";
 import { DayItineraryCard } from "~/components/DayItineraryCard";
 import { TimelineModal } from "~/components/TimelineModal";
 import React from "react";

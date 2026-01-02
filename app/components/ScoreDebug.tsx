@@ -1,4 +1,4 @@
-import type { RankingPreferences, ItineraryScore } from "results/scoring";
+import type { RankingPreferences, ItineraryScore } from "~/results/scoring";
 
 interface ScoreDebugProps {
   score: ItineraryScore;

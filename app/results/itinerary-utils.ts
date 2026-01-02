@@ -1,5 +1,5 @@
 import type { Itinerary, Route } from "./schema";
-import { parseTime, calculateDuration } from "../app/utils/format";
+import { parseTime, calculateDuration } from "../utils/format";
 
 /**
  * Filter return journeys to show all returns that allow at least 50% of the shorter route time

@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
-import { getTopTargetsPerStart } from "results/best-itineraries";
-import { DEFAULT_PREFERENCES, userPreferencesSchema } from "results/scoring";
+import { getTopTargetsPerStart } from "~/results/best-itineraries";
+import { DEFAULT_PREFERENCES, userPreferencesSchema } from "~/results/scoring";
 import { ItinerarySummary } from "~/components/ItinerarySummary";
 import { Link, useSearchParams, data } from "react-router";
 import {
@@ -11,12 +11,12 @@ import {
   resultMap,
   targetCacheForDefaultPrefs,
   percentileMapForDefaultPrefs,
-} from "results/parse.server";
+} from "~/results/parse.server";
 import { formatSamplePeriod } from "~/utils/format";
 import React from "react";
 import { PreferencesPanel } from "~/components/PreferencesPanel";
 import { START_LOCATION_ORDER } from "~/utils/constants";
-import type { Itinerary } from "results/schema";
+import type { Itinerary } from "~/results/schema";
 import {
   parsePreferencesFromCookie,
   createPreferencesCookie,

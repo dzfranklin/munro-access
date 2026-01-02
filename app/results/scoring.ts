@@ -1,6 +1,6 @@
 import type { Itinerary, Route } from "./schema";
 import { z } from "zod";
-import { isSameDay, getDaysBetween } from "../app/utils/format";
+import { isSameDay, getDaysBetween } from "../utils/format";
 
 // Preferences that affect itinerary scoring/ranking
 const rankingPreferencesSchema = z.object({

@@ -1,5 +1,5 @@
 import React from "react";
-import type { Itinerary, Route, Munro } from "results/schema";
+import type { Itinerary, Route, Munro } from "~/results/schema";
 import { ItineraryDisplay } from "./ItineraryDisplay";
 import {
   formatDuration,
@@ -9,7 +9,7 @@ import {
   formatDayLabel,
 } from "~/utils/format";
 import { formatMode } from "~/utils/transport";
-import { getViableReturns } from "results/itinerary-utils";
+import { getViableReturns } from "~/results/itinerary-utils";
 
 interface ItineraryOption {
   outbound: Itinerary;

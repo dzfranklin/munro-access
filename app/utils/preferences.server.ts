@@ -2,7 +2,7 @@ import {
   DEFAULT_PREFERENCES,
   userPreferencesSchema,
   type UserPreferences,
-} from "results/scoring";
+} from "~/results/scoring";
 
 export function parsePreferencesFromCookie(
   cookieHeader: string | null

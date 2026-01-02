@@ -1,6 +1,6 @@
 import type { Config } from "@react-router/dev/config";
 
-import { munroMap } from "./results/parse.server";
+import { munroMap } from "./app/results/parse.server";
 
 export default {
   async prerender({ getStaticPaths }) {

@@ -1,7 +1,7 @@
 import { data, Link } from "react-router";
 import type { Route } from "./+types/munro";
-import { munroMap, targetMap } from "results/parse.server";
-import type { Target } from "results/schema";
+import { munroMap, targetMap } from "~/results/parse.server";
+import type { Target } from "~/results/schema";
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [

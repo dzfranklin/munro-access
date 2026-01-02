@@ -1,5 +1,5 @@
 import type { Route } from "./+types/munros";
-import { munroMap as parsedMunros } from "results/parse.server";
+import { munroMap as parsedMunros } from "~/results/parse.server";
 import { Link } from "react-router";
 
 export function meta({}: Route.MetaArgs) {

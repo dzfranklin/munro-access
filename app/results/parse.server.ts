@@ -12,7 +12,7 @@ import {
   type Start,
   type Target,
 } from "./schema";
-import { slugify } from "../app/utils/format";
+import { slugify } from "../utils/format";
 import { computeAllTargetItineraries } from "./best-itineraries";
 import { DEFAULT_RANKING_PREFERENCES } from "./scoring";
 
