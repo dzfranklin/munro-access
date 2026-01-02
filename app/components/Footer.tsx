@@ -7,21 +7,46 @@ interface FooterProps {
 export function Footer({ samplePeriod }: FooterProps) {
   return (
     <footer className="mt-10 p-5 bg-gray-50 border border-gray-300 text-[13px] leading-relaxed">
-      <p className="m-0 mb-6 text-gray-600">
+      <p className="m-0 mb-3 text-gray-600">
         <strong>Note:</strong> Always verify current timetables. This site uses
         sample itineraries from {samplePeriod}.
+      </p>
+
+      <p className="m-0 mb-6 text-gray-600">
+        An{" "}
+        <a
+          href="https://github.com/dzfranklin/munro-access"
+          className="underline text-theme-navy-700"
+        >
+          open-source
+        </a>{" "}
+        personal project by{" "}
+        <a
+          href="https://dfranklin.dev"
+          className="underline text-theme-navy-700"
+        >
+          Daniel Franklin
+        </a>
+        .{" "}
+        <a
+          href="https://github.com/dzfranklin/munro-access/issues"
+          className="underline text-theme-navy-700"
+        >
+          Report an issue
+        </a>
+        .
       </p>
 
       <h3 className="text-base font-bold text-gray-800 m-0 mb-3">Browse</h3>
       <ul className="m-0 pl-0 list-none text-gray-600 space-y-2 mb-6">
         <li>
           <Link to="/munros" className="text-theme-navy-700 underline">
-            View all munros
+            View by Munro
           </Link>
         </li>
         <li>
           <Link to="/targets" className="text-theme-navy-700 underline">
-            View all starting points
+            View by route starting point
           </Link>
         </li>
       </ul>
