@@ -6,8 +6,20 @@ IMAGE_NAME="munro-access"
 APP_DIR="/home/app/munro-access"
 CONTAINER_FILE="munro-access.container"
 
+# Set up environment for systemd user services
+# Required when using 'sudo su app' instead of proper login
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+
 echo "=== Munro Access Deployment ==="
 echo "Working directory: $APP_DIR"
+
+# Check if lingering is enabled
+if ! loginctl show-user "$(whoami)" -p Linger | grep -q "Linger=yes"; then
+    echo "ERROR: User lingering is not enabled for $(whoami)"
+    echo "Run this as a sudoer user: sudo loginctl enable-linger app"
+    exit 1
+fi
 
 # Navigate to app directory
 cd "$APP_DIR"
