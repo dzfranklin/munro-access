@@ -1,0 +1,17 @@
+[Unit]
+Description=Munro Access Web Application
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=localhost/munro-access:latest
+ContainerName=munro-access
+PublishPort=3000:3000
+AutoUpdate=registry
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
