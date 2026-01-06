@@ -37,15 +37,17 @@ echo "Installing systemd service..."
 mkdir -p ~/.config/containers/systemd
 cp "$CONTAINER_FILE" ~/.config/containers/systemd/
 
-# Reload systemd and restart service
+# Reload systemd to regenerate service from .container file
 echo "Reloading systemd daemon..."
 systemctl --user daemon-reload
 
-echo "Restarting service..."
-systemctl --user restart munro-access.service
+# Stop existing service if running
+echo "Stopping existing service..."
+systemctl --user stop munro-access.service 2>/dev/null || true
 
-# Enable service if not already enabled
-systemctl --user enable munro-access.service
+# Start the service (Quadlet services are auto-enabled via .container file)
+echo "Starting service..."
+systemctl --user start munro-access.service
 
 # Show status
 echo "=== Deployment Complete ==="
